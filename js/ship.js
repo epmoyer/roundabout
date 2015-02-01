@@ -73,7 +73,7 @@ var Ship = Polygon.extend({
 		this.drawFlames = true;
 	},
 
-	update: function(paceFactor) {
+	update: function(paceFactor, angularVelocity) {
 		//console.log(paceFactor);
 		this.ascentVelocity -= Gravity;
 		this.radius += this.ascentVelocity;
@@ -85,7 +85,7 @@ var Ship = Polygon.extend({
 			this.ascentVelocity = 0;
 			this.radius =220;
 		}
-		this.radialAngle -= 0.01;
+		this.radialAngle += angularVelocity;
 		this.radial_to_cardinal();
 	},
 

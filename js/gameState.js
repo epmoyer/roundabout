@@ -1,11 +1,5 @@
 var AsteroidSize = 8;
 
-var VortexLines = 15;
-var VortexThickness = 15;
-var VortexStartRadius = 50;
-var VortexSpeed = -0.06;
-var VortexTwist = 0.20;
-
 var GameState = State.extend({
 
 	init: function(game) {
@@ -19,10 +13,6 @@ var GameState = State.extend({
 		this.ship = new Ship(Points.WIDE_SHIP, Points.FLAMES, 1.5, this.center_x, this.center_y, 200, 0);
 		this.ship.maxX = this.canvasWidth;
 		this.ship.maxY = this.canvasHeight;
-
-		this.vortexRadius = 20;
-		this.vortexTheta = 0;
-
 
 		this.stars = [];
 		for (var i=0; i<200; i++){
@@ -40,6 +30,8 @@ var GameState = State.extend({
 		this.score = 0;
 
 		this.lvl = 0;
+
+		this.vortex = new Vortex(this.center_x, this.center_y);
 
 		this.generateLvl();
 	},
@@ -178,10 +170,10 @@ var GameState = State.extend({
 		}
 
 		// Update ship
-		this.ship.update(paceFactor);
+		this.ship.update(paceFactor, this.vortex.radiusToAngularVelocity(this.ship.radius));
 
 		// Update vortex
-		this.vortexTheta += VortexSpeed;
+		this.vortex.update(paceFactor);
 
 		// End of level
 		/*
@@ -199,24 +191,14 @@ var GameState = State.extend({
 			ctx.drawPolygon(this.lifepolygon, 25+25*i, 20);
 		}
 		
+		/*
 		// Stars
 		ctx.fillStyle="#808080";
 		for(var i=0, len=this.stars.length; i<len; i+=2){
 			//console.log(this.stars[i]);
 			ctx.fillRect(this.stars[i],this.stars[i+1],2,2);
 		}
-
-		// Vortex
-		ctx.beginPath();
-		for(theta = 0, angle_delta = (Math.PI * 2)/VortexLines; theta < (Math.PI * 2); theta += angle_delta){
-			var sx = this.center_x + Math.cos(theta+this.vortexTheta - VortexTwist) * (this.vortexRadius - VortexThickness/2);
-			var sy = this.center_y + Math.sin(theta+this.vortexTheta - VortexTwist) * (this.vortexRadius - VortexThickness/2);
-			var ex = this.center_x + Math.cos(theta+this.vortexTheta + VortexTwist) * (this.vortexRadius + VortexThickness/2);
-			var ey = this.center_y + Math.sin(theta+this.vortexTheta + VortexTwist) * (this.vortexRadius + VortexThickness/2);
-			ctx.moveTo(sx,sy);
-			ctx.lineTo(ex,ey);
-		}
-		ctx.stroke();
+		*/
 
 		for (var i=0, len=this.bullets.length; i < len; i++){
 			this.bullets[i].draw(ctx);
@@ -227,5 +209,6 @@ var GameState = State.extend({
 		} 
 
 		this.ship.draw(ctx);
+		this.vortex.draw(ctx);
 	}
 })
