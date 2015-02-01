@@ -21,6 +21,7 @@ var Game = Class.extend({
 			s:          83,
 			d:          68,
 			w:          87,
+			one:        49,
 		})
 
 		var testing = new Testing();
@@ -38,10 +39,7 @@ var Game = Class.extend({
 	run: function() {
 		var self = this;
 
-		//console.log("test");
-		this.canvas.animate( function() {
-			//console.log("GameLogicCallback");
-
+		this.canvas.animate( function(paceFactor) {
 			if (self.nextState !== States.NO_CHANGE) {
 				switch(self.nextState){
 					case States.MENU:
@@ -60,7 +58,7 @@ var Game = Class.extend({
 			}
 
 			self.currentState.handleInputs(self.input);
-			self.currentState.update();
+			self.currentState.update(paceFactor);
 			self.currentState.render(self.canvas.ctx);
 		})
 	}

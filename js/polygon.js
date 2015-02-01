@@ -2,25 +2,32 @@ var Polygon = Class.extend({
 
 	init: function(p){
 		this.points = p.slice(0);
+		this.pointsMaster = p.slice(0);
+		this.angle = 0;
+		this.scale = 1;
+		this.setAngle(this.angle);
 	},
 
-	rotate: function(theta){
+	setAngle: function(theta){
+		this.angle = theta;
 		var c = Math.cos(theta);
 		var s = Math.sin(theta);
 
-		for(var i=0, len=this.points.length; i<len; i+=2){
-			var x = this.points[i];
-			var y = this.points[i+1];
+		for(var i=0, len=this.pointsMaster.length; i<len; i+=2){
+			var x = this.pointsMaster[i];
+			var y = this.pointsMaster[i+1];
 
-			this.points[i] = c*x - s*y;
-			this.points[i+1] = s*x + c*y;
+			//console.log(">>");
+			//console.log(c, s, x, y, (c*x - s*y), (s*x + c*y));
+
+			this.points[i] = (c*x - s*y) * this.scale;
+			this.points[i+1] = (s*x + c*y) * this.scale;
 		}
 	},
 
-	scale: function(c){
-		for(var i=0, len=this.points.length; i<len; i++){
-			this.points[i] *= c;
-		}
+	setScale: function(c){
+		this.scale = c;
+		this.setAngle(this.angle);
 	},
 
 

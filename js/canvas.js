@@ -1,6 +1,7 @@
 var Canvas = Class.extend({
 
 	init: function(width, height) {
+		this.showMetrics = true;
 		this.canvas = document.createElement("canvas");
 		this.canvas.width = width;
 		this.canvas.height = height;
@@ -10,6 +11,9 @@ var Canvas = Class.extend({
 			ctx.width = ctx.canvas.width;
 			ctx.height = ctx.canvas.height;
 			ctx.fps = 0;
+			ctx.fpsFrameAverage = 10; // Number of frames to average over
+			ctx.fpsFrameCount = 0;
+			ctx.fpsMsecCount = 0;
 
 			ctx.ACODE = "A".charCodeAt(0);
 			ctx.ZEROCODE = "0".charCodeAt(0);
@@ -26,24 +30,23 @@ var Canvas = Class.extend({
 				this.stroke();
 			};
 
-			ctx.drawFpsGague = function(x, y){
+			ctx.drawFpsGague = function(x, y, color, percentage){
 				x += 0.5;
 				y += 0.5;
 				this.beginPath();
-				var length = 30;
+				var length = 60;
 				var height = 6;
-				for(x_notch = 0; x_notch<=length; x_notch+=length/2){
-					this.moveTo(x+x_notch,y);
-					this.lineTo(x+x_notch,y+height/2);
-				}
-				this.moveTo(x,y+height/2);
-				this.lineTo(x+length, y+height/2);
-				x_needle = (this.fps / 120) * length;
-				//console.log(x_needle);
-				//x_needle = 7;
-				this.moveTo(x+x_needle, y+(height/2));
-				this.lineTo(x+x_needle, y+height);
+				var x_needle = percentage * length;
+
+				ctx.fillStyle="#FFFFFF";
+				ctx.rect(x,y,length,height);
+				ctx.fillStyle=color;
+				ctx.fillRect(x, y, x_needle, height);
+
 				this.stroke();
+
+				
+
 			}
 
 			ctx.vectorText = function(text, s, x, y, offset){
@@ -112,15 +115,58 @@ var Canvas = Class.extend({
 				function(cb, el){
 					window.setTimeout(cb, 1000/60);
 				};
+				
 		})();
 
 		var self = this;
 		var callback_f = function(timeStamp) {
+			
+			//---------------------------
+			// Calculate FPS and pacing
+			//---------------------------
+			/*
 			self.ctx.fps = Math.round(1000/(timeStamp - self.previousTimestamp));
+			// paceFactor represents the % of a 60fps frame that has elapsed.
+			// At 30fps the paceFactor is 2.0,  At 15fps it is 4.0
+			var paceFactor = (60*(timeStamp - self.previousTimestamp))/1000;
+
+			/console.log(paceFactor);
 			self.previousTimestamp = timeStamp;
-			//console.log(this.fps);
-			animation_callback_f();
+			*/
+			var timeNow = performance.now();
+			//self.ctx.fps = Math.round(1000/(timeNow - self.previousTimestamp));
+			self.ctx.fpsMsecCount += timeNow - self.previousTimestamp;
+			// paceFactor represents the % of a 60fps frame that has elapsed.
+			// At 30fps the paceFactor is 2.0,  At 15fps it is 4.0
+			var paceFactor = (60*(timeNow - self.previousTimestamp))/1000;
+
+			//console.log(paceFactor);
+			++self.ctx.fpsFrameCount;
+			if (self.ctx.fpsFrameCount >= self.ctx.fpsFrameAverage){
+				self.ctx.fpsFrameCount = 0;
+				self.ctx.fps = Math.round(1000/(self.ctx.fpsMsecCount/self.ctx.fpsFrameAverage));
+				self.ctx.fpsMsecCount = 0;
+			}
+			self.previousTimestamp = timeNow;
+			
+			//---------------------------
+			// Do animation
+			//---------------------------
+			var start = performance.now();
+			animation_callback_f(paceFactor);
+			var end = performance.now();
+			//console.log(end-start);
+
+			// Show metrics
+			if (self.showMetrics){
+				self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-10, "#00FF00", self.ctx.fps/120);
+				self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-16, "#FFFF00", (end-start)/(1000/120));
+			}
+
+			// Update screen and request callback
 			refresh_f(callback_f, self.canvas);
+
+			
 		};
 		refresh_f(callback_f, this.canvas );
 	}

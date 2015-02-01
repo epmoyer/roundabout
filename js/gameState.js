@@ -1,5 +1,11 @@
 var AsteroidSize = 8;
 
+var VortexLines = 15;
+var VortexThickness = 15;
+var VortexStartRadius = 50;
+var VortexSpeed = -0.06;
+var VortexTwist = 0.20;
+
 var GameState = State.extend({
 
 	init: function(game) {
@@ -7,28 +13,29 @@ var GameState = State.extend({
 		
 		this.canvasWidth = game.canvas.ctx.width;
 		this.canvasHeight = game.canvas.ctx.height;
+		this.center_x = this.canvasWidth/2;
+		this.center_y = this.canvasHeight/2;
 
-		this.ship = new Ship(Points.SHIP, Points.FLAMES, 2, 0, 0);
+		this.ship = new Ship(Points.WIDE_SHIP, Points.FLAMES, 1.5, this.center_x, this.center_y, 200, 0);
 		this.ship.maxX = this.canvasWidth;
 		this.ship.maxY = this.canvasHeight;
 
-		this.ship2 = new Ship(Points.SHIPB, Points.FLAMES, 2, 0, 0);
-		this.ship2.maxX = this.canvasWidth;
-		this.ship2.maxY = this.canvasHeight;
-		this.ship2.rotate(Math.PI/2, true); // temp: correct polygon orientation
-		this.ship2.rotate(-Math.PI);
+		this.vortexRadius = 20;
+		this.vortexTheta = 0;
+
 
 		this.stars = [];
+		for (var i=0; i<200; i++){
+			this.stars.push(Math.random() * this.canvasWidth);
+			this.stars.push(Math.random() * this.canvasHeight);
+		}
 
 		this.gameOver = false;
 		this.lives = 3;
 		this.lives2 = 3;
-		this.lifepolygon = new Polygon(Points.SHIP);
-		this.lifepolygon.scale(1.5);
-		this.lifepolygon.rotate(-Math.PI/2);
-		this.lifepolygon2 = new Polygon(Points.SHIPB);
-		this.lifepolygon2.scale(1.5);
-		//this.lifepolygon.2rotate(-Math.PI/2);
+		this.lifepolygon = new Polygon(Points.WIDE_SHIP);
+		this.lifepolygon.setScale(1.2);
+		this.lifepolygon.setAngle(-Math.PI/2);
 
 		this.score = 0;
 
@@ -42,45 +49,10 @@ var GameState = State.extend({
 
 		var margin = 20;
 
-		this.ship.x = margin;
-		this.ship.y = this.canvasHeight/2;
-		this.ship.vel = {
-					x: 0,
-					y: 0
-				}
-
-		this.ship2.x = this.canvasWidth - margin;
-		this.ship2.y = this.canvasHeight/2;
-		this.ship2.vel = {
-					x: 0,
-					y: 0
-				}
+		this.ship.radius = 200;
+		this.ship.radialAngle = 0;
 
 		this.bullets = [];
-		for (var i=0; i<50; i++){
-			this.stars.push(Math.random() * this.canvasWidth);
-			this.stars.push(Math.random() * this.canvasHeight);
-		}
-		/*
-		this.asteroids = [];
-		for (var i=0; i<num_asteroids; i++){
-			var n = Math.round(Math.random() * (Points.ASTEROIDS.length - 1));
-
-			var x = 0, y=0;
-			if (Math.random() > 0.5){
-				x = Math.random() * this.canvasWidth;
-			} else {
-				y = Math.random() * this.canvasHeight;
-			}
-
-			var aster = new Asteroid(Points.ASTEROIDS[n], AsteroidSize, x, y);
-			aster.maxX = this.canvasWidth;
-			aster.maxY = this.canvasHeight;
-
-			this.asteroids.push(aster);
-		}
-		*/
-
 	},
 
 	handleInputs: function(input) {
@@ -104,12 +76,7 @@ var GameState = State.extend({
 		}
 		*/
 
-		if (input.isDown("right")){
-			this.ship.rotate(0.07);
-		}
-		if (input.isDown("left")){
-			this.ship.rotate(-0.07);
-		}
+
 		if (input.isDown("up")){
 			this.ship.addVel();
 		}
@@ -118,22 +85,15 @@ var GameState = State.extend({
 		}
 
 
-		if (input.isDown("d")){
-			this.ship2.rotate(0.07);
-		}
-		if (input.isDown("a")){
-			this.ship2.rotate(-0.07);
-		}
-		if (input.isDown("s")){
-			this.ship2.addVel();
-		}
-		if (input.isPressed("w")){
-			this.bullets.push(this.ship2.shoot());
+
+		// Metrics toggle
+		if (input.isPressed("one")){
+			this.game.canvas.showMetrics = !this.game.canvas.showMetrics;
 		}
 
 	},
 
-	update: function() {
+	update: function(paceFactor) {
 		/*
 		for (var i=0, len=this.asteroids.length; i < len; i++){
 			var a = this.asteroids[i];
@@ -202,12 +162,6 @@ var GameState = State.extend({
 				this.generateLvl();
 				return;
 			}
-			if (this.ship2.hasPoint(b.x, b.y)){
-				//this.ship2.visible = false;
-				this.lives2--;
-				this.generateLvl();
-				return;
-			}
 		}
 
 
@@ -224,8 +178,10 @@ var GameState = State.extend({
 		}
 
 		// Update ship
-		this.ship.update();
-		this.ship2.update();
+		this.ship.update(paceFactor);
+
+		// Update vortex
+		this.vortexTheta += VortexSpeed;
 
 		// End of level
 		/*
@@ -239,26 +195,29 @@ var GameState = State.extend({
 	render: function(ctx){
 		ctx.clearAll();
 
-		//ctx.vectorText(this.score, 3, 35, 15);
-		//ctx.vectorText(this.game.canvas.ctx.fps, 2, 35, 30);
-		ctx.drawFpsGague(this.canvasWidth-40, this.canvasHeight-10);
-
 		for(var i=0; i<this.lives; i++){
-			ctx.drawPolygon(this.lifepolygon, 40+15*i, 20);
+			ctx.drawPolygon(this.lifepolygon, 25+25*i, 20);
 		}
-		for(var i=0; i<this.lives2; i++){
-			ctx.drawPolygon(this.lifepolygon2, this.canvasWidth-80+15*i, 20);
-		}
+		
+		// Stars
 		ctx.fillStyle="#808080";
 		for(var i=0, len=this.stars.length; i<len; i+=2){
 			//console.log(this.stars[i]);
 			ctx.fillRect(this.stars[i],this.stars[i+1],2,2);
 		}
-		/*
-		for (var i=0, len=this.asteroids.length; i < len; i++){
-			this.asteroids[i].draw(ctx);
+
+		// Vortex
+		ctx.beginPath();
+		for(theta = 0, angle_delta = (Math.PI * 2)/VortexLines; theta < (Math.PI * 2); theta += angle_delta){
+			var sx = this.center_x + Math.cos(theta+this.vortexTheta - VortexTwist) * (this.vortexRadius - VortexThickness/2);
+			var sy = this.center_y + Math.sin(theta+this.vortexTheta - VortexTwist) * (this.vortexRadius - VortexThickness/2);
+			var ex = this.center_x + Math.cos(theta+this.vortexTheta + VortexTwist) * (this.vortexRadius + VortexThickness/2);
+			var ey = this.center_y + Math.sin(theta+this.vortexTheta + VortexTwist) * (this.vortexRadius + VortexThickness/2);
+			ctx.moveTo(sx,sy);
+			ctx.lineTo(ex,ey);
 		}
-		*/
+		ctx.stroke();
+
 		for (var i=0, len=this.bullets.length; i < len; i++){
 			this.bullets[i].draw(ctx);
 		}
@@ -268,6 +227,5 @@ var GameState = State.extend({
 		} 
 
 		this.ship.draw(ctx);
-		this.ship2.draw(ctx);
 	}
 })

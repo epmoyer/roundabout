@@ -44,7 +44,7 @@ var MenuState = State.extend({
 
 	render: function(ctx) {
 		ctx.clearAll();
-		ctx.vectorText("SPACE WAR", 6, null, 180);
+		ctx.vectorText("ROUNDABOUT", 6, null, 180);
 		ctx.vectorText("PUSH SPACE TO PLAY", 2, null, 260);
 		/*
 		for (var i=0, len=this.asteroids.length; i < len; i++){

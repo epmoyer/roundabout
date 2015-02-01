@@ -1,28 +1,44 @@
+var Gravity = 0.01;
+
 var Ship = Polygon.extend({
 
 	maxX: null,
 	maxY: null,
 
-	init: function(p, pf, s, x, y){
+	init: function(p, pf, s, x, y, radius, radialAngle){
 		this._super(p);
 
-		this.flames = new Polygon(pf);
-		this.flames.scale(s);
+		//this.flames = new Polygon(pf);
+		//this.flames.scale(s);
 
-		this.x = x;
-		this.y = y;
+		this.center_x = x;
+		this.center_y = y;
+		this.radius = radius;
+		this.radialAngle = radialAngle;
+		this.angle = 0;
+		this.scale = s;
+		this.ascentVelocity = 0;
+
+		this.x = null;
+		this.y = null;
 
 		this.drawFlames = false;
 		this.visible = true;
 
-		this.scale(s);
-
-		this.angle = 0;
+		this.setScale(s);
+		this.radial_to_cardinal();
 
 		this.vel = {
 			x: 0,
 			y: 0
 		}
+	},
+
+	// Calculate caridnal position and angle from radial position and angle
+	radial_to_cardinal: function(){
+		this.setAngle(this.radialAngle);
+		this.x = this.center_x + this.radius * Math.cos(this.radialAngle);
+		this.y = this.center_y + this.radius * Math.sin(this.radialAngle);
 	},
 
 	collide: function(aster){
@@ -48,50 +64,36 @@ var Ship = Polygon.extend({
 		var b = new Bullet(this.points[0] + this.x, this.points[1] + this.y, this.angle);
 		b.maxX = this.maxX;
 		b.maxY = this.maxY;
+		b.update(); // Move the bullet one frame to get it away from the ship
 		return b;
 	},
 
 	addVel: function() {
-		if (this.vel.x * this.vel.x + this.vel.y * this.vel.y < 20 * 20){
-			this.vel.x += 0.05*Math.cos(this.angle);
-			this.vel.y += 0.05*Math.sin(this.angle);
-		}
+		this.ascentVelocity += 0.05;
 		this.drawFlames = true;
 	},
 
-	rotate: function(theta, points_only){
-		this._super(theta);
-		if (points_only !== true){
-			this.flames.rotate(theta);
-
-			this.angle += theta;
+	update: function(paceFactor) {
+		//console.log(paceFactor);
+		this.ascentVelocity -= Gravity;
+		this.radius += this.ascentVelocity;
+		if (this.radius < 30){
+			this.ascentVelocity = 0;
+			this.radius =30;
 		}
-	},
-
-	update: function() {
-		this.x += this.vel.x;
-		this.y += this.vel.y;
-
-		this.vel.x *= 0.99;
-		this.vel.y *= 0.99;
-
-		if (this.x > this.maxX){
-			this.x = 0;
-		} else if (this.x < 0) {
-			this.x = this.maxX;
+		if (this.radius > 220){
+			this.ascentVelocity = 0;
+			this.radius =220;
 		}
-		if (this.y > this.maxY){
-			this.y = 0;
-		} else if (this.y < 0) {
-			this.y = this.maxY;
-		}
+		this.radialAngle -= 0.01;
+		this.radial_to_cardinal();
 	},
 
 	draw: function(ctx){
 		if(this.visible){
 			ctx.drawPolygon(this, this.x, this.y);
 			if (this.drawFlames){
-				ctx.drawPolygon(this.flames, this.x, this.y);
+				//ctx.drawPolygon(this.flames, this.x, this.y);
 				this.drawFlames = false;
 			};
 		}
