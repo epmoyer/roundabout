@@ -7,6 +7,7 @@ var Bullet = Class.extend({
 		this.y = y;
 
 		this.shallRemove = false;
+		this.life = 60 * 30; // 30 seconds of life to start
 
 		this.vel = {
 			x: 5*Math.cos(angle),
@@ -26,8 +27,9 @@ var Bullet = Class.extend({
 
 		this.x += this.vel.x;
 		this.y += this.vel.y;
-
-
+		if(--this.life <= 0){
+			this.shallRemove = true;
+		}
 	},
 
 	draw: function(ctx) {

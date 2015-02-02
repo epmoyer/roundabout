@@ -7,6 +7,18 @@ var DrifterPoints = 100;
 var DrifterCollisionRadius = 13;
 var DrifterNumExplosionParticles = 20;
 
+var BlockerAppearScore = 10000;
+var BlockerSpawnRate = 0.001;
+var BlockerPoints = 500;
+var BlockerCollisionRadius = 13;
+var BlockerNumExplosionParticles = 30;
+var BlockerCoreExplosionParticles = 10;
+
+var ReflectedBulletLife = 15;
+
+var ShipBounceDampening = 0.2;
+var ShipBounceMinVelocity = 1.5;
+
 var ShipNumExplosionParticles = 30;
 
 var BulletsMax = 4;
@@ -61,12 +73,17 @@ var GameState = State.extend({
 			urls: ['sounds/ExtraLife.wav'],
 			volume: 1.00,
 		});
+		this.shot_reflect_sound = new Howl({
+			urls: ['sounds/Blocked.wav'],
+			volume: 0.25,
+		});
 		this.engine_sound_playing = false;
 
 		this.vortexCollapse = false;
 
-		// Drifters
+		// Aliens
 		this.drifters = [];
+		this.blockers = [];
 
 		this.particles = new Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
 	},
@@ -81,6 +98,7 @@ var GameState = State.extend({
 
 		this.bullets = [];
 		this.drifters = [];
+		this.blockers = [];
 	},
 
 	addPoints: function(points){
@@ -158,12 +176,15 @@ var GameState = State.extend({
 				for(var i=0, len=this.drifters.length; i<len; i++){
 					this.drifters[i].deathDive = true;
 				}
+				for(var i=0, len=this.blockers.length; i<len; i++){
+					this.blockers[i].deathDive = true;
+				}
 			}
 		}
 		else{
 			// Respawn after all enmies have cleared the playfield
 			if(!this.gameOver){
-				if(this.drifters.length == 0){
+				if((this.drifters.length == 0) && (this.blockers.length == 0)){
 					this.ship.radius = ShipStartRadius;
 					this.ship.radialAngle = ShipStartAngle;
 					this.ship.ascentVelocity = 0;
@@ -177,8 +198,14 @@ var GameState = State.extend({
 		for(var j=0, len2 = this.bullets.length; j<len2; j++){
 			var b = this.bullets[j];
 			var bulletRemove = false;
+
+			// Remove shots that reflect back into vortex
+			if (Math.sqrt(Math.pow(b.x - this.center_x, 2) + Math.pow(b.y - this.center_y,2)) <= this.vortex.radius){
+				bulletRemove = true;
+			}
+
+			// Shoot drifters
 			for(var k=0, len3 =this.drifters.length; k<len3; k++){
-				//if (this.drifters[k].hasPoint(b.x, b.y)){
 				drifter = this.drifters[k];
 				if (Math.sqrt(Math.pow(drifter.x - b.x, 2) + Math.pow(drifter.y - b.y,2)) < DrifterCollisionRadius){
 
@@ -194,6 +221,20 @@ var GameState = State.extend({
 					k--;
 
 					bulletRemove = true;
+				}
+			}
+			// Shoot blockers
+			for(var k=0, len3 =this.blockers.length; k<len3; k++){
+				blocker = this.blockers[k];
+				if (Math.sqrt(Math.pow(blocker.x - b.x, 2) + Math.pow(blocker.y - b.y,2)) < BlockerCollisionRadius){
+					// Reverse bullet direction
+					b.vel.x =- b.vel.x;
+					b.vel.y =- b.vel.y;
+					// Move the bullet after reflect, so that it cannot bounce around inside the blocker
+					b.x += b.vel.x;
+					b.y += b.vel.y;
+					b.life = ReflectedBulletLife;
+					this.shot_reflect_sound.play();
 				}
 			}
 			if(bulletRemove){
@@ -274,6 +315,65 @@ var GameState = State.extend({
 			}
 		}
 
+		//----------------
+		// Blockers
+		//----------------
+
+		//Spawn
+		if(!this.vortexCollapse && this.ship.visible && this.score > BlockerAppearScore){
+			if((Math.random() < BlockerSpawnRate) || (this.blockers.length == 0)){
+				blocker = new Blocker(Points.SHIELD_TYPE_SHORT, Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
+					DrifterMaxRadius, Math.random() * Math.PI * 2, Colors.RED,
+					this.vortex.radiusToAngularVelocity);
+				this.blockers.push(blocker);
+			}
+		}
+
+		// Update & check player collisions
+		var numObjectsConsumed = 0;
+		for(var i=0, len=this.blockers.length; i<len; i++){
+			numObjectsConsumed += this.blockers[i].update(paceFactor, this.vortex.radius);
+			if(this.blockers[i].alive == false){
+				// Remove dead blocker
+				this.blockers.splice(i, 1);
+				len--;
+				i--;
+			} else{
+				if(this.ship.visible){
+					d = this.blockers[i];
+					if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < BlockerCollisionRadius*2){
+						if(this.ship.radius > d.radius){
+							// Ship destroys blocker
+							d.die_sound.play();
+							this.particles.explosion(d.radius, d.radialAngle, BlockerNumExplosionParticles, blocker.color);
+							this.particles.explosion(d.radius, d.radialAngle, BlockerCoreExplosionParticles, blocker.core.color);
+							
+							// Remove dead blocker
+							this.blockers.splice(i, 1);
+							len--;
+							i--;
+
+							// Bounce the ship 
+							//this.ship.ascentVelocity = -this.ship.ascentVelocity * ShipBounceDampening;
+							this.ship.ascentVelocity = ShipBounceMinVelocity;
+						}
+						else {
+							// Blocker destroys ship
+							this.ship.vortexDeath = true; // Not realy a vortex death, but works for now.
+							this.player_die_sound.play();
+							this.particles.explosion(this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles, this.ship.color);
+						}
+
+					}
+				}
+			}
+		}
+		if(numObjectsConsumed>0){
+			if(!this.vortexCollapse && this.ship.visible){
+				this.vortex.grow(numObjectsConsumed);
+			}
+		}
+
 
 
 		// End of level
@@ -315,6 +415,11 @@ var GameState = State.extend({
 		// Drifters
 		for(var i=0, len=this.drifters.length; i<len; i++){
 			this.drifters[i].draw(ctx);
+		}
+
+		// Blockers
+		for(var i=0, len=this.blockers.length; i<len; i++){
+			this.blockers[i].draw(ctx);
 		}
 
 		this.ship.draw(ctx);
