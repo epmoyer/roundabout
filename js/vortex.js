@@ -5,7 +5,7 @@ var VortexMaxRadius = 350;
 var VortexRadialSpeed = -0.06;
 var VortexTwist = 0.20;
 var VortexGrowRadius = 10;
-var VortexGrowRate = 0.09;
+var VortexGrowRate = 0.18;
 var VortexCollapseRate = 0.2;
 var VortexBoostRange = 70;
 var VotexBoostVelocity = 0.06;
@@ -105,7 +105,7 @@ var Vortex = Class.extend({
 		}
 		else if(this.radius < this.target_radius){
 			// Growing
-			ctx.strokeStyle=Colors.YELLOW;
+			ctx.strokeStyle=Colors.MAGENTA;
 		}
 		else{
 			// Stable

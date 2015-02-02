@@ -5,6 +5,9 @@ var DrifterMaxRadius = 1024/2+30;
 var DrifterSpawnRate = 0.005;
 var DrifterPoints = 100;
 var DrifterCollisionRadius = 13;
+var DrifterNumExplosionParticles = 20;
+
+var ShipNumExplosionParticles = 30;
 
 var BulletsMax = 4;
 
@@ -64,6 +67,8 @@ var GameState = State.extend({
 
 		// Drifters
 		this.drifters = [];
+
+		this.particles = new Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
 	},
 
 	generateLvl: function() {
@@ -179,6 +184,9 @@ var GameState = State.extend({
 
 					this.addPoints(DrifterPoints);
 
+					// Explode
+					this.particles.explosion(drifter.radius, drifter.radialAngle, DrifterNumExplosionParticles, drifter.color);
+
 					// Remove dead drifter
 					this.drifters[k].die_sound.play();
 					this.drifters.splice(k, 1);
@@ -249,6 +257,9 @@ var GameState = State.extend({
 						this.ship.vortexDeath = true; // Not realy a vortex death, but works for now.
 						this.player_die_sound.play();
 
+						this.particles.explosion(d.radius, d.radialAngle, DrifterNumExplosionParticles, drifter.color);
+						this.particles.explosion(this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles, this.ship.color);
+
 						// Remove dead drifter
 						this.drifters.splice(i, 1);
 						len--;
@@ -272,6 +283,7 @@ var GameState = State.extend({
 			this.generateLvl();
 		}
 		*/
+		this.particles.update(paceFactor);
 	},
 
 	render: function(ctx){
@@ -309,5 +321,7 @@ var GameState = State.extend({
 
 		var showCollapse = (this.vortexCollapse || (this.ship.visible == false && this.drifters.length > 0));
 		this.vortex.draw(ctx, showCollapse);
+
+		this.particles.draw(ctx);
 	}
 })
