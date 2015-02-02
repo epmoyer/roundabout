@@ -10,8 +10,8 @@ var Ship = Polygon.extend({
 	init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity){
 		this._super(p, color);
 
-		//this.flames = new Polygon(pf);
-		//this.flames.scale(s);
+		this.flames = new Polygon(pf, Colors.CYAN);
+		this.flames.setScale(s);
 
 		this.center_x = x;
 		this.center_y = y;
@@ -53,6 +53,7 @@ var Ship = Polygon.extend({
 	// Calculate caridnal position and angle from radial position and angle
 	radial_to_cardinal: function(){
 		this.setAngle(this.radialAngle);
+		this.flames.setAngle(this.radialAngle);
 		this.x = this.center_x + this.radius * Math.cos(this.radialAngle);
 		this.y = this.center_y + this.radius * Math.sin(this.radialAngle);
 	},
@@ -127,7 +128,7 @@ var Ship = Polygon.extend({
 		if(this.visible){
 			ctx.drawPolygon(this, this.x, this.y);
 			if (this.drawFlames){
-				//ctx.drawPolygon(this.flames, this.x, this.y);
+				ctx.drawPolygon(this.flames, this.x, this.y);
 				this.drawFlames = false;
 			};
 		}

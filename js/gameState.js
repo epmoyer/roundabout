@@ -11,7 +11,7 @@ var ShipNumExplosionParticles = 30;
 
 var BulletsMax = 4;
 
-var ExtraLifeScore = 3000;
+var ExtraLifeScore = 5000;
 
 var GameState = State.extend({
 
