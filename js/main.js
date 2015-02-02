@@ -5,10 +5,21 @@ var States = {
 	END: 3
 }
 
+var Colors = {
+	BLUE: 		"#0000FF",
+	WHITE: 		"#FFFFFF",
+	GREEN:      "#00FF00",
+	YELLOW:     "#FFFF00",
+	RED:        "#FF0000",
+	CYAN:       "#00FFFF",
+	MAGENTA:	"#FF00FF",
+	CYAN_DK:    "#008080",
+}
+
 var Game = Class.extend({
 
 	init: function() {
-		this.canvas = new Canvas(640, 480);
+		this.canvas = new Canvas(1024, 768);
 
 		this.input = new InputHandler({
 			left: 		37,
@@ -21,11 +32,9 @@ var Game = Class.extend({
 			s:          83,
 			d:          68,
 			w:          87,
+			z:          90,
 			one:        49,
 		})
-
-		var testing = new Testing();
-		testing.testing();
 
 		this.canvas.ctx.strokeStyle = "#fff";
 
@@ -34,6 +43,12 @@ var Game = Class.extend({
 			score: 0
 		}
 		this.nextState = States.MENU;
+
+		var song = new Howl({
+		 	urls: ['sounds/song_roundabout.mp3'],
+		 	loop: true,
+		 	buffer: true,
+		}).play();
 	},
 
 	run: function() {

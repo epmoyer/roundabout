@@ -1,16 +1,24 @@
 var VortexLines = 15;
 var VortexThickness = 15;
-var VortexStartRadius = 50;
+var VortexStartRadius = 20;
+var VortexMaxRadius = 350;
 var VortexRadialSpeed = -0.06;
 var VortexTwist = 0.20;
+var VortexGrowRadius = 10;
+var VortexGrowRate = 0.09;
+var VortexCollapseRate = 0.2;
+var VortexBoostRange = 70;
+var VotexBoostVelocity = 0.06;
 
-var StarMaxRadius = 320;
+
+var StarMaxRadius = 1024/2;
 var StarfallSpeed = 0.3;
 
 var Vortex = Class.extend({
 
 	init: function(x, y){
-		this.radius = 20;
+		this.radius = VortexStartRadius;
+		this.target_radius = VortexStartRadius;
 		this.angle = 0;
 		this.center_x = x;
 		this.center_y = y;
@@ -20,22 +28,64 @@ var Vortex = Class.extend({
 			this.stars.push(Math.random() * StarMaxRadius);
 			this.stars.push(Math.random() * Math.PI * 2);
 		}
+
+		this.vortex_consume_sound = new Howl({
+			urls: ['sounds/VortexConsume.wav'],
+			volume: 1.0,
+		});
 	},
 
-	radiusToAngularVelocity: function(radius) {
+	radiusToAngularVelocity: function(radius, boost) {
+		if(typeof(boost)==='undefined'){
+			boost = false;
+		};
+		var boostVelocity = 0;
 		var distance = radius - 20;
 		if (distance < 1){
 			distance = 1;
 		}
-		return (-0.03 * ((StarMaxRadius - distance)/StarMaxRadius));
+		if (boost){
+			var distanceFromVortex = radius - this.radius;
+			if(distanceFromVortex < 0){
+				distanceFromVortex = 0;
+			}
+			if(distanceFromVortex<VortexBoostRange){
+				boostVelocity = VotexBoostVelocity * ((VortexBoostRange - distanceFromVortex)/VortexBoostRange);
+			}
+		}
+		return -((0.03 * ((StarMaxRadius - distance)/StarMaxRadius)) + boostVelocity);
 	},
 
-	update: function() {
+	grow: function(objectsConsumed) {
+		this.target_radius += VortexGrowRadius * objectsConsumed;
+		if (this.target_radius >= VortexMaxRadius){
+			this.target_radius = VortexMaxRadius;
+		}
+		this.vortex_consume_sound.play();
+	},
+
+	update: function(paceFactor, doCollapse) {
+		isCollapsed = false;
+
 		this.angle += VortexRadialSpeed;
+
+		if (doCollapse){
+			this.target_radius = VortexStartRadius;
+			this.radius -= VortexCollapseRate;
+			if (this.radius <= VortexStartRadius){
+				this.radius = VortexStartRadius;
+				isCollapsed = true;
+			}
+		}
+		else{
+			if(this.radius < this.target_radius){
+				this.radius += VortexGrowRate;
+			}
+		}
 
 		// Add rotational angle to stars based on radius
 		for(var i=0, len=this.stars.length; i<len; i+=2){
-			this.stars[i+1] += this.radiusToAngularVelocity(this.stars[i]);
+			this.stars[i+1] += this.radiusToAngularVelocity(this.stars[i], true);
 			this.stars[i] -= StarfallSpeed;
 			if (this.stars[i] < (this.radius + VortexThickness/2)){
 				// Star fell into the vortex, so regenerate it at the outside
@@ -43,12 +93,25 @@ var Vortex = Class.extend({
 				this.stars[i+1] = Math.random() * Math.PI * 2;
 			}
 		}
+		return isCollapsed;
 	},
 
-	draw: function(ctx) {
+	draw: function(ctx, doCollapse) {
 		// Vortex
 		ctx.beginPath();
-		for(theta = 0, angle_delta = (Math.PI * 2)/VortexLines; theta < (Math.PI * 2); theta += angle_delta){
+		if (doCollapse){
+			// Collapsing
+			ctx.strokeStyle=Colors.CYAN;
+		}
+		else if(this.radius < this.target_radius){
+			// Growing
+			ctx.strokeStyle=Colors.YELLOW;
+		}
+		else{
+			// Stable
+			ctx.strokeStyle=Colors.GREEN;
+		}
+		for(theta = 0, angle_delta = (Math.PI * 2)/VortexLines; theta < ((Math.PI * 2)-0.001); theta += angle_delta){
 			var sx = this.center_x + Math.cos(theta+this.angle - VortexTwist) * (this.radius - VortexThickness/2);
 			var sy = this.center_y + Math.sin(theta+this.angle - VortexTwist) * (this.radius - VortexThickness/2);
 			var ex = this.center_x + Math.cos(theta+this.angle + VortexTwist) * (this.radius + VortexThickness/2);

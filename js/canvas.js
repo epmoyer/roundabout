@@ -1,7 +1,7 @@
 var Canvas = Class.extend({
 
 	init: function(width, height) {
-		this.showMetrics = true;
+		this.showMetrics = false;
 		this.canvas = document.createElement("canvas");
 		this.canvas.width = width;
 		this.canvas.height = height;
@@ -20,13 +20,16 @@ var Canvas = Class.extend({
 			ctx.SPACECODE = " ".charCodeAt(0);
 			
 			ctx.drawPolygon = function(p, x, y) {
-				p = p.points;
+				var points = p.points;
 
+				this.strokeStyle = p.color;
 				this.beginPath();
-				this.moveTo(p[0]+x, p[1]+y);
-				for (var i=2, len=p.length; i<len; i+=2){
-					this.lineTo(p[i]+x, p[i+1] +y);
+				//console.log(p.color);
+				this.moveTo(points[0]+x, points[1]+y);
+				for (var i=2, len=points.length; i<len; i+=2){
+					this.lineTo(points[i]+x, points[i+1] +y);
 				}
+				
 				this.stroke();
 			};
 
@@ -44,12 +47,13 @@ var Canvas = Class.extend({
 				ctx.fillRect(x, y, x_needle, height);
 
 				this.stroke();
-
-				
-
 			}
 
-			ctx.vectorText = function(text, s, x, y, offset){
+			ctx.vectorText = function(text, s, x, y, offset, color){
+				if(typeof(color)==='undefined'){
+					color = Colors.GREEN;
+				};
+
 				text = text.toString().toUpperCase();
 				var step = s*6;
 
@@ -69,6 +73,7 @@ var Canvas = Class.extend({
 				x += 0.5;
 				y += 0.5;
 
+				this.strokeStyle = color;
 				for(var i = 0, len = text.length; i<len; i++){
 					var ch = text.charCodeAt(i);
 

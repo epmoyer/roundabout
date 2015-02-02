@@ -12,16 +12,18 @@ var EndState = State.extend({
 		this._super(game); // call super constructor
 
 		this.hasEnterName = false; // internal stage flag
-		this.nick = "no name";
+		this.nick = "NO NAME";
 		this.score = game.stateVars.score;
 
 		// arbitrary hiscore array
 		// TODO: implement real hiscore saving with PHP or something
 		this.hisores = [
-			["the doctor", 2000],
-			["son goku", 9999],
-			["noname", 3000],
-			["narsil", 10000]
+			["Dio", 9999],
+			["Jotaro", 3000],
+			["Joseph", 2000],
+			["Jonathan", 1000],
+			["FLOATINHEAD", 0600],
+			["FIENDFODDER", 0500],
 		];
 
 		// get and init inputfiled from DOM
@@ -50,6 +52,8 @@ var EndState = State.extend({
 
 				// cleanup and append score to hiscore array
 				this.nick = this.nick.replace(/[^a-zA-Z0-9\s]/g, "");
+				this.nick = this.nick.trim();
+				this.nick = this.nick.substring(0,13); // Limit name length
 				this.hisores.push([this.nick, this.score]);
 
 				// sort hiscore in ascending order
@@ -90,10 +94,10 @@ var EndState = State.extend({
 			ctx.vectorText("Hiscore", 3, null, 130);
 			for (var i = 0, len = this.hisores.length; i < len; i++) {
 				var hs = this.hisores[i];
-				ctx.vectorText(hs[0], 2, 200, 200+25*i);
-				ctx.vectorText(hs[1], 2, 320, 200+25*i, 10);
+				ctx.vectorText(hs[0], 2, 390, 200+25*i);
+				ctx.vectorText(hs[1], 2, 520, 200+25*i, 10);
 			}
-			ctx.vectorText("press space to continue", 1, null, 350);
+			ctx.vectorText("press space to continue", 1, null, 450);
 
 		} else {
 

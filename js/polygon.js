@@ -1,6 +1,12 @@
 var Polygon = Class.extend({
 
-	init: function(p){
+	init: function(p, color){
+		if(typeof(color)==='undefined'){
+			color = Colors.WHITE;
+		};
+
+		this.color = color;
+		//console.log(this.color);
 		this.points = p.slice(0);
 		this.pointsMaster = p.slice(0);
 		this.angle = 0;
