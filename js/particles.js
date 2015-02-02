@@ -23,7 +23,8 @@ var Particle = Class.extend({
 	update: function(paceFactor) {
 		var isAlive = true;
 		// Decay and die
-		if(--this.life <= 0){
+		this.life -= paceFactor;
+		if(this.life <= 0){
 			// Kill particle
 			isAlive = false;
 		}
@@ -31,7 +32,7 @@ var Particle = Class.extend({
 			// Get angular velocity
 			var angularVelocity = this.f_radiusToAngularVelocity(this.radius, false); // BUG: Boost doesn't work here. Calling without
 			// Apply angular velocity
-			this.angle += angularVelocity;
+			this.angle += angularVelocity * paceFactor;
 			// Apply radius decay
 			//this.radiusDecayVelocity += ParticleGravity;
 			//this.radius += this.radiusDecayVelocity;
@@ -39,8 +40,8 @@ var Particle = Class.extend({
 			this.x = this.particles.center_x + Math.cos(this.angle) * this.radius;
 			this.y = this.particles.center_y + Math.sin(this.angle) * this.radius;
 			// Add impulse
-			this.x += this.dx;
-			this.y += this.dy;
+			this.x += this.dx * paceFactor;
+			this.y += this.dy * paceFactor;
 			// Decay impulse
 			this.dx *= ParticleFriction;
 			this.dy *= ParticleFriction;
@@ -88,7 +89,7 @@ var Particles = Class.extend({
 
 	update: function(paceFactor) {
 		for(var i=0, len=this.particles.length; i<len; i+=1){
-			if(!this.particles[i].update()){
+			if(!this.particles[i].update(paceFactor)){
 				// Particle has died.  Remove it
 				this.particles.splice(i, 1);
 				len--;

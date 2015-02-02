@@ -7,9 +7,9 @@ var DrifterPoints = 100;
 var DrifterCollisionRadius = 13;
 var DrifterNumExplosionParticles = 20;
 
-var BlockerAppearScore = 10000;
+var BlockerAppearScore = 800;
 var BlockerSpawnRate = 0.001;
-var BlockerPoints = 500;
+var BlockerPoints = 250;
 var BlockerCollisionRadius = 13;
 var BlockerNumExplosionParticles = 30;
 var BlockerCoreExplosionParticles = 10;
@@ -115,9 +115,24 @@ var GameState = State.extend({
 
 	handleInputs: function(input) {
 
-		// Metrics toggle
-		if (input.isPressed("one")){
-			this.game.canvas.showMetrics = !this.game.canvas.showMetrics;
+		if(DeveloperModeEnabled){
+			// Metrics toggle
+			if (input.isPressed("one")){
+				this.game.canvas.showMetrics = !this.game.canvas.showMetrics;
+			}
+
+			// Slow Mo Debug toggle
+			if (input.isPressed("two")){
+				/*
+				if(this.game.slowMoDebug){
+					this.game.slowMoDebug = false;
+				}
+				else {
+					this.game.slowMoDebug = true;
+				}
+				*/
+				this.game.slowMoDebug = !this.game.slowMoDebug;
+			}
 		}
 
 		/*
@@ -248,7 +263,7 @@ var GameState = State.extend({
 		// Update bullets
 		for (var i=0, len=this.bullets.length; i < len; i++){
 			var b = this.bullets[i];
-			b.update();
+			b.update(paceFactor);
 
 			if(b.shallRemove) {
 				this.bullets.splice(i, 1);
@@ -320,7 +335,7 @@ var GameState = State.extend({
 		//----------------
 
 		//Spawn
-		if(!this.vortexCollapse && this.ship.visible && this.score > BlockerAppearScore){
+		if(!this.vortexCollapse && this.ship.visible && this.score >= BlockerAppearScore){
 			if((Math.random() < BlockerSpawnRate) || (this.blockers.length == 0)){
 				blocker = new Blocker(Points.SHIELD_TYPE_SHORT, Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
 					DrifterMaxRadius, Math.random() * Math.PI * 2, Colors.RED,

@@ -16,6 +16,8 @@ var Colors = {
 	CYAN_DK:    "#008080",
 }
 
+var DeveloperModeEnabled = false;
+
 var Game = Class.extend({
 
 	init: function() {
@@ -34,6 +36,7 @@ var Game = Class.extend({
 			w:          87,
 			z:          90,
 			one:        49,
+			two:        50,
 		})
 
 		this.canvas.ctx.strokeStyle = "#fff";
@@ -43,6 +46,7 @@ var Game = Class.extend({
 			score: 0
 		}
 		this.nextState = States.MENU;
+		this.slowMoDebug = false;
 
 		var song = new Howl({
 		 	urls: ['sounds/song_roundabout.mp3'],
@@ -73,7 +77,12 @@ var Game = Class.extend({
 			}
 
 			self.currentState.handleInputs(self.input);
-			self.currentState.update(paceFactor);
+			if(self.slowMoDebug){
+				self.currentState.update(paceFactor * 0.1);
+			}
+			else{
+				self.currentState.update(paceFactor * 0.7);
+			}
 			self.currentState.render(self.canvas.ctx);
 		})
 	}

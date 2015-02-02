@@ -67,11 +67,11 @@ var Vortex = Class.extend({
 	update: function(paceFactor, doCollapse) {
 		isCollapsed = false;
 
-		this.angle += VortexRadialSpeed;
+		this.angle += VortexRadialSpeed * paceFactor;
 
 		if (doCollapse){
 			this.target_radius = VortexStartRadius;
-			this.radius -= VortexCollapseRate;
+			this.radius -= VortexCollapseRate * paceFactor;
 			if (this.radius <= VortexStartRadius){
 				this.radius = VortexStartRadius;
 				isCollapsed = true;
@@ -79,14 +79,14 @@ var Vortex = Class.extend({
 		}
 		else{
 			if(this.radius < this.target_radius){
-				this.radius += VortexGrowRate;
+				this.radius += VortexGrowRate * paceFactor;
 			}
 		}
 
 		// Add rotational angle to stars based on radius
 		for(var i=0, len=this.stars.length; i<len; i+=2){
-			this.stars[i+1] += this.radiusToAngularVelocity(this.stars[i], true);
-			this.stars[i] -= StarfallSpeed;
+			this.stars[i+1] += this.radiusToAngularVelocity(this.stars[i], true) * paceFactor;
+			this.stars[i] -= StarfallSpeed * paceFactor;
 			if (this.stars[i] < (this.radius + VortexThickness/2)){
 				// Star fell into the vortex, so regenerate it at the outside
 				this.stars[i] = StarMaxRadius;

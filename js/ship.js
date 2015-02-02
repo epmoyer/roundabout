@@ -91,7 +91,7 @@ var Ship = Polygon.extend({
 		//b.vel.y += ship_velocity * Math.sin(ship_direction);
 		b.maxX = this.maxX;
 		b.maxY = this.maxY;
-		b.update(); // Move the bullet one frame to get it away from the ship
+		b.update(1.0); // Move the bullet one frame to get it away from the ship
 
 		//Recoil
 		this.ascentVelocity -= ShipRecoil;
@@ -106,8 +106,8 @@ var Ship = Polygon.extend({
 	update: function(paceFactor, angularVelocity, vortexRadius) {
 		//console.log(paceFactor);
 		this.angularVelocity = angularVelocity;
-		this.ascentVelocity -= ShipGravity;
-		this.radius += this.ascentVelocity;
+		this.ascentVelocity -= ShipGravity * paceFactor;
+		this.radius += this.ascentVelocity * paceFactor;
 		if (this.radius < vortexRadius){
 			if(!this.vortexDeath){
 				this.ascentVelocity = 0;
@@ -120,7 +120,7 @@ var Ship = Polygon.extend({
 			this.ascentVelocity = 0;
 			this.radius =370;
 		}
-		this.radialAngle += angularVelocity;
+		this.radialAngle += angularVelocity * paceFactor;
 		this.radial_to_cardinal();
 	},
 

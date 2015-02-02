@@ -57,12 +57,12 @@ var Drifter = Polygon.extend({
 	update: function(paceFactor, vortexRadius) {
 		var numVortexed = 0;
 		// Add rotational angle to stars based on radius
-		this.radialAngle += this.f_radiusToAngularVelocity(this.radius);
+		this.radialAngle += this.f_radiusToAngularVelocity(this.radius) * paceFactor;
 		if(this.deathDive){
-			this.radius -= 12 * DrifterFallSpeed;
+			this.radius -= 12 * DrifterFallSpeed * paceFactor;
 		} 
 		else {
-			this.radius -= DrifterFallSpeed;
+			this.radius -= DrifterFallSpeed * paceFactor;
 		}
 		this.radial_to_cardinal();
 		if (this.radius < vortexRadius){

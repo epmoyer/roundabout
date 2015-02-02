@@ -1,3 +1,5 @@
+var BulletVelocity = 5;
+
 var Bullet = Class.extend({
 	maxX: null,
 	maxY: null,
@@ -10,12 +12,12 @@ var Bullet = Class.extend({
 		this.life = 60 * 30; // 30 seconds of life to start
 
 		this.vel = {
-			x: 5*Math.cos(angle),
-			y: 5*Math.sin(angle)
+			x: BulletVelocity * Math.cos(angle),
+			y: BulletVelocity * Math.sin(angle)
 		}
 	},
 
-	update: function(){
+	update: function(paceFactor){
 		this.prevx = this.x;
 		this.prevy = this.y;
 
@@ -24,9 +26,10 @@ var Bullet = Class.extend({
 		){
 			this.shallRemove = true;
 		}
-
-		this.x += this.vel.x;
-		this.y += this.vel.y;
+		//console.log(paceFactor, this.x + this.vel.x * paceFactor, this.x + this.vel.x * 0.5);
+		this.x += this.vel.x * paceFactor;
+		this.y += this.vel.y * paceFactor;
+		
 		if(--this.life <= 0){
 			this.shallRemove = true;
 		}
