@@ -102,7 +102,7 @@ var EndState = State.extend({
 		} else {
 
 			ctx.vectorText("Thank you for playing", 4, null, 100);
-			ctx.vectorText("nick", 2, null, 180);
+			ctx.vectorText("TYPE YOUR NAME AND PRESS ENTER", 2, null, 180);
 			ctx.vectorText(this.nick, 3, null, 220);
 			ctx.vectorText(this.score, 3, null, 300);
 		}

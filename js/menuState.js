@@ -69,7 +69,7 @@ var MenuState = State.extend({
 		ctx.vectorText("Z TO THRUST", 1, null, 590, null, Colors.YELLOW);
 		ctx.vectorText("SPACE TO SHOOT", 1, null, 600, null, Colors.YELLOW);
 
-		ctx.vectorText("ALPHA BUILD 3", 2, null, 270, null, Colors.GREEN);
+		ctx.vectorText("VERSION 4", 2, null, 270, null, Colors.GREEN);
 		ctx.vectorText("WRITTEN BY TRAYTON MOYER AND ERIC MOYER FOR LUDAM MINI DARE 56", 2, null, 680, null, Colors.GREEN);
 		ctx.vectorText("MUSIC ROUNDABOUT 8 BIT BY STUDIO MEGAANE", 2, null, 700, null, Colors.GREEN);
 		ctx.vectorText("VECTOR FRAMEWORK DEVELOPED BY MAX WIHLBORG", 2, null, 720, null, Colors.GREEN);

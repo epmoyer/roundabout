@@ -78,7 +78,8 @@ var Game = Class.extend({
 
 			self.currentState.handleInputs(self.input);
 			if(self.slowMoDebug){
-				self.currentState.update(paceFactor * 0.1);
+				self.currentState.update(paceFactor * 0.1); // Slow Mo
+				//self.currentState.update(0); // Freeze Frame
 			}
 			else{
 				self.currentState.update(paceFactor * 0.7);
