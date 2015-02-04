@@ -10,14 +10,18 @@ var VortexCollapseRate = 0.2;
 var VortexBoostRange = 70;
 var VotexBoostVelocity = 0.06;
 
+var VortexShieldPoints = 10;
+var VortexShieldMargin = 15;
+var VortexShieldRotationSpeed = -0.06;
+var VortexShieldDrawMargin = 3;
 
 var StarMaxRadius = 1024/2;
 var StarfallSpeed = 0.3;
 
+
 var Vortex = Class.extend({
 
 	init: function(x, y){
-		this.radius = VortexStartRadius;
 		this.target_radius = VortexStartRadius;
 		this.angle = 0;
 		this.center_x = x;
@@ -33,6 +37,22 @@ var Vortex = Class.extend({
 			urls: ['sounds/VortexConsume.wav'],
 			volume: 1.0,
 		});
+
+		
+
+		// Build shield 
+		var shieldPoints = [];
+		for (var theta=0; theta<Math.PI*2+0.01; theta+=Math.PI*2/VortexShieldPoints){
+			shieldPoints.push(Math.cos(theta));
+			shieldPoints.push(Math.sin(theta));
+		}
+		this.shieldPolygon = new Polygon(shieldPoints, Colors.BLUE);
+		this.shieldAngle = 0;
+		this.shieldActive = true;
+
+		this.setRadius(VortexStartRadius);
+
+		
 	},
 
 	radiusToAngularVelocity: function(radius, boost) {
@@ -56,6 +76,12 @@ var Vortex = Class.extend({
 		return -((0.03 * ((StarMaxRadius - distance)/StarMaxRadius)) + boostVelocity);
 	},
 
+	setRadius: function(radius){
+		this.radius = radius;
+		this.shieldRadius = radius + VortexShieldMargin;
+		this.shieldPolygon.setScale(this.shieldRadius - VortexShieldDrawMargin);
+	},
+
 	grow: function(objectsConsumed) {
 		this.target_radius += VortexGrowRadius * objectsConsumed;
 		if (this.target_radius >= VortexMaxRadius){
@@ -71,15 +97,15 @@ var Vortex = Class.extend({
 
 		if (doCollapse){
 			this.target_radius = VortexStartRadius;
-			this.radius -= VortexCollapseRate * paceFactor;
+			this.setRadius(this.radius - VortexCollapseRate * paceFactor);
 			if (this.radius <= VortexStartRadius){
-				this.radius = VortexStartRadius;
+				this.setRadius(VortexStartRadius);
 				isCollapsed = true;
 			}
 		}
 		else{
 			if(this.radius < this.target_radius){
-				this.radius += VortexGrowRate * paceFactor;
+				this.setRadius(this.radius + VortexGrowRate * paceFactor);
 			}
 		}
 
@@ -93,6 +119,13 @@ var Vortex = Class.extend({
 				this.stars[i+1] = Math.random() * Math.PI * 2;
 			}
 		}
+
+		// Update shield
+		if(this.shieldActive){
+			this.shieldAngle += VortexShieldRotationSpeed * paceFactor;
+			this.shieldPolygon.setAngle(this.shieldAngle);
+		}
+
 		return isCollapsed;
 	},
 
@@ -130,5 +163,11 @@ var Vortex = Class.extend({
 			y = this.center_y + Math.sin(angle) * radius;
 			ctx.fillRect(x,y,2,2);
 		}
+
+		//Shield
+		if (this.shieldActive){
+			ctx.drawPolygon(this.shieldPolygon, this.center_x, this.center_y);
+		}
+
 	}
 });

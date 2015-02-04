@@ -1,13 +1,14 @@
 var ShipGravity = 0.08; //0.02;
 var ShipThrust = 0.40; //0.10;
 var ShipRecoil = 1.0; 
+var ShipMaxRadius = 370;
 
 var Ship = Polygon.extend({
 
 	maxX: null,
 	maxY: null,
 
-	init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity){
+	init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity, vortex){
 		this._super(p, color);
 
 		this.flames = new Polygon(pf, Colors.CYAN);
@@ -21,6 +22,7 @@ var Ship = Polygon.extend({
 		this.scale = s;
 		this.ascentVelocity = 0;
 		this.angularVelocity = 0;
+		this.vortex = vortex;
 
 		this.x = null;
 		this.y = null;
@@ -108,6 +110,16 @@ var Ship = Polygon.extend({
 		this.angularVelocity = angularVelocity;
 		this.ascentVelocity -= ShipGravity * paceFactor;
 		this.radius += this.ascentVelocity * paceFactor;
+
+		// Do not descend below vortex shield (if active)
+		if (this.vortex.shieldActive){
+			if(this.radius < this.vortex.shieldRadius){
+				this.radius = this.vortex.shieldRadius;
+				this.ascentVelocity = 0;
+			}
+		}
+
+		// Die if fall into vortex
 		if (this.radius < vortexRadius){
 			if(!this.vortexDeath){
 				this.ascentVelocity = 0;
@@ -116,9 +128,11 @@ var Ship = Polygon.extend({
 				this.vortex_consume_player_sound.play();
 			}
 		}
-		if (this.radius > 370){
+
+		// Do not fly past max raius
+		if (this.radius > ShipMaxRadius){
 			this.ascentVelocity = 0;
-			this.radius =370;
+			this.radius = ShipMaxRadius;
 		}
 		this.radialAngle += angularVelocity * paceFactor;
 		this.radial_to_cardinal();

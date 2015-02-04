@@ -7,26 +7,8 @@ var MenuState = State.extend({
 		this.canvasHeight = game.canvas.ctx.height;
 
 		this.vortex = new Vortex(this.canvasWidth/2, this.canvasHeight/2);
+		this.vortex.shieldActive = false;
 
-		/*
-		var num_asteroids = Math.random()*5 + 5;
-
-		this.asteroids = [];
-		for (var i=0; i<num_asteroids; i++){
-			var n = Math.round(Math.random() * (Points.ASTEROIDS.length - 1));
-
-			var x = Math.random() * this.canvasWidth;
-			var y = Math.random() * this.canvasHeight;
-
-			var s = [1, 2, 4][Math.round(Math.random() * 2)];
-
-			var aster = new Asteroid(Points.ASTEROIDS[n], AsteroidSize/s, x, y);
-			aster.maxX = this.canvasWidth;
-			aster.maxY = this.canvasHeight;
-
-			this.asteroids.push(aster);
-		}
-		*/
 		this.start_sound = new Howl({
 			urls: ['sounds/Tripple_blip.wav'],
 			volume: 0.5,
@@ -46,12 +28,6 @@ var MenuState = State.extend({
 	},
 
 	update: function(paceFactor) {
-		/*
-		for (var i=0, len=this.asteroids.length; i < len; i++){
-			var a = this.asteroids[i];
-			a.update();
-		}
-		*/
 		// Update vortex
 		this.vortex.update(paceFactor);
 	},
@@ -69,15 +45,11 @@ var MenuState = State.extend({
 		ctx.vectorText("Z TO THRUST", 1, null, 590, null, Colors.YELLOW);
 		ctx.vectorText("SPACE TO SHOOT", 1, null, 600, null, Colors.YELLOW);
 
-		ctx.vectorText("VERSION 4", 2, null, 270, null, Colors.GREEN);
+		ctx.vectorText("VERSION 5", 2, null, 270, null, Colors.GREEN);
 		ctx.vectorText("WRITTEN BY TRAYTON MOYER AND ERIC MOYER FOR LUDAM MINI DARE 56", 2, null, 680, null, Colors.GREEN);
 		ctx.vectorText("MUSIC ROUNDABOUT 8 BIT BY STUDIO MEGAANE", 2, null, 700, null, Colors.GREEN);
 		ctx.vectorText("VECTOR FRAMEWORK DEVELOPED BY MAX WIHLBORG", 2, null, 720, null, Colors.GREEN);
-		/*
-		for (var i=0, len=this.asteroids.length; i < len; i++){
-			this.asteroids[i].draw(ctx);
-		}
-		*/
+
 		this.vortex.draw(ctx);
 	}
 

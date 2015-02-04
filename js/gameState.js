@@ -19,6 +19,8 @@ var ReflectedBulletLife = 15;
 var ShipBounceDampening = 0.2;
 var ShipBounceMinVelocity = 1.5;
 
+var VortexShieldEndScore = 500;
+
 var ShipNumExplosionParticles = 30;
 
 var BulletsMax = 4;
@@ -38,7 +40,7 @@ var GameState = State.extend({
 		this.vortex = new Vortex(this.center_x, this.center_y);
 
 		this.ship = new Ship(Points.WIDE_SHIP, Points.FLAMES, 1.5, this.center_x, this.center_y, 
-			ShipStartRadius, ShipStartAngle, Colors.YELLOW, this.vortex.radiusToAngularVelocity);
+			ShipStartRadius, ShipStartAngle, Colors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
 		this.ship.maxX = this.canvasWidth;
 		this.ship.maxY = this.canvasHeight;
 
@@ -389,15 +391,12 @@ var GameState = State.extend({
 			}
 		}
 
-
-
-		// End of level
-		/*
-		if(this.asteroids.length == 0){
-			this.lvl++;
-			this.generateLvl();
+		// Vortex shield
+		if(this.score >= VortexShieldEndScore){
+			this.vortex.shieldActive = false;
 		}
-		*/
+
+		// Particles
 		this.particles.update(paceFactor);
 	},
 
