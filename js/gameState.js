@@ -91,8 +91,6 @@ var GameState = State.extend({
 	},
 
 	generateLvl: function() {
-		var num_asteroids = this.lvl+3; //Math.round(Math.pow(((this.lvl + 5)/10), 2) + 3);
-
 		var margin = 20;
 
 		this.ship.radius = ShipStartRadius;
