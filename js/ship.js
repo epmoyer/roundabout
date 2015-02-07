@@ -84,7 +84,7 @@ var Ship = Polygon.extend({
 		var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
 		var b_x = this.center_x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0];
 		var b_y = this.center_y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1];
-		var b = new Bullet(b_x, b_y, this.radialAngle + b_advance_angle); // start bullet angle one animation frame forward
+		var b = new Bullet(b_x, b_y, this.radialAngle + b_advance_angle, this.color); // start bullet angle one animation frame forward
 			
 		//var theta = this.f_radiusToAngularVelocity(this.radius);
 		//var ship_direction = this.angle + Math.PI/2;
@@ -136,6 +136,9 @@ var Ship = Polygon.extend({
 		}
 		this.radialAngle += angularVelocity * paceFactor;
 		this.radial_to_cardinal();
+
+		// Update vortex shield angle to match ship
+		this.vortex.shieldPolygon.setAngle(this.radialAngle);
 	},
 
 	draw: function(ctx){

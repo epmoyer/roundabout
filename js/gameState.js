@@ -19,7 +19,7 @@ var ReflectedBulletLife = 15;
 var ShipBounceDampening = 0.2;
 var ShipBounceMinVelocity = 1.5;
 
-var VortexShieldEndScore = 500;
+var VortexShieldEndScore = 100;
 
 var ShipNumExplosionParticles = 30;
 
@@ -39,7 +39,7 @@ var GameState = State.extend({
 
 		this.vortex = new Vortex(this.center_x, this.center_y);
 
-		this.ship = new Ship(Points.WIDE_SHIP, Points.FLAMES, 1.5, this.center_x, this.center_y, 
+		this.ship = new Ship(Points.WIDE_SHIP, Points.FLAMES, 1.5, this.center_x, this.center_y,
 			ShipStartRadius, ShipStartAngle, Colors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
 		this.ship.maxX = this.canvasWidth;
 		this.ship.maxY = this.canvasHeight;
@@ -87,7 +87,9 @@ var GameState = State.extend({
 		this.drifters = [];
 		this.blockers = [];
 
+		// Vortex
 		this.particles = new Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
+		this.vortex.particles = this.particles;
 	},
 
 	generateLvl: function() {
@@ -177,6 +179,8 @@ var GameState = State.extend({
 	},
 
 	update: function(paceFactor) {
+		var i, len, b;
+
 		if (this.ship.visible){
 			if (this.ship.vortexDeath){
 				this.engine_sound.stop();
@@ -188,10 +192,10 @@ var GameState = State.extend({
 				this.ship.vortexDeath = false;
 				this.vortexCollapse = true;
 				// Make all enemies death dive to clear field
-				for(var i=0, len=this.drifters.length; i<len; i++){
+				for(i=0, len=this.drifters.length; i<len; i++){
 					this.drifters[i].deathDive = true;
 				}
-				for(var i=0, len=this.blockers.length; i<len; i++){
+				for(i=0, len=this.blockers.length; i<len; i++){
 					this.blockers[i].deathDive = true;
 				}
 			}
@@ -199,7 +203,7 @@ var GameState = State.extend({
 		else{
 			// Respawn after all enmies have cleared the playfield
 			if(!this.gameOver){
-				if((this.drifters.length == 0) && (this.blockers.length == 0)){
+				if((this.drifters.length === 0) && (this.blockers.length === 0)){
 					this.ship.radius = ShipStartRadius;
 					this.ship.radialAngle = ShipStartAngle;
 					this.ship.ascentVelocity = 0;
@@ -211,7 +215,7 @@ var GameState = State.extend({
 
 		// Check bullet collisions
 		for(var j=0, len2 = this.bullets.length; j<len2; j++){
-			var b = this.bullets[j];
+			b = this.bullets[j];
 			var bulletRemove = false;
 
 			// Remove shots that reflect back into vortex
@@ -239,7 +243,7 @@ var GameState = State.extend({
 				}
 			}
 			// Shoot blockers
-			for(var k=0, len3 =this.blockers.length; k<len3; k++){
+			for(k=0, len3 =this.blockers.length; k<len3; k++){
 				blocker = this.blockers[k];
 				if (Math.sqrt(Math.pow(blocker.x - b.x, 2) + Math.pow(blocker.y - b.y,2)) < BlockerCollisionRadius){
 					// Reverse bullet direction
@@ -261,8 +265,8 @@ var GameState = State.extend({
 
 
 		// Update bullets
-		for (var i=0, len=this.bullets.length; i < len; i++){
-			var b = this.bullets[i];
+		for (i=0, len=this.bullets.length; i < len; i++){
+			b = this.bullets[i];
 			b.update(paceFactor);
 
 			if(b.shallRemove) {
@@ -273,9 +277,10 @@ var GameState = State.extend({
 		}
 
 		// Update ship
-		this.ship.update(paceFactor, 
-						 this.vortex.radiusToAngularVelocity(this.ship.radius, true),
-						 this.vortex.radius);
+		this.ship.update(
+			paceFactor,
+			this.vortex.radiusToAngularVelocity(this.ship.radius, true),
+			this.vortex.radius);
 
 		// Update vortex
 		var isCollapsed = this.vortex.update(paceFactor, this.vortexCollapse);
@@ -289,7 +294,7 @@ var GameState = State.extend({
 
 		//Spawn
 		if(!this.vortexCollapse && this.ship.visible){
-			if((Math.random() < DrifterSpawnRate) || (this.drifters.length == 0)){
+			if((Math.random() < DrifterSpawnRate) || (this.drifters.length === 0)){
 				drifter = new Drifter(Points.POINTY_SHIP, 2, this.center_x, this.center_y,
 					DrifterMaxRadius, Math.random() * Math.PI * 2, Colors.RED,
 					this.vortex.radiusToAngularVelocity);
@@ -299,9 +304,9 @@ var GameState = State.extend({
 
 		// Update & check player collisions
 		var numObjectsConsumed = 0;
-		for(var i=0, len=this.drifters.length; i<len; i++){
+		for(i=0, len=this.drifters.length; i<len; i++){
 			numObjectsConsumed += this.drifters[i].update(paceFactor, this.vortex.radius);
-			if(this.drifters[i].alive == false){
+			if(this.drifters[i].alive === false){
 				// Remove dead drifter
 				this.drifters.splice(i, 1);
 				len--;
@@ -324,11 +329,6 @@ var GameState = State.extend({
 				}
 			}
 		}
-		if(numObjectsConsumed>0){
-			if(!this.vortexCollapse && this.ship.visible){
-				this.vortex.grow(numObjectsConsumed);
-			}
-		}
 
 		//----------------
 		// Blockers
@@ -336,7 +336,7 @@ var GameState = State.extend({
 
 		//Spawn
 		if(!this.vortexCollapse && this.ship.visible && this.score >= BlockerAppearScore){
-			if((Math.random() < BlockerSpawnRate) || (this.blockers.length == 0)){
+			if((Math.random() < BlockerSpawnRate) || (this.blockers.length === 0)){
 				blocker = new Blocker(Points.SHIELD_TYPE_SHORT, Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
 					DrifterMaxRadius, Math.random() * Math.PI * 2, Colors.RED,
 					this.vortex.radiusToAngularVelocity);
@@ -345,10 +345,9 @@ var GameState = State.extend({
 		}
 
 		// Update & check player collisions
-		var numObjectsConsumed = 0;
-		for(var i=0, len=this.blockers.length; i<len; i++){
+		for(i=0, len=this.blockers.length; i<len; i++){
 			numObjectsConsumed += this.blockers[i].update(paceFactor, this.vortex.radius);
-			if(this.blockers[i].alive == false){
+			if(this.blockers[i].alive === false){
 				// Remove dead blocker
 				this.blockers.splice(i, 1);
 				len--;
@@ -383,6 +382,8 @@ var GameState = State.extend({
 				}
 			}
 		}
+
+		// Vortex grow
 		if(numObjectsConsumed>0){
 			if(!this.vortexCollapse && this.ship.visible){
 				this.vortex.grow(numObjectsConsumed);
@@ -391,7 +392,7 @@ var GameState = State.extend({
 
 		// Vortex shield
 		if(this.score >= VortexShieldEndScore){
-			this.vortex.shieldActive = false;
+			this.vortex.shieldErode = true;
 		}
 
 		// Particles
@@ -416,29 +417,29 @@ var GameState = State.extend({
 		}
 		*/
 
-		for (var i=0, len=this.bullets.length; i < len; i++){
+		for (i=0, len=this.bullets.length; i < len; i++){
 			this.bullets[i].draw(ctx);
 		}
 
 		if(this.gameOver){
 			ctx.vectorText("Game Over", 6, null, 200, null, Colors.GREEN);
-		} 
+		}
 
 		// Drifters
-		for(var i=0, len=this.drifters.length; i<len; i++){
+		for(i=0, len=this.drifters.length; i<len; i++){
 			this.drifters[i].draw(ctx);
 		}
 
 		// Blockers
-		for(var i=0, len=this.blockers.length; i<len; i++){
+		for(i=0, len=this.blockers.length; i<len; i++){
 			this.blockers[i].draw(ctx);
 		}
 
 		this.ship.draw(ctx);
 
-		var showCollapse = (this.vortexCollapse || (this.ship.visible == false && this.drifters.length > 0));
+		var showCollapse = (this.vortexCollapse || (this.ship.visible === false && this.drifters.length > 0));
 		this.vortex.draw(ctx, showCollapse);
 
 		this.particles.draw(ctx);
 	}
-})
+});

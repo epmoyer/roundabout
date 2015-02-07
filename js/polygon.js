@@ -3,7 +3,7 @@ var Polygon = Class.extend({
 	init: function(p, color){
 		if(typeof(color)==='undefined'){
 			color = Colors.WHITE;
-		};
+		}
 
 		this.color = color;
 		//console.log(this.color);
@@ -60,8 +60,9 @@ var Polygon = Class.extend({
 			var py1 = p[i+1] + oy;
 			var py2 = p[j+1] + oy;
 
-			if (( py1 > y != py2 > y ) &&
-			    ( x < (px2-px1) * (y-py1) / (py2-py1) + px1 )
+			if (
+				( py1 > y != py2 > y ) &&
+				( x < (px2-px1) * (y-py1) / (py2-py1) + px1 )
 			) {
 				c = !c;
 			}
@@ -69,4 +70,4 @@ var Polygon = Class.extend({
 		}
 		return c;
 	}
-})
+});

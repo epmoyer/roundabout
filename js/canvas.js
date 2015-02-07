@@ -1,3 +1,5 @@
+var MaxPaceRecoveryTicks = 5; // Max elapsed 60Hz frames to apply pacing (beyond this, just jank)
+
 var Canvas = Class.extend({
 
 	init: function(width, height) {
@@ -24,7 +26,7 @@ var Canvas = Class.extend({
 
 				this.strokeStyle = p.color;
 				this.beginPath();
-				//console.log(p.color);
+				//this.lineWidth = "5"; // Fat lines for screenshot thumbnail generation
 				this.moveTo(points[0]+x, points[1]+y);
 				for (var i=2, len=points.length; i<len; i+=2){
 					this.lineTo(points[i]+x, points[i+1] +y);
@@ -144,6 +146,9 @@ var Canvas = Class.extend({
 			// paceFactor represents the % of a 60fps frame that has elapsed.
 			// At 30fps the paceFactor is 2.0,  At 15fps it is 4.0
 			var paceFactor = (60*(timeNow - self.previousTimestamp))/1000;
+			if (paceFactor > MaxPaceRecoveryTicks) {
+				paceFactor = 1;
+			}
 
 			//console.log(paceFactor);
 			++self.ctx.fpsFrameCount;

@@ -71,14 +71,14 @@ var Particles = Class.extend({
 	},
 
 	explosion: function(radius, angle, quantity, color) {
-
+		console.log("explode:", radius, angle, quantity, color);
 		for(var i=0; i<quantity; i++){
 			theta = Math.random() * Math.PI * 2;
 			velocity = Math.random() * ExplosionMaxVelocity;
 			this.particles.push(new Particle(
 				this,
-				radius, 
-				angle, 
+				radius,
+				angle,
 				Math.cos(theta) * velocity,
 				Math.sin(theta) * velocity,
 				color,

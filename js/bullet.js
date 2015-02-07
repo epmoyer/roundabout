@@ -4,9 +4,10 @@ var Bullet = Class.extend({
 	maxX: null,
 	maxY: null,
 
-	init: function(x, y, angle){
+	init: function(x, y, angle, color){
 		this.x = x;
 		this.y = y;
+		this.color = color;
 
 		this.shallRemove = false;
 		this.life = 60 * 30; // 30 seconds of life to start
@@ -14,7 +15,7 @@ var Bullet = Class.extend({
 		this.vel = {
 			x: BulletVelocity * Math.cos(angle),
 			y: BulletVelocity * Math.sin(angle)
-		}
+		};
 	},
 
 	update: function(paceFactor){
@@ -37,8 +38,8 @@ var Bullet = Class.extend({
 
 	draw: function(ctx) {
 		ctx.beginPath();
-		ctx.moveTo(this.prevx, this.prevy);
-		ctx.lineTo(this.x, this.y);
+		ctx.fillStyle=this.color;
+		ctx.fillRect(this.x, this.y, 2, 2);
 		ctx.stroke();
 	}
 });
