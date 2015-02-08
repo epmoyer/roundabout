@@ -9,7 +9,9 @@ var TextSpacing = TextWidth + TextGap;
 
 var Canvas = Class.extend({
 
-	init: function(width, height) {
+	init: function(game, width, height) {
+		this.game = game;
+
 		this.showMetrics = false;
 		this.canvas = document.createElement("canvas");
 		this.canvas.width = width;
@@ -195,6 +197,13 @@ var Canvas = Class.extend({
 			//---------------------------
 			// Calculate FPS and pacing
 			//---------------------------
+			var timeNow;
+			if(self.game.browserSupportsPerformance){
+				timeNow = performance.now();
+			}
+			else{
+				timeNow = timeStamp;
+			}
 			/*
 			self.ctx.fps = Math.round(1000/(timeStamp - self.previousTimestamp));
 			// paceFactor represents the % of a 60fps frame that has elapsed.
@@ -204,7 +213,7 @@ var Canvas = Class.extend({
 			/console.log(paceFactor);
 			self.previousTimestamp = timeStamp;
 			*/
-			var timeNow = performance.now();
+			
 			//self.ctx.fps = Math.round(1000/(timeNow - self.previousTimestamp));
 			self.ctx.fpsMsecCount += timeNow - self.previousTimestamp;
 			// paceFactor represents the % of a 60fps frame that has elapsed.
@@ -226,16 +235,25 @@ var Canvas = Class.extend({
 			//---------------------------
 			// Do animation
 			//---------------------------
-			var start = performance.now();
-			animation_callback_f(paceFactor);
-			var end = performance.now();
-			//console.log(end-start);
-
-			// Show metrics
-			if (self.showMetrics){
-				self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-10, "#00FF00", self.ctx.fps/120);
-				self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-16, "#FFFF00", (end-start)/(1000/120));
+			var start;
+			var end;
+			if(self.game.browserSupportsPerformance){
+				start = performance.now();
 			}
+			
+			animation_callback_f(paceFactor);
+			
+			if(self.game.browserSupportsPerformance){
+				end = performance.now();
+			}
+
+			if (self.showMetrics){
+				self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-10, Colors.GREEN, self.ctx.fps/120);
+				if(self.game.browserSupportsPerformance){
+					self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-16, Colors.YELLOW, (end-start)/(1000/120));
+				}
+			}
+			
 
 			// Update screen and request callback
 			refresh_f(callback_f, self.canvas);

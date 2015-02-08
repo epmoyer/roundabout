@@ -21,7 +21,7 @@ var DeveloperModeEnabled = true;
 var Game = Class.extend({
 
 	init: function() {
-		this.canvas = new Canvas(1024, 768);
+		this.canvas = new Canvas(this, 1024, 768);
 
 		this.input = new InputHandler({
 			left:		37,
@@ -48,10 +48,27 @@ var Game = Class.extend({
 		this.nextState = States.MENU;
 		this.slowMoDebug = false;
 
+		// Browser/platform support
+		this.browserSupportsPerformance = true;
+		try{
+			var time = performance.now();
+		}
+		catch(err){
+			this.browserSupportsPerformance = false;
+		}
+
+		this.browserIsIos = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
+
+		if (DeveloperModeEnabled){
+				console.log("DEV: broswerSupportsPeformance=", this.browserSupportsPerformance);
+				console.log("DEV: broswerIsIos=", this.browserIsIos);
+		}
+
+		// Audio
 		var song = new Howl({
 			urls: ['sounds/song_roundabout.mp3'],
 			loop: true,
-			buffer: true,
+			buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
 		}).play();
 	},
 
