@@ -1,5 +1,12 @@
 var MaxPaceRecoveryTicks = 5; // Max elapsed 60Hz frames to apply pacing (beyond this, just jank)
 
+var TextWidth = 4;
+var TextHeight = 6;
+var TextCenterOffsetX = TextWidth/2;
+var TextCenterOffsetY = TextHeight/2;
+var TextGap = 2;
+var TextSpacing = TextWidth + TextGap;
+
 var Canvas = Class.extend({
 
 	init: function(width, height) {
@@ -49,15 +56,15 @@ var Canvas = Class.extend({
 				ctx.fillRect(x, y, x_needle, height);
 
 				this.stroke();
-			}
+			};
 
-			ctx.vectorText = function(text, s, x, y, offset, color){
+			ctx.vectorText = function(text, scale, x, y, offset, color){
 				if(typeof(color)==='undefined'){
 					color = Colors.GREEN;
-				};
+				}
 
 				text = text.toString().toUpperCase();
-				var step = s*6;
+				var step = scale*TextSpacing;
 
 				// add offset if specified
 				if (typeof offset === "number") {
@@ -91,12 +98,69 @@ var Canvas = Class.extend({
 					}
 
 					this.beginPath();
-					this.moveTo(p[0]*s+x, p[1]*s+y);
+					this.moveTo(p[0]*scale+x, p[1]*scale+y);
 					for (var j=2, len2=p.length; j<len2; j+=2){
-						this.lineTo(p[j]*s+x, p[j+1]*s +y);
+						this.lineTo(p[j]*scale+x, p[j+1]*scale +y);
 					}
 					this.stroke();
 					x += step;
+				}
+			};
+
+			ctx.vectorTextArc = function(text, scale, center_x, center_y, angle, radius, color){
+				if(typeof(color)==='undefined'){
+					color = Colors.GREEN;
+				}
+
+				text = text.toString().toUpperCase();
+				var step = scale*TextSpacing;
+
+				center_x += 0.5;
+				center_y += 0.5;
+
+				var render_angle = angle;
+				var render_angle_step = Math.asin(TextSpacing*scale/radius);
+				var character_angle = render_angle + Math.PI/2;
+
+				this.strokeStyle = color;
+				for(var i = 0, len = text.length; i<len; i++){
+					var ch = text.charCodeAt(i);
+
+					if (ch === this.SPACECODE){
+						render_angle += render_angle_step;
+						character_angle += render_angle_step;
+						continue;
+					}
+
+					// Get the character vector points
+					var p;
+					if(ch - this.ACODE >= 0){
+						p = Points.LETTERS[ch - this.ACODE];
+					} else {
+						p = Points.NUMBERS[ch - this.ZEROCODE];
+					}
+
+					// Render character
+					this.beginPath();
+					for (var j=0, len2=p.length; j<len2; j+=2){
+						var x = p[j] - TextCenterOffsetX;
+						var y = p[j+1] - TextCenterOffsetY;
+						var c = Math.cos(character_angle);
+						var s = Math.sin(character_angle);
+						var draw_x = (c*x - s*y) * scale + Math.cos(render_angle) * radius + center_x;
+						var draw_y = (s*x + c*y) * scale + Math.sin(render_angle) * radius + center_y;
+
+						if(j===0){
+							this.moveTo(draw_x, draw_y);
+						}
+						else{
+							this.lineTo(draw_x, draw_y);
+						}
+					}
+					this.stroke();
+
+					render_angle += render_angle_step;
+					character_angle += render_angle_step;
 				}
 			};
 
