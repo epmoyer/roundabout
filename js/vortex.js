@@ -40,7 +40,10 @@ var Vortex = Class.extend({
 			volume: 1.0,
 		});
 
-		
+		this.shield_erode_sound = new Howl({
+			urls: ['sounds/ShieldBreak.wav'],
+			volume: 1.0,
+		});
 
 		// Build shield 
 		var shieldPoints = [];
@@ -146,7 +149,6 @@ var Vortex = Class.extend({
 					// Remove the end segments
 					// console.log(this.shieldPolygon.pointsMaster);
 					if(this.particles){
-						console.log("shield explode");
 						x = this.shieldPolygon.points[2];
 						y = this.shieldPolygon.points[3];
 						this.particles.explosion(
@@ -161,6 +163,7 @@ var Vortex = Class.extend({
 							Math.atan2(y,x),
 							10,
 							Colors.CYAN);
+						this.shield_erode_sound.play();
 					}
 					this.shieldPolygon.pointsMaster.splice(len-2,2);
 					this.shieldPolygon.points.splice(len-2,2);
