@@ -70,21 +70,17 @@ var Game = Class.extend({
 			element.style.display = "block";
 			element.style.width = actualCanvasWidth + "px";
 			element.style.height = actualCanvasHeight + "px";
-			//element.style.margin = "0px auto 0px auto";
 			element.style.top = top + "px";
 			element.style.left = left + "px";
-			//element.style.align = "center";
 			console.log(
 				"new height:", actualCanvasHeight,
 				"new width:", actualCanvasWidth,
 				"inner Height:", viewport.height,
 				"inner width", viewport.width);
-			console.log("Resized.");
 
-			// Resize game
-			// element = document.getElementById("gameContainer");
-			// element.style.width = newGameWidth + "px";
-			// element.style.height = newGameHeight + "px";
+			self.input.addTouchRegion("touchThrust",0,0,viewport.width/2, viewport.height); // Left side of screen
+			self.input.addTouchRegion("touchFire",viewport.width/2+1,0,viewport.width,viewport.height); // Right side of screen
+			// console.log("Resized.");
 		};
 
 		window.addEventListener("resize", this.resize);

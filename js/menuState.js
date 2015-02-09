@@ -33,7 +33,7 @@ var MenuState = State.extend({
 			this.game.canvas.showMetrics = !this.game.canvas.showMetrics;
 		}
 
-		if (input.isPressed("spacebar")){
+		if (input.isPressed("spacebar") || input.isPressed("touchThrust") || input.isPressed("touchFire")){
 			this.game.nextState = States.GAME;
 			this.start_sound.play();
 		}

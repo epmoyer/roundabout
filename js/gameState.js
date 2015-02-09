@@ -145,9 +145,14 @@ var GameState = State.extend({
 		}*/
 		
 		if(!this.ship.visible){
-			if (input.isPressed("spacebar")){
+			if (input.isPressed("spacebar") || input.isPressed("touchFire") || input.isPressed("touchThrust")){
 				if (this.gameOver){
-					this.game.nextState = States.END;
+					if(this.game.browserSupportsTouch){
+						// Go back to menu on touch devices
+						this.game.nextState = States.MENU;
+					} else {
+						this.game.nextState = States.END;
+					}
 					this.game.stateVars.score = this.score;
 					return;
 				}
@@ -156,7 +161,7 @@ var GameState = State.extend({
 		}
 
 
-		if (input.isDown("z")){
+		if (input.isDown("z") || input.isDown("touchThrust")){
 			this.ship.addVel();
 			if(!this.engine_sound_playing){
 				this.engine_sound.play();
@@ -169,7 +174,7 @@ var GameState = State.extend({
 			}
 		}
 
-		if (input.isPressed("spacebar")){
+		if (input.isPressed("spacebar") || input.isPressed("touchFire")){
 			// Limit max shots on screen 
 			if(this.bullets.length < BulletsMax){
 				this.bullets.push(this.ship.shoot());

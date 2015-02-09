@@ -1,10 +1,21 @@
+var TouchRegion = Class.extend({
+	init: function(name, left, top, right, bottom) {
+		this.name = name;
+		this.left = left;
+		this.top = top;
+		this.right = right;
+		this.bottom = bottom;
+	}
+});
+
 var InputHandler = Class.extend({
 	init: function(keys) {
 		this.keys = {};
 		this.down = {};
 		this.pressed = {};
+		this.touchRegions = {};
 
-		for (key in keys){
+		for (var key in keys){
 			var code = keys[key];
 
 			this.keys[code] = key;
@@ -16,14 +27,71 @@ var InputHandler = Class.extend({
 		document.addEventListener("keydown", function(evt) {
 			if (self.keys[evt.keyCode]){
 				self.down[self.keys[evt.keyCode]] = true;
-			};
+			}
 		});
 		document.addEventListener("keyup", function(evt) {
 			if (self.keys[evt.keyCode]){
 				self.down[self.keys[evt.keyCode]] = false;
 				self.pressed[self.keys[evt.keyCode]] = false;
-			};
+			}
 		});
+
+		try{
+			document.addEventListener(
+				'touchstart',
+				function(event){
+					console.log("DEV: touchstart event.");
+					event.preventDefault();
+					var touch=event.changedTouches[0];
+					var x = touch.pageX;
+					var y = touch.pageY;
+					for(var name in self.touchRegions){
+						var region = self.touchRegions[name];
+						if ((x>region.left) && (x<region.right) && (y>region.top) && (y<region.bottom)){
+							self.down[name] = true;
+							console.log("DEV: Touch start:", name, x, y, touch);
+						}
+					}
+				},
+				false
+			);
+			document.addEventListener(
+				'touchend',
+				function(event){
+					console.log("DEV: touchstart event.");
+					event.preventDefault();
+					var touch=event.changedTouches[0];
+					var x = touch.pageX;
+					var y = touch.pageY;
+					for(var name in self.touchRegions){
+						var region = self.touchRegions[name];
+						if ((x>region.left) && (x<region.right) && (y>region.top) && (y<region.bottom)){
+							self.down[name] = false;
+							self.pressed[name] = false;
+							console.log("DEV: Touch end:", name, x, y, touch);
+						}
+					}
+				},
+				false
+			);
+			console.log("DEV: Registered touch event handlers.");
+		}
+		catch(err){
+			console.log("DEV: Could not register touch event handlers.");
+		}
+	},
+
+	addTouchRegion: function(name, left, top, right, bottom){
+		if (name in this.touchRegions){
+			// Remove old region if it exists.  Regions can thus be 
+			// redefined by calling addTouchRegion again with the 
+			// same name
+			delete this.touchRegions[name];
+		}
+		touchRegion = new TouchRegion(name, left, top, right, bottom);
+		this.touchRegions[name] = touchRegion;
+		this.down[name] = false;
+		this.pressed[name] = false;
 	},
 
 	isDown: function(key) {
@@ -32,10 +100,11 @@ var InputHandler = Class.extend({
 
 	isPressed: function(key) {
 		if (this.pressed[key]) {
-			return false
+			return false;
 		} else if (this.down[key]){
-			return this.pressed[key] = true;
+			this.pressed[key] = true;
+			return true;
 		}
 		return false;
 	}
-})
+});
