@@ -78,11 +78,20 @@ var MenuState = State.extend({
 		ctx.vectorTextArc("VERSION 5",
 			2, this.vortex.center_x, this.vortex.center_y,
 			this.creditsAngle3, 100, Colors.GREEN);
-		ctx.vectorTextArc("PUSH SPACE TO PLAY",
+		var startText;
+		var controlsText;
+		if (!this.game.browserSupportsTouch){
+			startText = "PUSH SPACE TO START";
+			controlsText = "Z TO THRUST        SPACE TO SHOOT";
+		} else {
+			startText = "TAP ANYWHERE TO START";
+			//              #########################################
+			controlsText = "TAP LEFT TO THRUST   TAP RIGHT TO SHOOT";
+		}
+		ctx.vectorTextArc(startText,
 			2, this.vortex.center_x, this.vortex.center_y,
 			this.creditsAngle3 + 270*Math.PI/360, 100, Colors.CYAN);
-
-		ctx.vectorTextArc("Z TO THRUST        SPACE TO SHOOT",
+		ctx.vectorTextArc(controlsText,
 			2, this.vortex.center_x, this.vortex.center_y,
 			this.creditsAngle4, 80, Colors.YELLOW);
 

@@ -13,7 +13,9 @@ var Canvas = Class.extend({
 		this.game = game;
 
 		this.showMetrics = false;
-		this.canvas = document.createElement("canvas");
+		// this.canvas = document.createElement("canvas");
+		this.canvas = document.getElementById("gameCanvas");
+		//this.canvas.style = "position:absolute;top:0;left:0";
 		this.canvas.width = width;
 		this.canvas.height = height;
 		this.previousTimestamp = 0;

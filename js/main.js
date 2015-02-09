@@ -48,7 +48,55 @@ var Game = Class.extend({
 		this.nextState = States.MENU;
 		this.slowMoDebug = false;
 
+		var self = this;
+
+		this.resize = function(){
+			// Get the dimensions of the viewport
+			var viewport = {
+				width: window.innerWidth,
+				height: window.innerHeight
+			};
+
+			// Determine game size
+			var targetWidth = 1024;
+			var targetHeight = 768;
+			var multiplier = Math.min((viewport.height / targetHeight), (viewport.width / targetWidth));
+			var actualCanvasWidth = Math.floor(targetWidth * multiplier);
+			var actualCanvasHeight = Math.floor(targetHeight * multiplier);
+			var top = Math.floor(viewport.height/2 - actualCanvasHeight/2);
+			var left = Math.floor(viewport.width/2 - actualCanvasWidth/2);
+
+			element = document.getElementById("gameCanvas");
+			element.style.display = "block";
+			element.style.width = actualCanvasWidth + "px";
+			element.style.height = actualCanvasHeight + "px";
+			//element.style.margin = "0px auto 0px auto";
+			element.style.top = top + "px";
+			element.style.left = left + "px";
+			//element.style.align = "center";
+			console.log(
+				"new height:", actualCanvasHeight,
+				"new width:", actualCanvasWidth,
+				"inner Height:", viewport.height,
+				"inner width", viewport.width);
+			console.log("Resized.");
+
+			// Resize game
+			// element = document.getElementById("gameContainer");
+			// element.style.width = newGameWidth + "px";
+			// element.style.height = newGameHeight + "px";
+		};
+
+		window.addEventListener("resize", this.resize);
+
+		this.resize();
+		
+
+		//--------------------------
 		// Browser/platform support
+		//--------------------------
+
+		// SUPPORT: performance.now()
 		this.browserSupportsPerformance = true;
 		try{
 			var time = performance.now();
@@ -57,11 +105,16 @@ var Game = Class.extend({
 			this.browserSupportsPerformance = false;
 		}
 
+		// SUPPORT: iOS
 		this.browserIsIos = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
 
+		// SUPPORT: Touch
+		this.browserSupportsTouch = ('ontouchstart' in document.documentElement);
+
 		if (DeveloperModeEnabled){
-				console.log("DEV: broswerSupportsPeformance=", this.browserSupportsPerformance);
-				console.log("DEV: broswerIsIos=", this.browserIsIos);
+				console.log("DEV: browserSupportsPeformance=", this.browserSupportsPerformance);
+				console.log("DEV: browserIsIos=", this.browserIsIos);
+				console.log("DEV: browserSupportsTouch=", this.browserSupportsTouch);
 		}
 
 		// Audio
