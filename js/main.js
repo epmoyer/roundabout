@@ -37,7 +37,19 @@ var Game = Class.extend({
 			z:          90,
 			one:        49,
 			two:        50,
+			three:      51,
+			four:       52,
 		});
+
+		// Highscores
+		this.highscores = [
+			["Dio", 2000],
+			["Jotaro", 1300],
+			["Joseph", 1200],
+			["Jonathan", 1100],
+			["FLOATINHEAD", 600],
+			["FIENDFODDER", 500],
+		];
 
 		this.canvas.ctx.strokeStyle = "#fff";
 

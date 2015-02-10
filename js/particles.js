@@ -2,7 +2,7 @@ var ExplosionMaxVelocity = 0.5;
 var ParticleLife = 50;
 var PaticleLifeVariation = 20;
 var ParticleFriction = 0.99;
-var ParticleGravity = -0.01; 
+var ParticleGravity = -0.01;
 
 var Particle = Class.extend({
 	init: function(particles, radius, angle, dx, dy, color, f_radiusToAngularVelocity){

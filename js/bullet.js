@@ -31,7 +31,8 @@ var Bullet = Class.extend({
 		this.x += this.vel.x * paceFactor;
 		this.y += this.vel.y * paceFactor;
 		
-		if(--this.life <= 0){
+		this.life -= paceFactor;
+		if(this.life <= 0){
 			this.shallRemove = true;
 		}
 	},

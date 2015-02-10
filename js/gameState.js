@@ -57,6 +57,7 @@ var GameState = State.extend({
 		this.lifepolygon.setAngle(-Math.PI/2);
 
 		this.score = 0;
+		this.highscore = this.game.highscores[0][1];
 
 		this.lvl = 0;
 
@@ -113,6 +114,11 @@ var GameState = State.extend({
 			}
 			this.score += DrifterPoints;
 		}
+
+		// Update highscore if exceeded
+		if (this.score > this.highscore){
+			this.highscore = this.score;
+		}
 	},
 
 	handleInputs: function(input) {
@@ -125,15 +131,17 @@ var GameState = State.extend({
 
 			// Slow Mo Debug toggle
 			if (input.isPressed("two")){
-				/*
-				if(this.game.slowMoDebug){
-					this.game.slowMoDebug = false;
-				}
-				else {
-					this.game.slowMoDebug = true;
-				}
-				*/
 				this.game.slowMoDebug = !this.game.slowMoDebug;
+			}
+
+			// Points
+			if (input.isPressed("three")){
+				this.addPoints(100);
+			}
+
+			// Die
+			if (input.isPressed("four")){
+				this.ship.vortexDeath = true;
 			}
 		}
 
@@ -408,6 +416,7 @@ var GameState = State.extend({
 		ctx.clearAll();
 
 		ctx.vectorText(this.score, 3, 15, 15, null, Colors.YELLOW);
+		ctx.vectorText(this.highscore, 3, this.canvasWidth - 6	, 15, 0 , Colors.YELLOW);
 
 		for(var i=0; i<this.lives; i++){
 			ctx.drawPolygon(this.lifepolygon, 25+25*i, 50);
