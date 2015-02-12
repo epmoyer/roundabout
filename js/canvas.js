@@ -111,9 +111,15 @@ var Canvas = Class.extend({
 				}
 			};
 
-			ctx.vectorTextArc = function(text, scale, center_x, center_y, angle, radius, color){
+			ctx.vectorTextArc = function(text, scale, center_x, center_y, angle, radius, color, isCentered, isReversed){
 				if(typeof(color)==='undefined'){
 					color = Colors.GREEN;
+				}
+				if(typeof(isCentered)==='undefined'){
+					isCentered = false;
+				}
+				if(typeof(isReversed)==='undefined'){
+					isReversed = false;
 				}
 
 				text = text.toString().toUpperCase();
@@ -124,7 +130,19 @@ var Canvas = Class.extend({
 
 				var render_angle = angle;
 				var render_angle_step = Math.asin(TextSpacing*scale/radius);
+				var renderAngleOffset = 0;
+				if (isCentered){
+					renderAngleOffset = render_angle_step * text.length / 2;
+					if(isReversed){
+						renderAngleOffset = -renderAngleOffset;
+					}
+				}
+				render_angle -= renderAngleOffset;
 				var character_angle = render_angle + Math.PI/2;
+				if(isReversed){
+					character_angle += Math.PI;
+					render_angle_step = - render_angle_step;
+				}
 
 				this.strokeStyle = color;
 				for(var i = 0, len = text.length; i<len; i++){

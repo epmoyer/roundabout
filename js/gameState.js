@@ -23,6 +23,11 @@ var VortexShieldEndScore = 500;
 
 var ShipNumExplosionParticles = 30;
 
+var PopUpTextLife = 3 * 60;
+var PopUpThrustPromptTime = 2 * 60;
+var PopUpFirePromptTime = 5 * 60;
+var PopUpCancelTime = 15; // Ticks to remove a pop-up when canceled
+
 var BulletsMax = 4;
 
 var ExtraLifeScore = 5000;
@@ -84,6 +89,9 @@ var GameState = State.extend({
 
 		this.vortexCollapse = false;
 
+		// Game Clock
+		this.gameClock = 0;
+
 		// Aliens
 		this.drifters = [];
 		this.blockers = [];
@@ -91,6 +99,17 @@ var GameState = State.extend({
 		// Vortex
 		this.particles = new Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
 		this.vortex.particles = this.particles;
+
+		// Pop-up messages
+		this.popUpText = "";
+		this.popUpText2 = null;
+		this.popUpLife = 0;
+		this.popUpThrustPending = true;
+		this.popUpFirePending = true;
+		this.popUpThrustActive = false;
+		this.popUpFireActive = false;
+		this.thrustHasOccurred = false;
+		this.popupShieldErodePending = true;
 	},
 
 	generateLvl: function() {
@@ -119,6 +138,16 @@ var GameState = State.extend({
 		if (this.score > this.highscore){
 			this.highscore = this.score;
 		}
+	},
+
+	showPopUp: function(popUpText, popUpText2){
+		if(typeof(popUpText2)==='undefined'){
+			popUpText2 = null;
+		}
+
+		this.popUpText = popUpText;
+		this.popUpText2 = popUpText2;
+		this.popUpLife = PopUpTextLife;
 	},
 
 	handleInputs: function(input) {
@@ -170,10 +199,17 @@ var GameState = State.extend({
 
 
 		if (input.isDown("z") || input.isDown("touchThrust")){
+			this.thrustHasOccurred = true;
+			this.popUpThrustPending = false;
 			this.ship.addVel();
 			if(!this.engine_sound_playing){
 				this.engine_sound.play();
 				this.engine_sound_playing = true;
+			}
+
+			// Cancel PopUp
+			if(this.popUpThrustActive){
+				this.popUpLife = Math.min(PopUpCancelTime, this.popUpLife);
 			}
 		} else {
 			if (this.engine_sound_playing){
@@ -183,9 +219,16 @@ var GameState = State.extend({
 		}
 
 		if (input.isPressed("spacebar") || input.isPressed("touchFire")){
+			this.popUpFirePending = false;
+
 			// Limit max shots on screen 
 			if(this.bullets.length < BulletsMax){
 				this.bullets.push(this.ship.shoot());
+			}
+
+			// Cancel PopUp
+			if(this.popUpFireActive){
+				this.popUpLife = Math.min(PopUpCancelTime, this.popUpLife);
 			}
 		}
 
@@ -193,6 +236,8 @@ var GameState = State.extend({
 
 	update: function(paceFactor) {
 		var i, len, b;
+
+		this.gameClock += paceFactor;
 
 		if (this.ship.visible){
 			if (this.ship.vortexDeath){
@@ -308,8 +353,36 @@ var GameState = State.extend({
 		//Spawn
 		if(!this.vortexCollapse && this.ship.visible){
 			if((Math.random() < DrifterSpawnRate) || (this.drifters.length === 0)){
+				var drifterRadius;
+				var drifterAngle;
+				if(this.drifters.length === 0){
+					// Start first drifter at one of the midscreen edges, so that it is immediately visisble
+					if (Math.random() > 0.5){
+						// Left/right
+						drifterRadius = this.center_x;
+						if (Math.random() > 0.5){
+							drifterAngle = 0;
+						}
+						else{
+							drifterAngle = Math.PI;
+						}
+					} else {
+						// Top/bottom
+						drifterRadius = this.center_y;
+						if (Math.random() > 0.5){
+							drifterAngle = Math.PI/2;
+						}
+						else{
+							drifterAngle = Math.PI*3/2;
+						}
+					}
+				}
+				else {
+					drifterRadius = DrifterMaxRadius;
+					drifterAngle =  Math.random() * Math.PI * 2;
+				}
 				drifter = new Drifter(Points.POINTY_SHIP, 2, this.center_x, this.center_y,
-					DrifterMaxRadius, Math.random() * Math.PI * 2, Colors.RED,
+					drifterRadius, drifterAngle, Colors.RED,
 					this.vortex.radiusToAngularVelocity);
 				this.drifters.push(drifter);
 			}
@@ -396,6 +469,45 @@ var GameState = State.extend({
 			}
 		}
 
+		//-------------------
+		// PopUps
+		//-------------------
+		// Life
+		var oldPopUpLife = this.popUpLife;
+		this.popUpLife -= paceFactor;
+
+		// Expiration
+		if ((this.popUpLife <= 0) && (oldPopUpLife > 0)){
+			// PopUp Expired
+			this.popUpThrustActive = false;
+			this.popUpFireActive = false;
+		}
+
+		// Generation
+		if(this.popUpThrustPending){
+			if (this.gameClock >= PopUpThrustPromptTime)
+			{
+				this.popUpThrustPending = false;
+				this.popUpThrustActive = true;
+				this.showPopUp(this.game.thrustPrompt);
+				this.popUpLife = PopUpTextLife;
+			}
+		}
+		if (this.popUpFirePending && this.thrustHasOccurred){
+			if (this.gameClock >= PopUpFirePromptTime)
+			{
+				this.popUpFirePending = false;
+				this.popUpFireActive = true;
+				this.showPopUp(this.game.shootPrompt);
+				this.popUpLife = PopUpTextLife;
+			}
+		}
+		if (this.vortex.shieldErode && this.popupShieldErodePending){
+			this.popupShieldErodePending = false;
+			this.showPopUp("SHIELD COLLAPSE", "AVOID VORTEX");
+			this.popUpLife = PopUpTextLife;
+		}
+
 		// Vortex grow
 		if(numObjectsConsumed>0){
 			if(!this.vortexCollapse && this.ship.visible){
@@ -420,6 +532,18 @@ var GameState = State.extend({
 
 		for(var i=0; i<this.lives; i++){
 			ctx.drawPolygon(this.lifepolygon, 25+25*i, 50);
+		}
+
+		// PopUp Text
+		if(this.popUpLife > 0){
+			ctx.vectorTextArc(this.popUpText,
+				3, this.vortex.center_x, this.vortex.center_y,
+				Math.PI*3/2, 150, Colors.YELLOW, true, false);
+			if(this.popUpText2){
+				ctx.vectorTextArc(this.popUpText2,
+					3, this.vortex.center_x, this.vortex.center_y,
+					Math.PI/2, 150, Colors.YELLOW, true, true);
+			}
 		}
 		
 		/*

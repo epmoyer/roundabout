@@ -83,10 +83,14 @@ var MenuState = State.extend({
 		if (!this.game.browserSupportsTouch){
 			startText = "PUSH SPACE TO START";
 			controlsText = "Z TO THRUST        SPACE TO SHOOT";
+			this.game.thrustPrompt = "PRESS Z TO THRUST";
+			this.game.shootPrompt = "PRESS SPACE TO SHOOT";
 		} else {
 			startText = "TAP ANYWHERE TO START";
 			//              #########################################
 			controlsText = "TAP LEFT TO THRUST   TAP RIGHT TO SHOOT";
+			this.game.thrustPrompt = "TAP LEFT TO THRUST";
+			this.game.shootPrompt = "TAP RIGHT TO SHOOT";
 		}
 		ctx.vectorTextArc(startText,
 			2, this.vortex.center_x, this.vortex.center_y,
