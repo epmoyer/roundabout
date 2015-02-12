@@ -20,12 +20,6 @@ var Drifter = Polygon.extend({
 		this.alive = true;
 		this.deathDive = false;
 		this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
-
-		this.die_sound = new Howl({
-			urls: ['sounds/Drifterexplosion.wav'],
-			volume: 0.25,
-		});
-
 	},
 
 	// Calculate caridnal position and angle from radial position and angle

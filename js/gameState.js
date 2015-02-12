@@ -14,6 +14,9 @@ var BlockerCollisionRadius = 13;
 var BlockerNumExplosionParticles = 30;
 var BlockerCoreExplosionParticles = 10;
 
+var SpawnOverlapRetries = 16;
+var OverlapAngleSpacing = Math.PI/16;
+
 var ReflectedBulletLife = 15;
 
 var ShipBounceDampening = 0.2;
@@ -85,6 +88,14 @@ var GameState = State.extend({
 			urls: ['sounds/Blocked.wav'],
 			volume: 0.25,
 		});
+		this.drifter_die_sound = new Howl({
+			urls: ['sounds/Drifterexplosion.wav'],
+			volume: 0.25,
+		});
+		this.blocker_die_sound = new Howl({
+			urls: ['sounds/Drifterexplosion.wav'],
+			volume: 0.25,
+		});
 		this.engine_sound_playing = false;
 
 		this.vortexCollapse = false;
@@ -121,6 +132,14 @@ var GameState = State.extend({
 		this.bullets = [];
 		this.drifters = [];
 		this.blockers = [];
+	},
+
+	angleBound2Pi: function(angle){
+		boundAngle = angle % (Math.PI * 2);
+		if(boundAngle<0){
+			boundAngle += (Math.PI * 2);
+		}
+		return (boundAngle);
 	},
 
 	addPoints: function(points){
@@ -235,7 +254,7 @@ var GameState = State.extend({
 	},
 
 	update: function(paceFactor) {
-		var i, len, b;
+		var i, len, b, numOusideEnemies, outsideEnemyAngles;
 
 		this.gameClock += paceFactor;
 
@@ -292,7 +311,7 @@ var GameState = State.extend({
 					this.particles.explosion(drifter.radius, drifter.radialAngle, DrifterNumExplosionParticles, drifter.color);
 
 					// Remove dead drifter
-					this.drifters[k].die_sound.play();
+					this.drifter_die_sound.play();
 					this.drifters.splice(k, 1);
 					len3--;
 					k--;
@@ -380,7 +399,43 @@ var GameState = State.extend({
 				else {
 					drifterRadius = DrifterMaxRadius;
 					drifterAngle =  Math.random() * Math.PI * 2;
+
+					// Make sure new drifter is not on top of an existing enemy
+					numOusideEnemies = 0;
+					outsideEnemyAngles = [];
+					for(i=0, len=this.drifters.length; i<len; i++){
+						if(this.drifters[i].radius > drifterRadius - (DrifterCollisionRadius * 2)){
+							outsideEnemyAngles.push(this.angleBound2Pi(this.drifters[i].radialAngle));
+							++numOusideEnemies;
+						}
+					}
+					for(i=0, len=this.blockers.length; i<len; i++){
+						if(this.blockers[i].radius > drifterRadius - (BlockerCollisionRadius + DrifterCollisionRadius)){
+							outsideEnemyAngles.push(this.angleBound2Pi(this.blockers[i].radialAngle));
+							++numOusideEnemies;
+						}
+					}
+					if(numOusideEnemies > 0){
+						// Try SpawnOverlapRetries times, then give up
+						for (i = 0; i<SpawnOverlapRetries; i++){
+							overlapping = false;
+							for(j=0; j<numOusideEnemies; j++){
+								if(Math.abs(drifterAngle-outsideEnemyAngles[j]) < OverlapAngleSpacing){
+									overlapping = true;
+								}
+							}
+							if(!overlapping){
+								break;
+							}
+							else {
+								drifterAngle = this.angleBound2Pi(drifterAngle + OverlapAngleSpacing);
+								//console.log("DEV: Advancing drifter spawn.");
+							}
+						}
+					}
 				}
+
+				// Create drifter
 				drifter = new Drifter(Points.POINTY_SHIP, 2, this.center_x, this.center_y,
 					drifterRadius, drifterAngle, Colors.RED,
 					this.vortex.radiusToAngularVelocity);
@@ -423,8 +478,45 @@ var GameState = State.extend({
 		//Spawn
 		if(!this.vortexCollapse && this.ship.visible && this.score >= BlockerAppearScore){
 			if((Math.random() < BlockerSpawnRate) || (this.blockers.length === 0)){
+
+				var blockerRadius = DrifterMaxRadius;
+				var blockerAngle = Math.random() * Math.PI * 2;
+
+				// Make sure new blocker is not on top of an existing enemy
+				numOusideEnemies = 0;
+				outsideEnemyAngles = [];
+				for(i=0, len=this.drifters.length; i<len; i++){
+					if(this.drifters[i].radius > blockerRadius - (DrifterCollisionRadius + BlockerCollisionRadius)){
+						outsideEnemyAngles.push(this.angleBound2Pi(this.drifters[i].radialAngle));
+						++numOusideEnemies;
+					}
+				}
+				for(i=0, len=this.blockers.length; i<len; i++){
+					if(this.blockers[i].radius > blockerRadius - (BlockerCollisionRadius*2)){
+						outsideEnemyAngles.push(this.angleBound2Pi(this.blockers[i].radialAngle));
+						++numOusideEnemies;
+					}
+				}
+				if(numOusideEnemies > 0){
+					// Try SpawnOverlapRetries times, then give up
+					for (i = 0; i<SpawnOverlapRetries; i++){
+						overlapping = false;
+						for(j=0; j<numOusideEnemies; j++){
+							if(Math.abs(blockerAngle-outsideEnemyAngles[j]) < OverlapAngleSpacing){
+								overlapping = true;
+							}
+						}
+						if(!overlapping){
+							break;
+						}
+						else {
+							blockerAngle = this.angleBound2Pi(blockerAngle + OverlapAngleSpacing);
+						}
+					}
+				}
+
 				blocker = new Blocker(Points.SHIELD_TYPE_SHORT, Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
-					DrifterMaxRadius, Math.random() * Math.PI * 2, Colors.RED,
+					blockerRadius, blockerAngle, Colors.RED,
 					this.vortex.radiusToAngularVelocity);
 				this.blockers.push(blocker);
 			}
@@ -444,7 +536,7 @@ var GameState = State.extend({
 					if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < BlockerCollisionRadius*2){
 						if(this.ship.radius > d.radius){
 							// Ship destroys blocker
-							d.die_sound.play();
+							this.blocker_die_sound.play();
 							this.particles.explosion(d.radius, d.radialAngle, BlockerNumExplosionParticles, blocker.color);
 							this.particles.explosion(d.radius, d.radialAngle, BlockerCoreExplosionParticles, blocker.core.color);
 							
@@ -527,9 +619,11 @@ var GameState = State.extend({
 	render: function(ctx){
 		ctx.clearAll();
 
+		// Scores
 		ctx.vectorText(this.score, 3, 15, 15, null, Colors.YELLOW);
 		ctx.vectorText(this.highscore, 3, this.canvasWidth - 6	, 15, 0 , Colors.YELLOW);
 
+		// Extra Lives
 		for(var i=0; i<this.lives; i++){
 			ctx.drawPolygon(this.lifepolygon, 25+25*i, 50);
 		}
@@ -545,20 +639,13 @@ var GameState = State.extend({
 					Math.PI/2, 150, Colors.YELLOW, true, true);
 			}
 		}
-		
-		/*
-		// Stars
-		ctx.fillStyle="#808080";
-		for(var i=0, len=this.stars.length; i<len; i+=2){
-			//console.log(this.stars[i]);
-			ctx.fillRect(this.stars[i],this.stars[i+1],2,2);
-		}
-		*/
 
+		// Bullets
 		for (i=0, len=this.bullets.length; i < len; i++){
 			this.bullets[i].draw(ctx);
 		}
 
+		// Game OVer
 		if(this.gameOver){
 			ctx.vectorText("Game Over", 6, null, 200, null, Colors.GREEN);
 		}
@@ -573,11 +660,14 @@ var GameState = State.extend({
 			this.blockers[i].draw(ctx);
 		}
 
+		// Player
 		this.ship.draw(ctx);
 
+		// Vortex
 		var showCollapse = (this.vortexCollapse || (this.ship.visible === false && this.drifters.length > 0));
 		this.vortex.draw(ctx, showCollapse);
 
+		// Particles
 		this.particles.draw(ctx);
 	}
 });

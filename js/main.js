@@ -130,6 +130,7 @@ var Game = Class.extend({
 			urls: ['sounds/song_roundabout.mp3'],
 			loop: true,
 			buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
+			volume: 0.75,
 		}).play();
 	},
 
