@@ -72,28 +72,28 @@ var GameState = State.extend({
 		this.generateLvl();
 
 		this.engine_sound = new Howl({
-			urls: ['sounds/Engine.ogg'], //, 'sounds/Engine.wav'],
+			src: ['sounds/Engine.ogg', 'sounds/Engine.wav'],
 			volume: 0.25,
 			loop: true,
 		});
 		this.player_die_sound = new Howl({
-			urls: ['sounds/Playerexplosion2.wav'],
+			src: ['sounds/Playerexplosion2.wav'],
 			volume: 0.25,
 		});
 		this.extra_life_sound = new Howl({
-			urls: ['sounds/ExtraLife.wav'],
+			src: ['sounds/ExtraLife.wav'],
 			volume: 1.00,
 		});
 		this.shot_reflect_sound = new Howl({
-			urls: ['sounds/Blocked.wav'],
+			src: ['sounds/Blocked.wav'],
 			volume: 0.25,
 		});
 		this.drifter_die_sound = new Howl({
-			urls: ['sounds/Drifterexplosion.wav'],
+			src: ['sounds/Drifterexplosion.wav'],
 			volume: 0.25,
 		});
 		this.blocker_die_sound = new Howl({
-			urls: ['sounds/Drifterexplosion.wav'],
+			src: ['sounds/Drifterexplosion.wav'],
 			volume: 0.25,
 		});
 		this.engine_sound_playing = false;

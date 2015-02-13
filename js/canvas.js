@@ -20,6 +20,8 @@ var Canvas = Class.extend({
 		this.canvas.height = height;
 		this.previousTimestamp = 0;
 
+		this.DEBUGLOGGED = false;
+
 		this.ctx = (function(ctx) {
 			ctx.width = ctx.canvas.width;
 			ctx.height = ctx.canvas.height;
@@ -31,6 +33,8 @@ var Canvas = Class.extend({
 			ctx.ACODE = "A".charCodeAt(0);
 			ctx.ZEROCODE = "0".charCodeAt(0);
 			ctx.SPACECODE = " ".charCodeAt(0);
+			ctx.EXCLAMATIONCODE = "!".charCodeAt(0);
+			ctx.ACCENTCODE = '`'.charCodeAt(0);
 			
 			ctx.drawPolygon = function(p, x, y) {
 				var points = p.points;
@@ -95,20 +99,23 @@ var Canvas = Class.extend({
 						continue;
 					}
 					var p;
-					if(ch - this.ACODE >= 0){
-						p = Points.LETTERS[ch - this.ACODE];
-					} else {
-						p = Points.NUMBERS[ch - this.ZEROCODE];
+					if ((ch >= this.EXCLAMATIONCODE) && (ch <= this.ACCENTCODE)){
+						p = Points.ASCII[ch - this.EXCLAMATIONCODE];
+					}
+					else{
+						p = Points.UNIMPLEMENTED_CHAR;
 					}
 
 					this.beginPath();
 					this.moveTo(p[0]*scale+x, p[1]*scale+y);
+					
 					for (var j=2, len2=p.length; j<len2; j+=2){
 						this.lineTo(p[j]*scale+x, p[j+1]*scale +y);
 					}
 					this.stroke();
 					x += step;
 				}
+				this.DEBUGLOGGED = true;
 			};
 
 			ctx.vectorTextArc = function(text, scale, center_x, center_y, angle, radius, color, isCentered, isReversed){
@@ -156,10 +163,11 @@ var Canvas = Class.extend({
 
 					// Get the character vector points
 					var p;
-					if(ch - this.ACODE >= 0){
-						p = Points.LETTERS[ch - this.ACODE];
-					} else {
-						p = Points.NUMBERS[ch - this.ZEROCODE];
+					if ((ch >= this.EXCLAMATIONCODE) && (ch <= this.ACCENTCODE)){
+						p = Points.ASCII[ch - this.EXCLAMATIONCODE];
+					}
+					else{
+						p = Points.UNIMPLEMENTED_CHAR;
 					}
 
 					// Render character

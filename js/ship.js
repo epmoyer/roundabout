@@ -42,12 +42,12 @@ var Ship = Polygon.extend({
 		this.vortexDeath = false;
 
 		this.shoot_sound = new Howl({
-			urls: ['sounds/Laser_Shoot_sustained.wav'],
+			src: ['sounds/Laser_Shoot_sustained.wav'],
 			volume: 0.25,
 		});
 
 		this.vortex_consume_player_sound = new Howl({
-			urls: ['sounds/VortexConsume.wav'],
+			src: ['sounds/VortexConsume.wav'],
 			volume: 0.50,
 		});
 	},

@@ -36,12 +36,12 @@ var Vortex = Class.extend({
 		}
 
 		this.vortex_consume_sound = new Howl({
-			urls: ['sounds/VortexConsume.wav'],
+			src: ['sounds/VortexConsume.wav'],
 			volume: 1.0,
 		});
 
 		this.shield_erode_sound = new Howl({
-			urls: ['sounds/ShieldBreak.wav'],
+			src: ['sounds/ShieldBreak.wav'],
 			volume: 1.0,
 		});
 
