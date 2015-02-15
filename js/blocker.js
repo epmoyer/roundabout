@@ -1,4 +1,4 @@
-var BlockerFallSpeed = 0.3;
+var BlockerFallSpeed = 0.4;
 
 var Blocker = Polygon.extend({
 
@@ -58,7 +58,7 @@ var Blocker = Polygon.extend({
 		this.radialAngle += this.f_radiusToAngularVelocity(this.radius) * paceFactor;
 		if(this.deathDive){
 			this.radius -= 12 * DrifterFallSpeed * paceFactor;
-		} 
+		}
 		else {
 			this.radius -= DrifterFallSpeed * paceFactor;
 		}
@@ -79,4 +79,4 @@ var Blocker = Polygon.extend({
 		//ctx.arc(this.x,this.y,13,0,2*Math.PI);
 		//ctx.stroke();
 	}
-})
+});

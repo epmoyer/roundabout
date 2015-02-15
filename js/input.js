@@ -5,6 +5,8 @@ var TouchRegion = Class.extend({
 		this.top = top;
 		this.right = right;
 		this.bottom = bottom;
+
+		this.touchStartIdentifier = 0; // Unique identifier of most recent touchstart event
 	}
 });
 
@@ -49,6 +51,7 @@ var InputHandler = Class.extend({
 						var region = self.touchRegions[name];
 						if ((x>region.left) && (x<region.right) && (y>region.top) && (y<region.bottom)){
 							self.down[name] = true;
+							region.touchStartIdentifier = touch.identifier;
 							console.log("DEV: Touch start:", name, x, y, touch);
 						}
 					}
@@ -65,7 +68,11 @@ var InputHandler = Class.extend({
 					var y = touch.pageY;
 					for(var name in self.touchRegions){
 						var region = self.touchRegions[name];
-						if ((x>region.left) && (x<region.right) && (y>region.top) && (y<region.bottom)){
+						// If the unique identifier associated with this touchend event matches
+						// the identifier associated with the most recent touchstart event
+						// for this touchRegion.
+						if (region.touchStartIdentifier == touch.identifier){
+							// Mark the virtual button as not down and not pressed
 							self.down[name] = false;
 							self.pressed[name] = false;
 							console.log("DEV: Touch end:", name, x, y, touch);

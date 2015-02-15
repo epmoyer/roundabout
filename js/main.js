@@ -39,6 +39,7 @@ var Game = Class.extend({
 			two:        50,
 			three:      51,
 			four:       52,
+			five:       53,
 		});
 
 		// Highscores
@@ -132,6 +133,18 @@ var Game = Class.extend({
 			buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
 			volume: 0.75,
 		}).play();
+	},
+
+	updateHighScores: function (nickName, score){
+		this.highscores.push([nickName, score]);
+
+		// sort hiscore in ascending order
+		this.highscores.sort(function(a, b) {
+			return b[1] - a[1];
+		});
+
+		// Drop the last
+		this.highscores.splice(this.highscores.length-1, 1);
 	},
 
 	run: function() {

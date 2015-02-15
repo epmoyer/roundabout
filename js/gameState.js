@@ -1,6 +1,6 @@
 var ShipStartRadius = 250;
 var ShipStartAngle = -Math.PI / 2;
-
+	
 var DrifterMaxRadius = 1024/2+30;
 var DrifterSpawnRate = 0.005;
 var DrifterPoints = 100;
@@ -51,12 +51,6 @@ var GameState = State.extend({
 			ShipStartRadius, ShipStartAngle, Colors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
 		this.ship.maxX = this.canvasWidth;
 		this.ship.maxY = this.canvasHeight;
-
-		this.stars = [];
-		for (var i=0; i<200; i++){
-			this.stars.push(Math.random() * this.canvasWidth);
-			this.stars.push(Math.random() * this.canvasHeight);
-		}
 
 		this.gameOver = false;
 		this.lives = 3;
@@ -191,20 +185,21 @@ var GameState = State.extend({
 			if (input.isPressed("four")){
 				this.ship.vortexDeath = true;
 			}
-		}
 
-		/*
-		if(this.lives == 0){
-			this.game.nextState = States.END;
-			this.game.stateVars.score = this.score;
-			return;
-		}*/
+			// Grow vortex
+			if (input.isPressed("five")){
+				this.vortex.grow(1);
+			}
+
+		}
 		
 		if(!this.ship.visible){
 			if (input.isPressed("spacebar") || input.isPressed("touchFire") || input.isPressed("touchThrust")){
 				if (this.gameOver){
 					if(this.game.browserSupportsTouch){
-						// Go back to menu on touch devices
+						// On touch devices just update high score and go back to menu
+						this.game.updateHighScores("NONAME", this.score);
+
 						this.game.nextState = States.MENU;
 					} else {
 						this.game.nextState = States.END;
@@ -618,6 +613,9 @@ var GameState = State.extend({
 
 	render: function(ctx){
 		ctx.clearAll();
+
+		// DEBUG: Show number of stars
+		//ctx.vectorText(this.vortex.stars.length, 3,300,15,null, Colors.GREEN);
 
 		// Scores
 		ctx.vectorText(this.score, 3, 15, 15, null, Colors.YELLOW);

@@ -1,4 +1,4 @@
-var DrifterFallSpeed = 0.3;
+var DrifterFallSpeed = 0.6;
 
 var Drifter = Polygon.extend({
 
@@ -54,7 +54,7 @@ var Drifter = Polygon.extend({
 		this.radialAngle += this.f_radiusToAngularVelocity(this.radius) * paceFactor;
 		if(this.deathDive){
 			this.radius -= 12 * DrifterFallSpeed * paceFactor;
-		} 
+		}
 		else {
 			this.radius -= DrifterFallSpeed * paceFactor;
 		}
@@ -74,4 +74,4 @@ var Drifter = Polygon.extend({
 		//ctx.arc(this.x,this.y,13,0,2*Math.PI);
 		//ctx.stroke();
 	}
-})
+});

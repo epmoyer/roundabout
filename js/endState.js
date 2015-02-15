@@ -1,6 +1,9 @@
 /**
  * EndState class, called when game is over
  */
+
+var CursorBlinkRate = 2;
+
 var EndState = State.extend({
 
 	/**
@@ -11,7 +14,7 @@ var EndState = State.extend({
 	init: function(game) {
 		this._super(game); // call super constructor
 
-		this.nick = "NO NAME";
+		this.nick = "";
 		this.score = game.stateVars.score;
 		if (game.stateVars.score > game.highscores[game.highscores.length-1][1]){
 			this.hasEnteredName = false;
@@ -25,6 +28,7 @@ var EndState = State.extend({
 		this.namefield.value = this.nick;
 		this.namefield.focus();
 		this.namefield.select();
+		this.cursorBlinkTimer = 0;
 	},
 
 	/**
@@ -48,15 +52,8 @@ var EndState = State.extend({
 				this.nick = this.nick.replace(/[^a-zA-Z0-9\s]/g, "");
 				this.nick = this.nick.trim();
 				this.nick = this.nick.substring(0,13); // Limit name length
-				this.game.highscores.push([this.nick, this.score]);
 
-				// sort hiscore in ascending order
-				this.game.highscores.sort(function(a, b) {
-					return b[1] - a[1];
-				});
-
-				// Drop the last
-				this.game.highscores.splice(this.game.highscores.length-1, 1);
+				this.game.updateHighScores(this.nick, this.score);
 			}
 		}
 	},
@@ -64,7 +61,8 @@ var EndState = State.extend({
 	/**
 	 * @override State.update
 	 */
-	update: function() {
+	update: function(paceFactor) {
+		this.cursorBlinkTimer += ((CursorBlinkRate*2)/60) * paceFactor;
 		if (!this.hasEnteredName) {
 			this.namefield.focus(); // focus so player input is read
 			// exit if same namefield not updated
@@ -88,7 +86,7 @@ var EndState = State.extend({
 		if (this.hasEnteredName) {
 			// manually tweaked positions for, straightforward text
 			// positioning
-			ctx.vectorText("Hiscore", 3, null, 130);
+			ctx.vectorText("HALL OF FAME", 3, null, 130);
 			for (var i = 0, len = this.game.highscores.length; i < len; i++) {
 				var hs = this.game.highscores[i];
 				ctx.vectorText(hs[0], 2, 390, 200+25*i);
@@ -98,9 +96,13 @@ var EndState = State.extend({
 
 		} else {
 
-			ctx.vectorText("Thank you for playing", 4, null, 100);
+			ctx.vectorText("YOU MADE IT TO THE HALL OF FAME!", 4, null, 100);
 			ctx.vectorText("TYPE YOUR NAME AND PRESS ENTER", 2, null, 180);
-			ctx.vectorText(this.nick, 3, null, 220);
+			if(this.cursorBlinkTimer%2 > 1){
+				ctx.vectorText(" " + this.nick + "_", 3, null, 220);
+			} else{
+				ctx.vectorText(this.nick, 3, null, 220);
+			}
 			ctx.vectorText(this.score, 3, null, 300);
 		}
 	}

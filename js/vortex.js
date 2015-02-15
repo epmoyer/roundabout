@@ -5,20 +5,20 @@ var VortexMaxRadius = 350;
 var VortexRadialSpeed = -0.06;
 var VortexTwist = 0.20;
 var VortexGrowRadius = 10;
-var VortexGrowRate = 0.18;
-var VortexCollapseRate = 0.2;
+var VortexGrowRate = 0.23;
+var VortexCollapseRate = 1.0;
 var VortexBoostRange = 70;
 var VotexBoostVelocity = 0.06;
 
-// var VortexShieldPoints = 10;
 var VortexShieldPoints = 18;
 var VortexShieldMargin = 15;
-// var VortexShieldRotationSpeed = -0.06;
 var VortexShieldDrawMargin = 3;
 var VortexShieldErodeTime = 30;
 
 var StarMaxRadius = 1024/2;
 var StarfallSpeed = 0.3;
+var StarSpawnRate = 0.07;
+var StarNumMax = 100;
 
 
 var Vortex = Class.extend({
@@ -30,7 +30,7 @@ var Vortex = Class.extend({
 		this.center_y = y;
 
 		this.stars = [];
-		for (var i=0; i<100; i++){
+		for (var i=0; i<StarNumMax; i++){
 			this.stars.push(Math.random() * StarMaxRadius);
 			this.stars.push(Math.random() * Math.PI * 2);
 		}
@@ -124,14 +124,25 @@ var Vortex = Class.extend({
 			}
 		}
 
+		//-----------
+		// Stars
+		//-----------
 		// Add rotational angle to stars based on radius
 		for(var i=0, len=this.stars.length; i<len; i+=2){
 			this.stars[i+1] += this.radiusToAngularVelocity(this.stars[i], true) * paceFactor;
 			this.stars[i] -= StarfallSpeed * paceFactor;
 			if (this.stars[i] < (this.radius + VortexThickness/2)){
-				// Star fell into the vortex, so regenerate it at the outside
-				this.stars[i] = StarMaxRadius;
-				this.stars[i+1] = Math.random() * Math.PI * 2;
+				// Star fell into the vortex, so remove it
+				this.stars.splice(i,2);
+				i-=2;
+				len-=2;
+			}
+		}
+		// Spawn
+		if(this.stars.length < StarNumMax*2){
+			if(Math.random() * paceFactor < StarSpawnRate){
+				this.stars.push(Math.random() * StarMaxRadius);
+				this.stars.push(Math.random() * Math.PI * 2);
 			}
 		}
 
