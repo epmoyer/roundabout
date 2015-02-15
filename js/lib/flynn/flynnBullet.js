@@ -1,10 +1,8 @@
-var BulletVelocity = 5;
-
-var Bullet = Class.extend({
+var FlynnBullet = Class.extend({
 	maxX: null,
 	maxY: null,
 
-	init: function(x, y, angle, color){
+	init: function(x, y, angle, velocity, color){
 		this.x = x;
 		this.y = y;
 		this.color = color;
@@ -13,8 +11,8 @@ var Bullet = Class.extend({
 		this.life = 60 * 30; // 30 seconds of life to start
 
 		this.vel = {
-			x: BulletVelocity * Math.cos(angle),
-			y: BulletVelocity * Math.sin(angle)
+			x: velocity * Math.cos(angle),
+			y: velocity * Math.sin(angle)
 		};
 	},
 

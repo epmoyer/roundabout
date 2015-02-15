@@ -48,13 +48,13 @@ var GameState = FlynnState.extend({
 		this.vortex = new Vortex(this.center_x, this.center_y);
 
 		this.ship = new Ship(Points.WIDE_SHIP, Points.FLAMES, 1.5, this.center_x, this.center_y,
-			ShipStartRadius, ShipStartAngle, Colors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
+			ShipStartRadius, ShipStartAngle, FlynnColors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
 		this.ship.maxX = this.canvasWidth;
 		this.ship.maxY = this.canvasHeight;
 
 		this.gameOver = false;
 		this.lives = 3;
-		this.lifepolygon = new FlynnPolygon(Points.WIDE_SHIP, Colors.YELLOW);
+		this.lifepolygon = new FlynnPolygon(Points.WIDE_SHIP, FlynnColors.YELLOW);
 		this.lifepolygon.setScale(1.2);
 		this.lifepolygon.setAngle(-Math.PI/2);
 
@@ -432,7 +432,7 @@ var GameState = FlynnState.extend({
 
 				// Create drifter
 				drifter = new Drifter(Points.POINTY_SHIP, 2, this.center_x, this.center_y,
-					drifterRadius, drifterAngle, Colors.RED,
+					drifterRadius, drifterAngle, FlynnColors.RED,
 					this.vortex.radiusToAngularVelocity);
 				this.drifters.push(drifter);
 			}
@@ -511,7 +511,7 @@ var GameState = FlynnState.extend({
 				}
 
 				blocker = new Blocker(Points.SHIELD_TYPE_SHORT, Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
-					blockerRadius, blockerAngle, Colors.RED,
+					blockerRadius, blockerAngle, FlynnColors.RED,
 					this.vortex.radiusToAngularVelocity);
 				this.blockers.push(blocker);
 			}
@@ -615,11 +615,11 @@ var GameState = FlynnState.extend({
 		ctx.clearAll();
 
 		// DEBUG: Show number of stars
-		//ctx.vectorText(this.vortex.stars.length, 3,300,15,null, Colors.GREEN);
+		//ctx.vectorText(this.vortex.stars.length, 3,300,15,null, FlynnColors.GREEN);
 
 		// Scores
-		ctx.vectorText(this.score, 3, 15, 15, null, Colors.YELLOW);
-		ctx.vectorText(this.highscore, 3, this.canvasWidth - 6	, 15, 0 , Colors.YELLOW);
+		ctx.vectorText(this.score, 3, 15, 15, null, FlynnColors.YELLOW);
+		ctx.vectorText(this.highscore, 3, this.canvasWidth - 6	, 15, 0 , FlynnColors.YELLOW);
 
 		// Extra Lives
 		for(var i=0; i<this.lives; i++){
@@ -630,11 +630,11 @@ var GameState = FlynnState.extend({
 		if(this.popUpLife > 0){
 			ctx.vectorTextArc(this.popUpText,
 				3, this.vortex.center_x, this.vortex.center_y,
-				Math.PI*3/2, 150, Colors.YELLOW, true, false);
+				Math.PI*3/2, 150, FlynnColors.YELLOW, true, false);
 			if(this.popUpText2){
 				ctx.vectorTextArc(this.popUpText2,
 					3, this.vortex.center_x, this.vortex.center_y,
-					Math.PI/2, 150, Colors.YELLOW, true, true);
+					Math.PI/2, 150, FlynnColors.YELLOW, true, true);
 			}
 		}
 
@@ -645,7 +645,7 @@ var GameState = FlynnState.extend({
 
 		// Game OVer
 		if(this.gameOver){
-			ctx.vectorText("Game Over", 6, null, 200, null, Colors.GREEN);
+			ctx.vectorText("Game Over", 6, null, 200, null, FlynnColors.GREEN);
 		}
 
 		// Drifters

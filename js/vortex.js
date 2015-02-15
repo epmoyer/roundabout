@@ -51,7 +51,7 @@ var Vortex = Class.extend({
 			shieldPoints.push(Math.cos(theta-Math.PI/2));
 			shieldPoints.push(Math.sin(theta-Math.PI/2));
 		}
-		this.shieldPolygon = new FlynnPolygon(shieldPoints, Colors.CYAN);
+		this.shieldPolygon = new FlynnPolygon(shieldPoints, FlynnColors.CYAN);
 		this.shieldAngle = 0;
 		this.shieldActive = true;
 		this.shieldPolygon.setAngle(this.shieldAngle);
@@ -166,14 +166,14 @@ var Vortex = Class.extend({
 							this.shieldRadius,
 							Math.atan2(y,x),
 							10,
-							Colors.CYAN);
+							FlynnColors.CYAN);
 						x = this.shieldPolygon.points[len-4];
 						y = this.shieldPolygon.points[len-3];
 						this.particles.explosion(
 							this.shieldRadius,
 							Math.atan2(y,x),
 							10,
-							Colors.CYAN);
+							FlynnColors.CYAN);
 						this.shield_erode_sound.play();
 					}
 					this.shieldPolygon.pointsMaster.splice(len-2,2);
@@ -196,15 +196,15 @@ var Vortex = Class.extend({
 		ctx.beginPath();
 		if (doCollapse){
 			// Collapsing
-			ctx.strokeStyle=Colors.CYAN;
+			ctx.strokeStyle=FlynnColors.CYAN;
 		}
 		else if(this.radius < this.target_radius){
 			// Growing
-			ctx.strokeStyle=Colors.MAGENTA;
+			ctx.strokeStyle=FlynnColors.MAGENTA;
 		}
 		else{
 			// Stable
-			ctx.strokeStyle=Colors.GREEN;
+			ctx.strokeStyle=FlynnColors.GREEN;
 		}
 		for(theta = 0, angle_delta = (Math.PI * 2)/VortexLines; theta < ((Math.PI * 2)-0.001); theta += angle_delta){
 			var sx = this.center_x + Math.cos(theta+this.angle - VortexTwist) * (this.radius - VortexThickness/2);

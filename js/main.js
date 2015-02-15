@@ -5,17 +5,6 @@ var States = {
 	END: 3
 };
 
-var Colors = {
-	BLUE:		"#2020FF",
-	WHITE:		"#FFFFFF",
-	GREEN:      "#00FF00",
-	YELLOW:     "#FFFF00",
-	RED:        "#FF0000",
-	CYAN:       "#00FFFF",
-	MAGENTA:	"#FF00FF",
-	CYAN_DK:    "#008080",
-};
-
 var DeveloperModeEnabled = true;
 
 var Game = Class.extend({

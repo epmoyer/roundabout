@@ -66,7 +66,7 @@ var FlynnCanvas = Class.extend({
 
 			ctx.vectorText = function(text, scale, x, y, offset, color){
 				if(typeof(color)==='undefined'){
-					color = Colors.GREEN;
+					color = FlynnColors.GREEN;
 				}
 
 				text = text.toString().toUpperCase();
@@ -128,7 +128,7 @@ var FlynnCanvas = Class.extend({
 
 			ctx.vectorTextArc = function(text, scale, center_x, center_y, angle, radius, color, isCentered, isReversed){
 				if(typeof(color)==='undefined'){
-					color = Colors.GREEN;
+					color = FlynnColors.GREEN;
 				}
 				if(typeof(isCentered)==='undefined'){
 					isCentered = false;
@@ -282,9 +282,9 @@ var FlynnCanvas = Class.extend({
 			}
 
 			if (self.showMetrics){
-				self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-10, Colors.GREEN, self.ctx.fps/120);
+				self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-10, FlynnColors.GREEN, self.ctx.fps/120);
 				if(self.game.browserSupportsPerformance){
-					self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-16, Colors.YELLOW, (end-start)/(1000/120));
+					self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-16, FlynnColors.YELLOW, (end-start)/(1000/120));
 				}
 			}
 			

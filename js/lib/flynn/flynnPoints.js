@@ -1,6 +1,22 @@
+//------------
+// Colors 
+//------------
+var FlynnColors = {
+	BLUE:		"#2020FF",
+	WHITE:		"#FFFFFF",
+	GREEN:      "#00FF00",
+	YELLOW:     "#FFFF00",
+	RED:        "#FF0000",
+	CYAN:       "#00FFFF",
+	MAGENTA:	"#FF00FF",
+	CYAN_DK:    "#008080",
+};
+
+//------------
+// Font 
+//------------
 var FlynnUnimplementedChar = [0,6,0,0,4,0,4,6,0,6,4,0,4,6,0,0,0,6];
 var FlynnPenUp = 9999;
-
 var FlynnPoints = {
 	UNIMPLEMENTED_CHAR: FlynnUnimplementedChar,
 	PEN_UP: FlynnPenUp,

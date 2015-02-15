@@ -60,18 +60,18 @@ var MenuState = FlynnState.extend({
 
 		// Font Test
 		//ctx.vectorText("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
-		//	2.5, 30, 30, null, Colors.MAGENTA);
+		//	2.5, 30, 30, null, FlynnColors.MAGENTA);
 		//ctx.vectorText("Unimplemented:{|}~",
-		//	2.5, 30, 55, null, Colors.MAGENTA);
+		//	2.5, 30, 55, null, FlynnColors.MAGENTA);
 
 		for(var angle = 0; angle < Math.PI + 0.1; angle+=Math.PI){
-			ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, Colors.MAGENTA);
-			ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle-0.01 + angle, 297, Colors.CYAN);
+			ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, FlynnColors.MAGENTA);
+			ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle-0.01 + angle, 297, FlynnColors.CYAN);
 		}
 
 		ctx.vectorTextArc("VERSION 5.1",
 			2, this.vortex.center_x, this.vortex.center_y,
-			this.creditsAngle3, 100, Colors.GREEN);
+			this.creditsAngle3, 100, FlynnColors.GREEN);
 		var startText;
 		var controlsText;
 		if (!this.game.browserSupportsTouch){
@@ -88,20 +88,20 @@ var MenuState = FlynnState.extend({
 		}
 		ctx.vectorTextArc(startText,
 			2, this.vortex.center_x, this.vortex.center_y,
-			this.creditsAngle3 + 270*Math.PI/360, 100, Colors.CYAN);
+			this.creditsAngle3 + 270*Math.PI/360, 100, FlynnColors.CYAN);
 		ctx.vectorTextArc(controlsText,
 			2, this.vortex.center_x, this.vortex.center_y,
-			this.creditsAngle4, 80, Colors.YELLOW);
+			this.creditsAngle4, 80, FlynnColors.YELLOW);
 
 		ctx.vectorTextArc(
 			"WRITTEN BY TRAYTON MOYER (FLOATIN' HEAD) AND ERIC MOYER (FIENDFODDER) FOR LUDAM MINI DARE 56",
-			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle , 240, Colors.GREEN);
+			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle , 240, FlynnColors.GREEN);
 		ctx.vectorTextArc(
 			"BASED ON THE ASTEROIDS VECTOR FRAMEWORK DEVELOPED BY MAX WIHLBORG",
-			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2 , 220, Colors.GREEN);
+			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2 , 220, FlynnColors.GREEN);
 		ctx.vectorTextArc(
 			"MUSIC ROUNDABOUT 8 BIT BY STUDIO MEGAANE",
-			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2B , 200, Colors.GREEN);
+			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2B , 200, FlynnColors.GREEN);
 
 		this.vortex.draw(ctx);
 	}

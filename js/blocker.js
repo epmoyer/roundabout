@@ -5,7 +5,7 @@ var Blocker = FlynnPolygon.extend({
 	init: function(p, p2, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity){
 		this._super(p, color);
 
-		this.core = new FlynnPolygon(p2, Colors.CYAN);
+		this.core = new FlynnPolygon(p2, FlynnColors.CYAN);
 		this.core.setScale(s);
 
 		this.center_x = x;

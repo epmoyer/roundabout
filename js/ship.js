@@ -1,7 +1,8 @@
 var ShipGravity = 0.08; //0.02;
 var ShipThrust = 0.40; //0.10;
-var ShipRecoil = 1.0; 
+var ShipRecoil = 1.0;
 var ShipMaxRadius = 370;
+var ShipBulletVelocity = 5;
 
 var Ship = FlynnPolygon.extend({
 
@@ -11,7 +12,7 @@ var Ship = FlynnPolygon.extend({
 	init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity, vortex){
 		this._super(p, color);
 
-		this.flames = new FlynnPolygon(pf, Colors.CYAN);
+		this.flames = new FlynnPolygon(pf, FlynnColors.CYAN);
 		this.flames.setScale(s);
 
 		this.center_x = x;
@@ -84,13 +85,7 @@ var Ship = FlynnPolygon.extend({
 		var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
 		var b_x = this.center_x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0];
 		var b_y = this.center_y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1];
-		var b = new Bullet(b_x, b_y, this.radialAngle + b_advance_angle, this.color); // start bullet angle one animation frame forward
-			
-		//var theta = this.f_radiusToAngularVelocity(this.radius);
-		//var ship_direction = this.angle + Math.PI/2;
-		//var ship_velocity = Math.sin(theta)*this.radius;
-		//b.vel.x += ship_velocity * Math.cos(ship_direction);
-		//b.vel.y += ship_velocity * Math.sin(ship_direction);
+		var b = new FlynnBullet(b_x, b_y, this.radialAngle + b_advance_angle, ShipBulletVelocity, this.color); // start bullet angle one animation frame forward
 		b.maxX = this.maxX;
 		b.maxY = this.maxY;
 		b.update(1.0); // Move the bullet one frame to get it away from the ship
@@ -147,7 +142,7 @@ var Ship = FlynnPolygon.extend({
 			if (this.drawFlames){
 				ctx.drawPolygon(this.flames, this.x, this.y);
 				this.drawFlames = false;
-			};
+			}
 		}
 	}
-})
+});
