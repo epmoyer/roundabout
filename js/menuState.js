@@ -59,8 +59,10 @@ var MenuState = State.extend({
 		var title_step = 5;
 
 		// Font Test
-		// ctx.vectorText("!\"#$%&\'()*+,-./   0123456789:;<=>?@   ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`   {|}~", 
-		// 	2, 30, 30, null, Colors.MAGENTA);
+		//ctx.vectorText("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
+		//	2.5, 30, 30, null, Colors.MAGENTA);
+		//ctx.vectorText("Unimplemented:{|}~",
+		//	2.5, 30, 55, null, Colors.MAGENTA);
 
 		for(var angle = 0; angle < Math.PI + 0.1; angle+=Math.PI){
 			ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, Colors.MAGENTA);

@@ -107,10 +107,20 @@ var Canvas = Class.extend({
 					}
 
 					this.beginPath();
-					this.moveTo(p[0]*scale+x, p[1]*scale+y);
-					
-					for (var j=2, len2=p.length; j<len2; j+=2){
-						this.lineTo(p[j]*scale+x, p[j+1]*scale +y);
+					var pen_up = false;
+					for (var j=0, len2=p.length; j<len2; j+=2){
+						if(p[j]==Points.PEN_UP){
+							pen_up = true;
+						}
+						else{
+							if(j===0 || pen_up){
+								this.moveTo(p[j]*scale+x, p[j+1]*scale +y);
+								pen_up = false;
+							}
+							else{
+								this.lineTo(p[j]*scale+x, p[j+1]*scale +y);
+							}
+						}
 					}
 					this.stroke();
 					x += step;
@@ -171,20 +181,27 @@ var Canvas = Class.extend({
 					}
 
 					// Render character
+					var pen_up = false;
 					this.beginPath();
 					for (var j=0, len2=p.length; j<len2; j+=2){
-						var x = p[j] - TextCenterOffsetX;
-						var y = p[j+1] - TextCenterOffsetY;
-						var c = Math.cos(character_angle);
-						var s = Math.sin(character_angle);
-						var draw_x = (c*x - s*y) * scale + Math.cos(render_angle) * radius + center_x;
-						var draw_y = (s*x + c*y) * scale + Math.sin(render_angle) * radius + center_y;
-
-						if(j===0){
-							this.moveTo(draw_x, draw_y);
+						if(p[j]==Points.PEN_UP){
+							pen_up = true;
 						}
 						else{
-							this.lineTo(draw_x, draw_y);
+							var x = p[j] - TextCenterOffsetX;
+							var y = p[j+1] - TextCenterOffsetY;
+							var c = Math.cos(character_angle);
+							var s = Math.sin(character_angle);
+							var draw_x = (c*x - s*y) * scale + Math.cos(render_angle) * radius + center_x;
+							var draw_y = (s*x + c*y) * scale + Math.sin(render_angle) * radius + center_y;
+
+							if(j===0 || pen_up){
+								this.moveTo(draw_x, draw_y);
+								pen_up = false;
+							}
+							else{
+								this.lineTo(draw_x, draw_y);
+							}
 						}
 					}
 					this.stroke();
