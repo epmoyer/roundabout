@@ -1,4 +1,4 @@
-var State = Class.extend({
+var FlynnState = Class.extend({
 
 	init: function(game){
 		this.game = game;

@@ -4,7 +4,7 @@
 
 var CursorBlinkRate = 2;
 
-var EndState = State.extend({
+var EndState = FlynnState.extend({
 
 	/**
 	 * Constructor

@@ -3,7 +3,7 @@ var ShipThrust = 0.40; //0.10;
 var ShipRecoil = 1.0; 
 var ShipMaxRadius = 370;
 
-var Ship = Polygon.extend({
+var Ship = FlynnPolygon.extend({
 
 	maxX: null,
 	maxY: null,
@@ -11,7 +11,7 @@ var Ship = Polygon.extend({
 	init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity, vortex){
 		this._super(p, color);
 
-		this.flames = new Polygon(pf, Colors.CYAN);
+		this.flames = new FlynnPolygon(pf, Colors.CYAN);
 		this.flames.setScale(s);
 
 		this.center_x = x;

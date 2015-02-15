@@ -35,7 +35,7 @@ var BulletsMax = 4;
 
 var ExtraLifeScore = 5000;
 
-var GameState = State.extend({
+var GameState = FlynnState.extend({
 
 	init: function(game) {
 		this._super(game);
@@ -54,7 +54,7 @@ var GameState = State.extend({
 
 		this.gameOver = false;
 		this.lives = 3;
-		this.lifepolygon = new Polygon(Points.WIDE_SHIP, Colors.YELLOW);
+		this.lifepolygon = new FlynnPolygon(Points.WIDE_SHIP, Colors.YELLOW);
 		this.lifepolygon.setScale(1.2);
 		this.lifepolygon.setAngle(-Math.PI/2);
 
@@ -102,7 +102,7 @@ var GameState = State.extend({
 		this.blockers = [];
 
 		// Vortex
-		this.particles = new Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
+		this.particles = new FlynnParticles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
 		this.vortex.particles = this.particles;
 
 		// Pop-up messages

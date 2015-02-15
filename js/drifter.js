@@ -1,6 +1,6 @@
 var DrifterFallSpeed = 0.6;
 
-var Drifter = Polygon.extend({
+var Drifter = FlynnPolygon.extend({
 
 	init: function(p, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity){
 		this._super(p, color);

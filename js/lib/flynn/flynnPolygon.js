@@ -1,4 +1,4 @@
-var Polygon = Class.extend({
+var FlynnPolygon = Class.extend({
 
 	init: function(p, color){
 		if(typeof(color)==='undefined'){

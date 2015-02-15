@@ -51,7 +51,7 @@ var Vortex = Class.extend({
 			shieldPoints.push(Math.cos(theta-Math.PI/2));
 			shieldPoints.push(Math.sin(theta-Math.PI/2));
 		}
-		this.shieldPolygon = new Polygon(shieldPoints, Colors.CYAN);
+		this.shieldPolygon = new FlynnPolygon(shieldPoints, Colors.CYAN);
 		this.shieldAngle = 0;
 		this.shieldActive = true;
 		this.shieldPolygon.setAngle(this.shieldAngle);

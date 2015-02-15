@@ -5,7 +5,7 @@ var CreditsAngularVelocity2B = -0.015;
 var CreditsAngularVelocity3 = -0.020;
 var CreditsAngularVelocity4 = -0.027;
 
-var MenuState = State.extend({
+var MenuState = FlynnState.extend({
 
 	init: function(game){
 		this.game = game;
