@@ -1,4 +1,4 @@
-var TouchRegion = Class.extend({
+var FlynnTouchRegion = Class.extend({
 	init: function(name, left, top, right, bottom) {
 		this.name = name;
 		this.left = left;
@@ -10,7 +10,7 @@ var TouchRegion = Class.extend({
 	}
 });
 
-var InputHandler = Class.extend({
+var FlynnInputHandler = Class.extend({
 	init: function(keys) {
 		this.keys = {};
 		this.down = {};
@@ -95,7 +95,7 @@ var InputHandler = Class.extend({
 			// same name
 			delete this.touchRegions[name];
 		}
-		touchRegion = new TouchRegion(name, left, top, right, bottom);
+		touchRegion = new FlynnTouchRegion(name, left, top, right, bottom);
 		this.touchRegions[name] = touchRegion;
 		this.down[name] = false;
 		this.pressed[name] = false;

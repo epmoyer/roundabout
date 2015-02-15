@@ -21,9 +21,9 @@ var DeveloperModeEnabled = true;
 var Game = Class.extend({
 
 	init: function() {
-		this.canvas = new Canvas(this, 1024, 768);
+		this.canvas = new FlynnCanvas(this, 1024, 768);
 
-		this.input = new InputHandler({
+		this.input = new FlynnInputHandler({
 			left:		37,
 			up:			38,
 			right:		39,

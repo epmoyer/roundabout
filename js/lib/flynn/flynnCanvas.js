@@ -1,21 +1,19 @@
-var MaxPaceRecoveryTicks = 5; // Max elapsed 60Hz frames to apply pacing (beyond this, just jank)
+var FlynnMaxPaceRecoveryTicks = 5; // Max elapsed 60Hz frames to apply pacing (beyond this, just jank)
 
-var TextWidth = 4;
-var TextHeight = 6;
-var TextCenterOffsetX = TextWidth/2;
-var TextCenterOffsetY = TextHeight/2;
-var TextGap = 2;
-var TextSpacing = TextWidth + TextGap;
+var FlynnTextWidth = 4;
+var FlynnTextHeight = 6;
+var FlynnTextCenterOffsetX = FlynnTextWidth/2;
+var FlynnTextCenterOffsetY = FlynnTextHeight/2;
+var FlynnTextGap = 2;
+var FlynnTextSpacing = FlynnTextWidth + FlynnTextGap;
 
-var Canvas = Class.extend({
+var FlynnCanvas = Class.extend({
 
 	init: function(game, width, height) {
 		this.game = game;
 
 		this.showMetrics = false;
-		// this.canvas = document.createElement("canvas");
 		this.canvas = document.getElementById("gameCanvas");
-		//this.canvas.style = "position:absolute;top:0;left:0";
 		this.canvas.width = width;
 		this.canvas.height = height;
 		this.previousTimestamp = 0;
@@ -72,7 +70,7 @@ var Canvas = Class.extend({
 				}
 
 				text = text.toString().toUpperCase();
-				var step = scale*TextSpacing;
+				var step = scale*FlynnTextSpacing;
 
 				// add offset if specified
 				if (typeof offset === "number") {
@@ -100,16 +98,16 @@ var Canvas = Class.extend({
 					}
 					var p;
 					if ((ch >= this.EXCLAMATIONCODE) && (ch <= this.ACCENTCODE)){
-						p = Points.ASCII[ch - this.EXCLAMATIONCODE];
+						p = FlynnPoints.ASCII[ch - this.EXCLAMATIONCODE];
 					}
 					else{
-						p = Points.UNIMPLEMENTED_CHAR;
+						p = FlynnPoints.UNIMPLEMENTED_CHAR;
 					}
 
 					this.beginPath();
 					var pen_up = false;
 					for (var j=0, len2=p.length; j<len2; j+=2){
-						if(p[j]==Points.PEN_UP){
+						if(p[j]==FlynnPoints.PEN_UP){
 							pen_up = true;
 						}
 						else{
@@ -140,13 +138,13 @@ var Canvas = Class.extend({
 				}
 
 				text = text.toString().toUpperCase();
-				var step = scale*TextSpacing;
+				var step = scale*FlynnTextSpacing;
 
 				center_x += 0.5;
 				center_y += 0.5;
 
 				var render_angle = angle;
-				var render_angle_step = Math.asin(TextSpacing*scale/radius);
+				var render_angle_step = Math.asin(FlynnTextSpacing*scale/radius);
 				var renderAngleOffset = 0;
 				if (isCentered){
 					renderAngleOffset = render_angle_step * text.length / 2;
@@ -174,22 +172,22 @@ var Canvas = Class.extend({
 					// Get the character vector points
 					var p;
 					if ((ch >= this.EXCLAMATIONCODE) && (ch <= this.ACCENTCODE)){
-						p = Points.ASCII[ch - this.EXCLAMATIONCODE];
+						p = FlynnPoints.ASCII[ch - this.EXCLAMATIONCODE];
 					}
 					else{
-						p = Points.UNIMPLEMENTED_CHAR;
+						p = FlynnPoints.UNIMPLEMENTED_CHAR;
 					}
 
 					// Render character
 					var pen_up = false;
 					this.beginPath();
 					for (var j=0, len2=p.length; j<len2; j+=2){
-						if(p[j]==Points.PEN_UP){
+						if(p[j]==FlynnPoints.PEN_UP){
 							pen_up = true;
 						}
 						else{
-							var x = p[j] - TextCenterOffsetX;
-							var y = p[j+1] - TextCenterOffsetY;
+							var x = p[j] - FlynnTextCenterOffsetX;
+							var y = p[j+1] - FlynnTextCenterOffsetY;
 							var c = Math.cos(character_angle);
 							var s = Math.sin(character_angle);
 							var draw_x = (c*x - s*y) * scale + Math.cos(render_angle) * radius + center_x;
@@ -249,22 +247,13 @@ var Canvas = Class.extend({
 			else{
 				timeNow = timeStamp;
 			}
-			/*
-			self.ctx.fps = Math.round(1000/(timeStamp - self.previousTimestamp));
-			// paceFactor represents the % of a 60fps frame that has elapsed.
-			// At 30fps the paceFactor is 2.0,  At 15fps it is 4.0
-			var paceFactor = (60*(timeStamp - self.previousTimestamp))/1000;
-
-			/console.log(paceFactor);
-			self.previousTimestamp = timeStamp;
-			*/
 			
 			//self.ctx.fps = Math.round(1000/(timeNow - self.previousTimestamp));
 			self.ctx.fpsMsecCount += timeNow - self.previousTimestamp;
 			// paceFactor represents the % of a 60fps frame that has elapsed.
 			// At 30fps the paceFactor is 2.0,  At 15fps it is 4.0
 			var paceFactor = (60*(timeNow - self.previousTimestamp))/1000;
-			if (paceFactor > MaxPaceRecoveryTicks) {
+			if (paceFactor > FlynnMaxPaceRecoveryTicks) {
 				paceFactor = 1;
 			}
 
@@ -299,11 +288,9 @@ var Canvas = Class.extend({
 				}
 			}
 			
-
 			// Update screen and request callback
 			refresh_f(callback_f, self.canvas);
 
-			
 		};
 		refresh_f(callback_f, this.canvas );
 	}
