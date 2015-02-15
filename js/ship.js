@@ -43,12 +43,12 @@ var Ship = FlynnPolygon.extend({
 		this.vortexDeath = false;
 
 		this.shoot_sound = new Howl({
-			src: ['sounds/Laser_Shoot_sustained.wav'],
+			src: ['sounds/Laser_Shoot_sustained.ogg', 'sounds/Laser_Shoot_sustained.mp3'],
 			volume: 0.25,
 		});
 
 		this.vortex_consume_player_sound = new Howl({
-			src: ['sounds/VortexConsume.wav'],
+			src: ['sounds/VortexConsume.ogg', 'sounds/VortexConsume.mp3'],
 			volume: 0.50,
 		});
 	},

@@ -24,7 +24,7 @@ var MenuState = FlynnState.extend({
 		this.creditsAngle4 = Math.PI/4;
 
 		this.start_sound = new Howl({
-			src: ['sounds/Tripple_blip.wav'],
+			src: ['sounds/Tripple_blip.ogg','sounds/Tripple_blip.mp3'],
 			volume: 0.5,
 		});
 	},
@@ -69,7 +69,7 @@ var MenuState = FlynnState.extend({
 			ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle-0.01 + angle, 297, FlynnColors.CYAN);
 		}
 
-		ctx.vectorTextArc("VERSION 5.1",
+		ctx.vectorTextArc("VERSION 6.0",
 			2, this.vortex.center_x, this.vortex.center_y,
 			this.creditsAngle3, 100, FlynnColors.GREEN);
 		var startText;

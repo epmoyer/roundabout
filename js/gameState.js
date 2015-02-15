@@ -66,28 +66,28 @@ var GameState = FlynnState.extend({
 		this.generateLvl();
 
 		this.engine_sound = new Howl({
-			src: ['sounds/Engine.ogg', 'sounds/Engine.wav'],
+			src: ['sounds/Engine.ogg','sounds/Engine.mp3'],
 			volume: 0.25,
 			loop: true,
 		});
 		this.player_die_sound = new Howl({
-			src: ['sounds/Playerexplosion2.wav'],
+			src: ['sounds/Playerexplosion2.ogg','sounds/Playerexplosion2.mp3'],
 			volume: 0.25,
 		});
 		this.extra_life_sound = new Howl({
-			src: ['sounds/ExtraLife.wav'],
+			src: ['sounds/ExtraLife.ogg','sounds/ExtraLife.mp3'],
 			volume: 1.00,
 		});
 		this.shot_reflect_sound = new Howl({
-			src: ['sounds/Blocked.wav'],
+			src: ['sounds/Blocked.ogg','sounds/Blocked.mp3'],
 			volume: 0.25,
 		});
 		this.drifter_die_sound = new Howl({
-			src: ['sounds/Drifterexplosion.wav'],
+			src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
 			volume: 0.25,
 		});
 		this.blocker_die_sound = new Howl({
-			src: ['sounds/Drifterexplosion.wav'],
+			src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
 			volume: 0.25,
 		});
 		this.engine_sound_playing = false;
