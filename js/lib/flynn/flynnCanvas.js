@@ -39,7 +39,7 @@ var FlynnCanvas = Class.extend({
 
 				this.strokeStyle = p.color;
 				this.beginPath();
-				//this.lineWidth = "5"; // Fat lines for screenshot thumbnail generation
+				//this.lineWidth = "6"; // Fat lines for screenshot thumbnail generation
 				this.moveTo(points[0]+x, points[1]+y);
 				for (var i=2, len=points.length; i<len; i+=2){
 					this.lineTo(points[i]+x, points[i+1] +y);
