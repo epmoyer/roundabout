@@ -33,7 +33,7 @@ var Blocker = FlynnPolygon.extend({
 		this.y = this.center_y + this.radius * Math.sin(this.radialAngle);
 	},
 
-	collide: function(aster){
+	collide: function(polygon){
 		if (!this.visible){
 			return false;
 		}
@@ -41,7 +41,7 @@ var Blocker = FlynnPolygon.extend({
 			var x = this.points[i] + this.x;
 			var y = this.points[i+1] + this.y;
 
-			if (aster.hasPoint(x,y)){
+			if (polygon.hasPoint(x,y)){
 				return true;
 			}
 		}

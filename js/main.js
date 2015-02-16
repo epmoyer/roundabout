@@ -1,3 +1,4 @@
+
 var States = {
 	NO_CHANGE: 0,
 	MENU: 1,
@@ -8,8 +9,10 @@ var States = {
 var DeveloperModeEnabled = true;
 
 var Game = Class.extend({
-
+	
 	init: function() {
+		"use strict";
+
 		this.canvas = new FlynnCanvas(this, 1024, 768);
 
 		this.input = new FlynnInputHandler({
@@ -68,27 +71,25 @@ var Game = Class.extend({
 			var top = Math.floor(viewport.height/2 - actualCanvasHeight/2);
 			var left = Math.floor(viewport.width/2 - actualCanvasWidth/2);
 
-			element = document.getElementById("gameCanvas");
+			var element = document.getElementById("gameCanvas");
 			element.style.display = "block";
 			element.style.width = actualCanvasWidth + "px";
 			element.style.height = actualCanvasHeight + "px";
 			element.style.top = top + "px";
 			element.style.left = left + "px";
-			console.log(
-				"new height:", actualCanvasHeight,
-				"new width:", actualCanvasWidth,
-				"inner Height:", viewport.height,
-				"inner width", viewport.width);
+			// console.log(
+			// 	"new height:", actualCanvasHeight,
+			// 	"new width:", actualCanvasWidth,
+			// 	"inner Height:", viewport.height,
+			// 	"inner width", viewport.width);
 
 			self.input.addTouchRegion("touchThrust",0,0,viewport.width/2, viewport.height); // Left side of screen
 			self.input.addTouchRegion("touchFire",viewport.width/2+1,0,viewport.width,viewport.height); // Right side of screen
-			// console.log("Resized.");
 		};
 
 		window.addEventListener("resize", this.resize);
 
 		this.resize();
-		
 
 		//--------------------------
 		// Browser/platform support
@@ -110,9 +111,9 @@ var Game = Class.extend({
 		this.browserSupportsTouch = ('ontouchstart' in document.documentElement);
 
 		if (DeveloperModeEnabled){
-				console.log("DEV: browserSupportsPeformance=", this.browserSupportsPerformance);
-				console.log("DEV: browserIsIos=", this.browserIsIos);
-				console.log("DEV: browserSupportsTouch=", this.browserSupportsTouch);
+			console.log("DEV: browserSupportsPeformance=", this.browserSupportsPerformance);
+			console.log("DEV: browserIsIos=", this.browserIsIos);
+			console.log("DEV: browserSupportsTouch=", this.browserSupportsTouch);
 		}
 
 		// Audio
@@ -125,6 +126,7 @@ var Game = Class.extend({
 	},
 
 	updateHighScores: function (nickName, score){
+		"use strict";
 		this.highscores.push([nickName, score]);
 
 		// sort hiscore in ascending order
@@ -137,6 +139,7 @@ var Game = Class.extend({
 	},
 
 	run: function() {
+		"use strict";
 		var self = this;
 
 		this.canvas.animate( function(paceFactor) {
@@ -151,8 +154,6 @@ var Game = Class.extend({
 					case States.END:
 						self.currentState = new EndState(self);
 						break;
-
-
 				}
 				self.nextState = States.NO_CHANGE;
 			}
