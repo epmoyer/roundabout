@@ -1,7 +1,7 @@
 var FlynnState = Class.extend({
 
-	init: function(game){
-		this.game = game;
+	init: function(mcp){
+		this.mcp = mcp;
 	},
 
 	handleInputs: function() {},

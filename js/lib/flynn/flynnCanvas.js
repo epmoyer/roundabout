@@ -216,6 +216,8 @@ var FlynnCanvas = Class.extend({
 			return ctx;
 		})(this.canvas.getContext("2d"));
 
+		this.ctx.strokeStyle = FlynnColors.WHITE;
+
 		document.body.appendChild(this.canvas);
 	},
 

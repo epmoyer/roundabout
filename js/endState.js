@@ -11,19 +11,18 @@ var EndState = FlynnState.extend({
 	 * 
 	 * @param  {Game} game manager for the state
 	 */
-	init: function(game) {
-		this._super(game); // call super constructor
+	init: function(mcp) {
+		this._super(mcp);
 
 		this.nick = "";
-		this.score = game.stateVars.score;
-		if (game.stateVars.score > game.highscores[game.highscores.length-1][1]){
+		this.score = mcp.custom.score;
+		if (mcp.custom.score > mcp.highscores[mcp.highscores.length-1][1]){
 			this.hasEnteredName = false;
 		} else {
 			this.hasEnteredName = true;
 		}
 
-
-		// get and init inputfiled from DOM
+		// get and init input field from DOM
 		this.namefield = document.getElementById("namefield");
 		this.namefield.value = this.nick;
 		this.namefield.focus();
@@ -40,7 +39,7 @@ var EndState = FlynnState.extend({
 		if (this.hasEnteredName) {
 			if (input.isPressed("spacebar")) {
 				// change the game state
-				this.game.nextState = States.MENU;
+				this.mcp.nextState = States.MENU;
 			}
 		} else {
 			if (input.isPressed("enter")) {
@@ -53,7 +52,7 @@ var EndState = FlynnState.extend({
 				this.nick = this.nick.trim();
 				this.nick = this.nick.substring(0,13); // Limit name length
 
-				this.game.updateHighScores(this.nick, this.score);
+				this.mcp.updateHighScores(this.nick, this.score);
 			}
 		}
 	},
@@ -87,8 +86,8 @@ var EndState = FlynnState.extend({
 			// manually tweaked positions for, straightforward text
 			// positioning
 			ctx.vectorText("HALL OF FAME", 3, null, 130);
-			for (var i = 0, len = this.game.highscores.length; i < len; i++) {
-				var hs = this.game.highscores[i];
+			for (var i = 0, len = this.mcp.highscores.length; i < len; i++) {
+				var hs = this.mcp.highscores[i];
 				ctx.vectorText(hs[0], 2, 390, 200+25*i);
 				ctx.vectorText(hs[1], 2, 520, 200+25*i, 10);
 			}

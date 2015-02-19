@@ -37,11 +37,11 @@ var ExtraLifeScore = 5000;
 
 var GameState = FlynnState.extend({
 
-	init: function(game) {
-		this._super(game);
+	init: function(mcp) {
+		this._super(mcp);
 		
-		this.canvasWidth = game.canvas.ctx.width;
-		this.canvasHeight = game.canvas.ctx.height;
+		this.canvasWidth = mcp.canvas.ctx.width;
+		this.canvasHeight = mcp.canvas.ctx.height;
 		this.center_x = this.canvasWidth/2;
 		this.center_y = this.canvasHeight/2;
 
@@ -59,7 +59,7 @@ var GameState = FlynnState.extend({
 		this.lifepolygon.setAngle(-Math.PI/2);
 
 		this.score = 0;
-		this.highscore = this.game.highscores[0][1];
+		this.highscore = this.mcp.highscores[0][1];
 
 		this.lvl = 0;
 
@@ -168,12 +168,12 @@ var GameState = FlynnState.extend({
 		if(DeveloperModeEnabled){
 			// Metrics toggle
 			if (input.isPressed("one")){
-				this.game.canvas.showMetrics = !this.game.canvas.showMetrics;
+				this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
 			}
 
 			// Slow Mo Debug toggle
 			if (input.isPressed("two")){
-				this.game.slowMoDebug = !this.game.slowMoDebug;
+				this.mcp.slowMoDebug = !this.mcp.slowMoDebug;
 			}
 
 			// Points
@@ -196,15 +196,15 @@ var GameState = FlynnState.extend({
 		if(!this.ship.visible){
 			if (input.isPressed("spacebar") || input.isPressed("touchFire") || input.isPressed("touchThrust")){
 				if (this.gameOver){
-					if(this.game.browserSupportsTouch){
+					if(this.mcp.browserSupportsTouch){
 						// On touch devices just update high score and go back to menu
-						this.game.updateHighScores("NONAME", this.score);
+						this.mcp.updateHighScores("NONAME", this.score);
 
-						this.game.nextState = States.MENU;
+						this.mcp.nextState = States.MENU;
 					} else {
-						this.game.nextState = States.END;
+						this.mcp.nextState = States.END;
 					}
-					this.game.stateVars.score = this.score;
+					this.mcp.custom.score = this.score;
 					return;
 				}
 			}
@@ -576,7 +576,7 @@ var GameState = FlynnState.extend({
 			{
 				this.popUpThrustPending = false;
 				this.popUpThrustActive = true;
-				this.showPopUp(this.game.thrustPrompt);
+				this.showPopUp(this.mcp.custom.thrustPrompt);
 				this.popUpLife = PopUpTextLife;
 			}
 		}
@@ -585,7 +585,7 @@ var GameState = FlynnState.extend({
 			{
 				this.popUpFirePending = false;
 				this.popUpFireActive = true;
-				this.showPopUp(this.game.shootPrompt);
+				this.showPopUp(this.mcp.custom.shootPrompt);
 				this.popUpLife = PopUpTextLife;
 			}
 		}

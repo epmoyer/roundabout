@@ -18,6 +18,8 @@ var FlynnMcp = Class.extend({
 		this.resizeFunc = null;
 		this.slowMoDebug = false;
 
+		this.custom={}; // Container for custom game data which needs to be exchanged globally.
+
 		// Highscores
 		this.highscores = [
 			["No Name", 100],

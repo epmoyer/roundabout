@@ -7,11 +7,11 @@ var CreditsAngularVelocity4 = -0.027;
 
 var MenuState = FlynnState.extend({
 
-	init: function(game){
-		this.game = game;
+	init: function(mcp){
+		this._super(mcp);
 
-		this.canvasWidth = game.canvas.ctx.width;
-		this.canvasHeight = game.canvas.ctx.height;
+		this.canvasWidth = mcp.canvas.ctx.width;
+		this.canvasHeight = mcp.canvas.ctx.height;
 
 		this.vortex = new Vortex(this.canvasWidth/2, this.canvasHeight/2);
 		this.vortex.shieldActive = false;
@@ -32,11 +32,11 @@ var MenuState = FlynnState.extend({
 	handleInputs: function(input) {
 		// Metrics toggle
 		if (input.isPressed("one")){
-			this.game.canvas.showMetrics = !this.game.canvas.showMetrics;
+			this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
 		}
 
 		if (input.isPressed("spacebar") || input.isPressed("touchThrust") || input.isPressed("touchFire")){
-			this.game.nextState = States.GAME;
+			this.mcp.nextState = States.GAME;
 			this.start_sound.play();
 		}
 	},
@@ -74,17 +74,17 @@ var MenuState = FlynnState.extend({
 			this.creditsAngle3, 100, FlynnColors.GREEN);
 		var startText;
 		var controlsText;
-		if (!this.game.browserSupportsTouch){
+		if (!this.mcp.browserSupportsTouch){
 			startText = "PUSH SPACE TO START";
 			controlsText = "Z TO THRUST        SPACE TO SHOOT";
-			this.game.thrustPrompt = "PRESS Z TO THRUST";
-			this.game.shootPrompt = "PRESS SPACE TO SHOOT";
+			this.mcp.custom.thrustPrompt = "PRESS Z TO THRUST";
+			this.mcp.custom.shootPrompt = "PRESS SPACE TO SHOOT";
 		} else {
 			startText = "TAP ANYWHERE TO START";
 			//              #########################################
 			controlsText = "TAP LEFT TO THRUST   TAP RIGHT TO SHOOT";
-			this.game.thrustPrompt = "TAP LEFT TO THRUST";
-			this.game.shootPrompt = "TAP RIGHT TO SHOOT";
+			this.mcp.custom.thrustPrompt = "TAP LEFT TO THRUST";
+			this.mcp.custom.shootPrompt = "TAP RIGHT TO SHOOT";
 		}
 		ctx.vectorTextArc(startText,
 			2, this.vortex.center_x, this.vortex.center_y,

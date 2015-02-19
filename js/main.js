@@ -1,3 +1,5 @@
+var GameCanvasHeight = 1024;
+var GameCanvasWidth = 768;
 
 var States = {
 	NO_CHANGE: 0,
@@ -13,7 +15,9 @@ var Game = Class.extend({
 	init: function() {
 		"use strict";
 
-		this.canvas = new FlynnCanvas(this, 1024, 768);
+		var self = this;
+
+		//this.canvas = new FlynnCanvas(this, 1024, 768);
 
 		this.input = new FlynnInputHandler({
 			left:		37,
@@ -34,8 +38,23 @@ var Game = Class.extend({
 			five:       53,
 		});
 
-		// Highscores
-		this.highscores = [
+		this.mcp = new FlynnMcp(GameCanvasHeight, GameCanvasWidth, this.input, DeveloperModeEnabled);
+		this.mcp.setStateBuilderFunc(
+			function(state){
+				switch(state){
+					case States.MENU:
+						return new MenuState(self.mcp);
+					case States.GAME:
+						return new GameState(self.mcp);
+					case States.END:
+						return new EndState(self.mcp);
+				}
+			}
+		);
+		this.mcp.nextState = States.MENU;
+
+		// Scores
+		this.mcp.highscores = [
 			["Dio", 2000],
 			["Jotaro", 1300],
 			["Joseph", 1200],
@@ -43,78 +62,15 @@ var Game = Class.extend({
 			["FLOATINHEAD", 600],
 			["FIENDFODDER", 500],
 		];
+		this.mcp.custom.score = 0;
 
-		this.canvas.ctx.strokeStyle = "#fff";
-
-		this.currentState = null;
-		this.stateVars = {
-			score: 0
-		};
-		this.nextState = States.MENU;
-		this.slowMoDebug = false;
-
-		var self = this;
-
-		this.resize = function(){
-			// Get the dimensions of the viewport
-			var viewport = {
-				width: window.innerWidth,
-				height: window.innerHeight
-			};
-
-			// Determine game size
-			var targetWidth = 1024;
-			var targetHeight = 768;
-			var multiplier = Math.min((viewport.height / targetHeight), (viewport.width / targetWidth));
-			var actualCanvasWidth = Math.floor(targetWidth * multiplier);
-			var actualCanvasHeight = Math.floor(targetHeight * multiplier);
-			var top = Math.floor(viewport.height/2 - actualCanvasHeight/2);
-			var left = Math.floor(viewport.width/2 - actualCanvasWidth/2);
-
-			var element = document.getElementById("gameCanvas");
-			element.style.display = "block";
-			element.style.width = actualCanvasWidth + "px";
-			element.style.height = actualCanvasHeight + "px";
-			element.style.top = top + "px";
-			element.style.left = left + "px";
-			// console.log(
-			// 	"new height:", actualCanvasHeight,
-			// 	"new width:", actualCanvasWidth,
-			// 	"inner Height:", viewport.height,
-			// 	"inner width", viewport.width);
-
-			self.input.addTouchRegion("touchThrust",0,0,viewport.width/2, viewport.height); // Left side of screen
-			self.input.addTouchRegion("touchFire",viewport.width/2+1,0,viewport.width,viewport.height); // Right side of screen
-		};
-
-		window.addEventListener("resize", this.resize);
-
-		this.resize();
-
-		//--------------------------
-		// Browser/platform support
-		//--------------------------
-
-		// SUPPORT: performance.now()
-		this.browserSupportsPerformance = true;
-		try{
-			var time = performance.now();
-		}
-		catch(err){
-			this.browserSupportsPerformance = false;
-		}
-
-		// SUPPORT: iOS
-		this.browserIsIos = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
-
-		// SUPPORT: Touch
-		this.browserSupportsTouch = ('ontouchstart' in document.documentElement);
-
-		if (DeveloperModeEnabled){
-			console.log("DEV: browserSupportsPeformance=", this.browserSupportsPerformance);
-			console.log("DEV: browserIsIos=", this.browserIsIos);
-			console.log("DEV: browserSupportsTouch=", this.browserSupportsTouch);
-		}
+		
+		// Set resize handler and force a resize
+		this.mcp.setResizeFunc( function(width, height){
+			self.input.addTouchRegion("touchThrust",0,0,width/2,height); // Left side of screen
+			self.input.addTouchRegion("touchFire",width/2+1,0,width,height); // Right side of screen
+		});
+		this.mcp.resize();
 
 		// Audio
 		var song = new Howl({
@@ -125,48 +81,8 @@ var Game = Class.extend({
 		}).play();
 	},
 
-	updateHighScores: function (nickName, score){
-		"use strict";
-		this.highscores.push([nickName, score]);
-
-		// sort hiscore in ascending order
-		this.highscores.sort(function(a, b) {
-			return b[1] - a[1];
-		});
-
-		// Drop the last
-		this.highscores.splice(this.highscores.length-1, 1);
-	},
-
 	run: function() {
-		"use strict";
-		var self = this;
-
-		this.canvas.animate( function(paceFactor) {
-			if (self.nextState !== States.NO_CHANGE) {
-				switch(self.nextState){
-					case States.MENU:
-						self.currentState = new MenuState(self);
-						break;
-					case States.GAME:
-						self.currentState = new GameState(self);
-						break;
-					case States.END:
-						self.currentState = new EndState(self);
-						break;
-				}
-				self.nextState = States.NO_CHANGE;
-			}
-
-			self.currentState.handleInputs(self.input);
-			if(self.slowMoDebug){
-				self.currentState.update(paceFactor * 0.1); // Slow Mo
-				//self.currentState.update(0); // Freeze Frame
-			}
-			else{
-				self.currentState.update(paceFactor * 0.7);
-			}
-			self.currentState.render(self.canvas.ctx);
-		});
+		// Start the game
+		this.mcp.run();
 	}
 });
