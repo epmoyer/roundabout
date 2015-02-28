@@ -34,8 +34,8 @@ var FlynnParticle = Class.extend({
 			// Apply angular velocity
 			this.angle += angularVelocity * paceFactor;
 			// Apply radius decay
-			//this.radiusDecayVelocity += FlynnParticleGravity;
-			//this.radius += this.radiusDecayVelocity;
+			this.radiusDecayVelocity += FlynnParticleGravity;
+			this.radius += this.radiusDecayVelocity;
 			// Get cartesian position
 			this.x = this.particles.center_x + Math.cos(this.angle) * this.radius;
 			this.y = this.particles.center_y + Math.sin(this.angle) * this.radius;
