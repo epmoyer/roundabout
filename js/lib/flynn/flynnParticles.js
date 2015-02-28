@@ -1,6 +1,6 @@
 var FlynnExplosionMaxVelocity = 0.5;
 var FlynnParticleLife = 50;
-var FlynnPaticleLifeVariation = 20;
+var FlynnParticleLifeVariation = 20;
 var FlynnParticleFriction = 0.99;
 var FlynnParticleGravity = -0.01;
 
@@ -16,7 +16,7 @@ var FlynnParticle = Class.extend({
 		this.color = color;
 		this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
 
-		this.life = FlynnParticleLife + (Math.random()-0.5) * FlynnPaticleLifeVariation;
+		this.life = FlynnParticleLife + (Math.random()-0.5) * FlynnParticleLifeVariation;
 		this.radiusDecayVelocity = 0;
 	},
 
@@ -45,7 +45,7 @@ var FlynnParticle = Class.extend({
 			// Decay impulse
 			this.dx *= FlynnParticleFriction;
 			this.dy *= FlynnParticleFriction;
-			// Convert back to polar cooridinates
+			// Convert back to polar coordinates
 			this.angle = Math.atan2(this.y-this.particles.center_y, this.x-this.particles.center_x);
 			this.radius = Math.sqrt(Math.pow(this.y-this.particles.center_y,2) + Math.pow(this.x-this.particles.center_x,2));
 			
@@ -56,7 +56,7 @@ var FlynnParticle = Class.extend({
 	draw: function(ctx) {
 		ctx.fillStyle=this.color;
 		ctx.fillRect(this.x,this.y,2,2);
-	},
+	}
 
 });
 
@@ -101,5 +101,5 @@ var FlynnParticles = Class.extend({
 		for(var i=0, len=this.particles.length; i<len; i+=1){
 			this.particles[i].draw(ctx);
 		}
-	},
+	}
 });

@@ -25,7 +25,7 @@ var FlynnBullet = Class.extend({
 		){
 			this.shallRemove = true;
 		}
-		//console.log(paceFactor, this.x + this.vel.x * paceFactor, this.x + this.vel.x * 0.5);
+
 		this.x += this.vel.x * paceFactor;
 		this.y += this.vel.y * paceFactor;
 		

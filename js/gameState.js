@@ -19,7 +19,6 @@ var OverlapAngleSpacing = Math.PI/16;
 
 var ReflectedBulletLife = 15;
 
-var ShipBounceDampening = 0.2;
 var ShipBounceMinVelocity = 1.5;
 
 var VortexShieldEndScore = 500;
@@ -540,8 +539,9 @@ var GameState = FlynnState.extend({
 							len--;
 							i--;
 
-							// Bounce the ship 
-							//this.ship.ascentVelocity = -this.ship.ascentVelocity * ShipBounceDampening;
+                            this.addPoints(BlockerPoints);
+
+							// Bounce the ship
 							this.ship.ascentVelocity = ShipBounceMinVelocity;
 						}
 						else {

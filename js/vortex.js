@@ -8,7 +8,7 @@ var VortexGrowRadius = 10;
 var VortexGrowRate = 0.23;
 var VortexCollapseRate = 1.0;
 var VortexBoostRange = 70;
-var VotexBoostVelocity = 0.06;
+var VortexBoostVelocity = 0.06;
 
 var VortexShieldPoints = 18;
 var VortexShieldMargin = 15;
@@ -77,7 +77,7 @@ var Vortex = Class.extend({
 				distanceFromVortex = 0;
 			}
 			if(distanceFromVortex<VortexBoostRange){
-				boostVelocity = VotexBoostVelocity * ((VortexBoostRange - distanceFromVortex)/VortexBoostRange);
+				boostVelocity = VortexBoostVelocity * ((VortexBoostRange - distanceFromVortex)/VortexBoostRange);
 			}
 		}
 		return -((0.03 * ((StarMaxRadius - distance)/StarMaxRadius)) + boostVelocity);
