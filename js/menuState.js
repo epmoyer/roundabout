@@ -25,15 +25,17 @@ var MenuState = FlynnState.extend({
 
 		this.start_sound = new Howl({
 			src: ['sounds/Tripple_blip.ogg','sounds/Tripple_blip.mp3'],
-			volume: 0.5,
+			volume: 0.5
 		});
 	},
 
 	handleInputs: function(input) {
 		// Metrics toggle
-		if (input.isPressed("one")){
-			this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
-		}
+        if(this.mcp.developerModeEnabled) {
+            if (input.isPressed("one")) {
+                this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
+            }
+        }
 
 		if (input.isPressed("spacebar") || input.isPressed("touchThrust") || input.isPressed("touchFire")){
 			this.mcp.nextState = States.GAME;

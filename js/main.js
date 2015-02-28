@@ -8,16 +8,12 @@ var States = {
 	END: 3
 };
 
-var DeveloperModeEnabled = true;
-
 var Game = Class.extend({
 	
 	init: function() {
 		"use strict";
 
 		var self = this;
-
-		//this.canvas = new FlynnCanvas(this, 1024, 768);
 
 		this.input = new FlynnInputHandler({
 			left:		37,
@@ -38,7 +34,13 @@ var Game = Class.extend({
 			five:       53,
 		});
 
-		this.mcp = new FlynnMcp(GameCanvasHeight, GameCanvasWidth, this.input, DeveloperModeEnabled);
+        // Detect developer mode from URL arguments ("?develop=true").
+        var developerModeEnabled = false;
+        if(flynnGetUrlValue("develop")=='true'){
+            developerModeEnabled = true;
+        }
+
+		this.mcp = new FlynnMcp(GameCanvasHeight, GameCanvasWidth, this.input, States.NO_CHANGE, developerModeEnabled);
 		this.mcp.setStateBuilderFunc(
 			function(state){
 				switch(state){

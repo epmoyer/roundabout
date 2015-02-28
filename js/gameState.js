@@ -164,7 +164,7 @@ var GameState = FlynnState.extend({
 
 	handleInputs: function(input) {
 
-		if(DeveloperModeEnabled){
+		if(this.mcp.developerModeEnabled){
 			// Metrics toggle
 			if (input.isPressed("one")){
 				this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
