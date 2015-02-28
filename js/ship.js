@@ -1,8 +1,9 @@
-var ShipGravity = 0.08; //0.02;
-var ShipThrust = 0.40; //0.10;
+var ShipGravity = 0.08;
+var ShipThrust = 0.40;
 var ShipRecoil = 1.0;
 var ShipMaxRadius = 370;
 var ShipBulletVelocity = 5;
+var ShipBulletLife = 60 * 30; // 30 seconds
 
 var Ship = FlynnPolygon.extend({
 
@@ -85,7 +86,11 @@ var Ship = FlynnPolygon.extend({
 		var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
 		var b_x = this.center_x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0];
 		var b_y = this.center_y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1];
-		var b = new FlynnBullet(b_x, b_y, this.radialAngle + b_advance_angle, ShipBulletVelocity, this.color); // start bullet angle one animation frame forward
+		var b = new FlynnBullet(
+            b_x, b_y, this.radialAngle + b_advance_angle,
+            ShipBulletVelocity, ShipBulletLife, this.color
+        ); // start bullet angle one animation frame forward
+
 		b.maxX = this.maxX;
 		b.maxY = this.maxY;
 		b.update(1.0); // Move the bullet one frame to get it away from the ship

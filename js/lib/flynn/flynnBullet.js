@@ -2,13 +2,13 @@ var FlynnBullet = Class.extend({
 	maxX: null,
 	maxY: null,
 
-	init: function(x, y, angle, velocity, color){
+	init: function(x, y, angle, velocity, lifeFrames, color){
 		this.x = x;
 		this.y = y;
 		this.color = color;
 
 		this.shallRemove = false;
-		this.life = 60 * 30; // 30 seconds of life to start
+		this.life = lifeFrames;
 
 		this.vel = {
 			x: velocity * Math.cos(angle),
