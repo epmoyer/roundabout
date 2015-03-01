@@ -101,7 +101,7 @@ var GameState = FlynnState.extend({
 		this.blockers = [];
 
 		// Vortex
-		this.particles = new FlynnParticles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
+		this.particles = new Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
 		this.vortex.particles = this.particles;
 
 		// Pop-up messages

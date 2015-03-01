@@ -1,23 +1,21 @@
-var FlynnExplosionMaxVelocity = 0.5;
+// Note: This particle library is completely untested.
+//       It is a genericised version of the radial particle library used by Roundabout, based on cartesian
+//       coordinates only.  What could possibly go wrong? :)
+
 var FlynnParticleLife = 50;
 var FlynnParticleLifeVariation = 20;
 var FlynnParticleFriction = 0.99;
-var FlynnParticleGravity = -0.01;
 
 var FlynnParticle = Class.extend({
-	init: function(particles, radius, angle, dx, dy, color, f_radiusToAngularVelocity){
+	init: function(particles, x, y, dx, dy, color){
 		this.particles = particles;
-		this.radius = radius;
-		this.angle = angle;
+        this.x = x;
+        this.y = y;
 		this.dx = dx;
 		this.dy = dy;
-		this.x = 0;
-		this.y = 0;
 		this.color = color;
-		this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
 
 		this.life = FlynnParticleLife + (Math.random()-0.5) * FlynnParticleLifeVariation;
-		this.radiusDecayVelocity = 0;
 	},
 
 	update: function(paceFactor) {
@@ -29,26 +27,12 @@ var FlynnParticle = Class.extend({
 			isAlive = false;
 		}
 		else{
-			// Get angular velocity
-			var angularVelocity = this.f_radiusToAngularVelocity(this.radius, false); // BUG: Boost doesn't work here. Calling without
-			// Apply angular velocity
-			this.angle += angularVelocity * paceFactor;
-			// Apply radius decay
-			this.radiusDecayVelocity += FlynnParticleGravity;
-			this.radius += this.radiusDecayVelocity;
-			// Get cartesian position
-			this.x = this.particles.center_x + Math.cos(this.angle) * this.radius;
-			this.y = this.particles.center_y + Math.sin(this.angle) * this.radius;
 			// Add impulse
 			this.x += this.dx * paceFactor;
 			this.y += this.dy * paceFactor;
 			// Decay impulse
 			this.dx *= FlynnParticleFriction;
 			this.dy *= FlynnParticleFriction;
-			// Convert back to polar coordinates
-			this.angle = Math.atan2(this.y-this.particles.center_y, this.x-this.particles.center_x);
-			this.radius = Math.sqrt(Math.pow(this.y-this.particles.center_y,2) + Math.pow(this.x-this.particles.center_x,2));
-			
 		}
 		return isAlive;
 	},
@@ -62,26 +46,21 @@ var FlynnParticle = Class.extend({
 
 var FlynnParticles = Class.extend({
 
-	init: function(center_x, center_y, f_radiusToAngularVelocity){
-		this.center_x = center_x;
-		this.center_y = center_y;
-		this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
-
+	init: function(){
 		this.particles=[];
 	},
 
-	explosion: function(radius, angle, quantity, color) {
+	explosion: function(x, y, quantity, velocity, color) {
 		for(var i=0; i<quantity; i++){
 			theta = Math.random() * Math.PI * 2;
-			velocity = Math.random() * FlynnExplosionMaxVelocity;
+			velocity = Math.random() * velocity;
 			this.particles.push(new FlynnParticle(
 				this,
-				radius,
-				angle,
+				x,
+				y,
 				Math.cos(theta) * velocity,
 				Math.sin(theta) * velocity,
-				color,
-				this.f_radiusToAngularVelocity
+				color
 			));
 		}
 	},
