@@ -32,12 +32,22 @@ var MenuState = FlynnState.extend({
 	handleInputs: function(input) {
 		// Metrics toggle
         if(this.mcp.developerModeEnabled) {
-            if (input.isPressed("one")) {
+            if (input.isPressed("six")) {
                 this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
             }
         }
+        if(this.mcp.arcadeModeEnabled) {
+            if (input.isPressed("five")) {
+                this.mcp.credits += 1;
+            }
+        }
 
-		if (input.isPressed("spacebar") || input.isPressed("touchThrust") || input.isPressed("touchFire")){
+		if (  ( input.isPressed("spacebar") && !this.mcp.arcadeModeEnabled)
+           || ( input.isPressed("one")      &&  this.mcp.arcadeModeEnabled && this.mcp.credits > 0)
+           || input.isPressed("touchThrust")
+           || input.isPressed("touchFire"))
+        {
+            this.mcp.credits -= 1;
 			this.mcp.nextState = States.GAME;
 			this.start_sound.play();
 		}
@@ -55,42 +65,56 @@ var MenuState = FlynnState.extend({
 	},
 
 	render: function(ctx) {
-		ctx.clearAll();
-		var title_x = 160;
-		var title_y = 150;
-		var title_step = 5;
+        ctx.clearAll();
+        var title_x = 160;
+        var title_y = 150;
+        var title_step = 5;
 
-		// Font Test
-		//ctx.vectorText("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
-		//	2.5, 30, 30, null, FlynnColors.MAGENTA);
-		//ctx.vectorText("Unimplemented:{|}~",
-		//	2.5, 30, 55, null, FlynnColors.MAGENTA);
+        // Font Test
+        //ctx.vectorText("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
+        //	2.5, 30, 30, null, FlynnColors.MAGENTA);
+        //ctx.vectorText("Unimplemented:{|}~",
+        //	2.5, 30, 55, null, FlynnColors.MAGENTA);
 
-		for(var angle = 0; angle < Math.PI + 0.1; angle+=Math.PI){
-			ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, FlynnColors.MAGENTA);
-			ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle-0.01 + angle, 297, FlynnColors.CYAN);
-		}
+        for (var angle = 0; angle < Math.PI + 0.1; angle += Math.PI) {
+            ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, FlynnColors.MAGENTA);
+            ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle - 0.01 + angle, 297, FlynnColors.CYAN);
+        }
 
-		ctx.vectorTextArc("VERSION 6.0",
-			2, this.vortex.center_x, this.vortex.center_y,
-			this.creditsAngle3, 100, FlynnColors.GREEN);
-		var startText;
-		var controlsText;
-		if (!this.mcp.browserSupportsTouch){
-			startText = "PUSH SPACE TO START";
-			controlsText = "Z TO THRUST        SPACE TO SHOOT";
-			this.mcp.custom.thrustPrompt = "PRESS Z TO THRUST";
-			this.mcp.custom.shootPrompt = "PRESS SPACE TO SHOOT";
-		} else {
-			startText = "TAP ANYWHERE TO START";
-			//              #########################################
-			controlsText = "TAP LEFT TO THRUST   TAP RIGHT TO SHOOT";
-			this.mcp.custom.thrustPrompt = "TAP LEFT TO THRUST";
-			this.mcp.custom.shootPrompt = "TAP RIGHT TO SHOOT";
-		}
-		ctx.vectorTextArc(startText,
-			2, this.vortex.center_x, this.vortex.center_y,
-			this.creditsAngle3 + 270*Math.PI/360, 100, FlynnColors.CYAN);
+        ctx.vectorTextArc("VERSION 6.0",
+            2, this.vortex.center_x, this.vortex.center_y,
+            this.creditsAngle3, 100, FlynnColors.GREEN);
+        var startText;
+        var controlsText;
+        if (this.mcp.arcadeModeEnabled) {
+            startText =     "        PRESS START";
+            //              #########################################
+            controlsText = "LEFT/RIGHT BUTTON TO THRUST/SHOOT";
+            this.mcp.custom.thrustPrompt = "PRESS LEFT BUTTON TO THRUST";
+            this.mcp.custom.shootPrompt = "PRESS RIGHT BUTTON TO SHOOT";
+            ctx.vectorText(this.mcp.credits + " Credits", 2, 10, this.canvasHeight - 20, null, FlynnColors.YELLOW);
+        }
+        else {
+            if (!this.mcp.browserSupportsTouch) {
+                startText = "PUSH SPACE TO START";
+                controlsText = "Z TO THRUST        SPACE TO SHOOT";
+                this.mcp.custom.thrustPrompt = "PRESS Z TO THRUST";
+                this.mcp.custom.shootPrompt = "PRESS SPACE TO SHOOT";
+            } else {
+                startText = "TAP ANYWHERE TO START";
+                //              #########################################
+                controlsText = "TAP LEFT TO THRUST   TAP RIGHT TO SHOOT";
+                this.mcp.custom.thrustPrompt = "TAP LEFT TO THRUST";
+                this.mcp.custom.shootPrompt = "TAP RIGHT TO SHOOT";
+            }
+        }
+        if(!this.mcp.arcadeModeEnabled || (this.mcp.arcadeModeEnabled && (this.mcp.credits > 0))) {
+            if (Math.floor(this.mcp.clock / 40) % 2 == 1) {
+                ctx.vectorTextArc(startText,
+                    2, this.vortex.center_x, this.vortex.center_y,
+                    this.creditsAngle3 + 270 * Math.PI / 360, 100, FlynnColors.CYAN);
+            }
+        }
 		ctx.vectorTextArc(controlsText,
 			2, this.vortex.center_x, this.vortex.center_y,
 			this.creditsAngle4, 80, FlynnColors.YELLOW);

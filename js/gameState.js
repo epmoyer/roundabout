@@ -166,27 +166,27 @@ var GameState = FlynnState.extend({
 
 		if(this.mcp.developerModeEnabled){
 			// Metrics toggle
-			if (input.isPressed("one")){
+			if (input.isPressed("six")){
 				this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
 			}
 
 			// Slow Mo Debug toggle
-			if (input.isPressed("two")){
+			if (input.isPressed("seven")){
 				this.mcp.slowMoDebug = !this.mcp.slowMoDebug;
 			}
 
 			// Points
-			if (input.isPressed("three")){
+			if (input.isPressed("eight")){
 				this.addPoints(100);
 			}
 
 			// Die
-			if (input.isPressed("four")){
+			if (input.isPressed("nine")){
 				this.ship.vortexDeath = true;
 			}
 
 			// Grow vortex
-			if (input.isPressed("five")){
+			if (input.isPressed("zero")){
 				this.vortex.grow(1);
 			}
 

@@ -17,6 +17,7 @@ var FlynnMcp = Class.extend({
 		this.stateBuilderFunc = null;
 		this.resizeFunc = null;
 		this.slowMoDebug = false;
+        this.clock = 0;
 
 		this.custom={}; // Container for custom game data which needs to be exchanged globally.
 
@@ -116,6 +117,9 @@ var FlynnMcp = Class.extend({
 		var self = this;
 
 		this.canvas.animate( function(paceFactor) {
+            // Update clock
+            self.clock += paceFactor;
+
 			// Change state (if pending)
 			if (self.nextState !== self.noChangeState) {
 				self.currentState = self.stateBuilderFunc(self.nextState);
