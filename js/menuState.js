@@ -27,6 +27,11 @@ var MenuState = FlynnState.extend({
 			src: ['sounds/Tripple_blip.ogg','sounds/Tripple_blip.mp3'],
 			volume: 0.5
 		});
+
+        this.insert_coin_sound = new Howl({
+            src: ['sounds/InsertCoin.ogg','sounds/InsertCoin.mp3'],
+            volume: 0.5
+        });
 	},
 
 	handleInputs: function(input) {
@@ -44,6 +49,7 @@ var MenuState = FlynnState.extend({
         if(this.mcp.arcadeModeEnabled) {
             if (input.isPressed("five")) {
                 this.mcp.credits += 1;
+                this.insert_coin_sound.play();
             }
         }
 
