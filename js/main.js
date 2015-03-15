@@ -17,28 +17,28 @@ var Game = Class.extend({
 
 		this.input = new FlynnInputHandler({
 			//left:		37,
-			//up:			38,
-			//right:		39,
+			//up:       38,
+			//right:	39,
 			//down:		40,
 			spacebar:	32,
 			enter:		13,
-			//a:			65,
-			//s:          83,
-			//d:          68,
-            //q:          81,
-			//w:          87,
+			//a:		65,
+			//s:        83,
+			//d:        68,
+            //q:        81,
+			//w:        87,
 			z:          90,
 			one:        49,  // ARCADE    Mode: Start
-			//two:        50,
-			//three:      51,
-			//four:       52,
+			//two:      50,
+			//three:    51,
+			//four:     52,
 			five:       53,  // ARCADE    Mode: Quarters
             six:        54,  // DEVELOPER Mode: Toggle metrics display
             seven:      55,  // DEVELOPER Mode: Toggle slow motion
             eight:      56,  // DEVELOPER Mode: Add points
             nine:       57,  // DEVELOPER Mode: Die
             zero:       48,  // DEVELOPER Mode: Grow vortex
-            //dash:       189
+            //dash:     189
 		});
 
         // Detect developer mode from URL arguments ("?develop=true")

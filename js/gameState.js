@@ -23,7 +23,8 @@ var ShipBounceMinVelocity = 1.5;
 
 var VortexShieldEndScore = 500;
 
-var ShipNumExplosionParticles = 30;
+var ShipNumExplosionParticles = 50;
+var ShipRespawnDelayTicks = 60 * 3;
 
 var PopUpTextLife = 3 * 60;
 var PopUpThrustPromptTime = 2 * 60;
@@ -96,6 +97,9 @@ var GameState = FlynnState.extend({
 		// Game Clock
 		this.gameClock = 0;
 
+		// Timers
+		this.mcp.timers.add('shipRespawnDelay', 0);
+
 		// Aliens
 		this.drifters = [];
 		this.blockers = [];
@@ -162,6 +166,15 @@ var GameState = FlynnState.extend({
 		this.popUpLife = PopUpTextLife;
 	},
 
+	doShipDie: function(){
+		this.ship.vortexDeath = true; // Mark the player as dead
+		this.player_die_sound.play();
+		this.particles.explosion(
+			this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles,
+			this.ship.color, ShipExplosionMaxVelocity);
+		this.mcp.timers.set('shipRespawnDelay', ShipRespawnDelayTicks);
+	},
+
 	handleInputs: function(input) {
 
 		if(this.mcp.developerModeEnabled){
@@ -189,7 +202,6 @@ var GameState = FlynnState.extend({
 			if (input.isPressed("zero")){
 				this.vortex.grow(1);
 			}
-
 		}
 		
 		if(!this.ship.visible){
@@ -273,7 +285,7 @@ var GameState = FlynnState.extend({
 		}
 		else{
 			// Respawn after all enmies have cleared the playfield
-			if(!this.gameOver){
+			if(!this.gameOver && this.mcp.timers.isExpired('shipRespawnDelay')){
 				if((this.drifters.length === 0) && (this.blockers.length === 0)){
 					this.ship.radius = ShipStartRadius;
 					this.ship.radialAngle = ShipStartAngle;
@@ -450,12 +462,9 @@ var GameState = FlynnState.extend({
 				if(this.ship.visible){
 					d = this.drifters[i];
 					if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < DrifterCollisionRadius*2){
-						this.ship.vortexDeath = true; // Not realy a vortex death, but works for now.
-						this.player_die_sound.play();
-
+						this.doShipDie();
 						this.particles.explosion(d.radius, d.radialAngle, DrifterNumExplosionParticles, drifter.color);
-						this.particles.explosion(this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles, this.ship.color);
-
+						
 						// Remove dead drifter
 						this.drifters.splice(i, 1);
 						len--;
@@ -546,11 +555,8 @@ var GameState = FlynnState.extend({
 						}
 						else {
 							// Blocker destroys ship
-							this.ship.vortexDeath = true; // Not realy a vortex death, but works for now.
-							this.player_die_sound.play();
-							this.particles.explosion(this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles, this.ship.color);
+							this.doShipDie();
 						}
-
 					}
 				}
 			}

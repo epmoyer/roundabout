@@ -14,10 +14,13 @@ var FlynnMcp = Class.extend({
 		this.nextState = noChangeState;
 		this.currentState = null;
 
+		this.version = 'v1.0';
+
 		this.stateBuilderFunc = null;
 		this.resizeFunc = null;
 		this.slowMoDebug = false;
         this.clock = 0;
+        this.timers = new FlynnTimers();
 
 		this.custom={}; // Container for custom game data which needs to be exchanged globally.
 
@@ -78,11 +81,6 @@ var FlynnMcp = Class.extend({
 			element.style.height = actualCanvasHeight + "px";
 			element.style.top = top + "px";
 			element.style.left = left + "px";
-			// console.log(
-			// 	"new height:", actualCanvasHeight,
-			// 	"new width:", actualCanvasWidth,
-			// 	"inner Height:", viewport.height,
-			// 	"inner width", viewport.width);
 
 			if(this.resizeFunc){
 				this.resizeFunc(viewport.width, viewport.height);
@@ -117,8 +115,9 @@ var FlynnMcp = Class.extend({
 		var self = this;
 
 		this.canvas.animate( function(paceFactor) {
-            // Update clock
+            // Update clock and timers
             self.clock += paceFactor;
+            self.timers.update(paceFactor);
 
 			// Change state (if pending)
 			if (self.nextState !== self.noChangeState) {

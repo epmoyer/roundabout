@@ -1,5 +1,5 @@
 // Note: This particle library is completely untested.
-//       It is a genericised version of the radial particle library used by Roundabout, based on cartesian
+//       It is a genericised version of the radial particle library used by Roundabout, rewritten to use cartesian
 //       coordinates only.  What could possibly go wrong? :)
 
 var FlynnParticleLife = 50;

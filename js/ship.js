@@ -4,6 +4,7 @@ var ShipRecoil = 1.0;
 var ShipMaxRadius = 370;
 var ShipBulletVelocity = 5;
 var ShipBulletLife = 60 * 30; // 30 seconds
+var ShipExplosionMaxVelocity = 0.8;
 
 var Ship = FlynnPolygon.extend({
 

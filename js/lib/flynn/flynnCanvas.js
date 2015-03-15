@@ -250,7 +250,6 @@ var FlynnCanvas = Class.extend({
 				timeNow = timeStamp;
 			}
 			
-			//self.ctx.fps = Math.round(1000/(timeNow - self.previousTimestamp));
 			self.ctx.fpsMsecCount += timeNow - self.previousTimestamp;
 			// paceFactor represents the % of a 60fps frame that has elapsed.
 			// At 30fps the paceFactor is 2.0,  At 15fps it is 4.0
@@ -259,7 +258,6 @@ var FlynnCanvas = Class.extend({
 				paceFactor = 1;
 			}
 
-			//console.log(paceFactor);
 			++self.ctx.fpsFrameCount;
 			if (self.ctx.fpsFrameCount >= self.ctx.fpsFrameAverage){
 				self.ctx.fpsFrameCount = 0;

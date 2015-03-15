@@ -35,6 +35,11 @@ var MenuState = FlynnState.extend({
             if (input.isPressed("six")) {
                 this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
             }
+            
+            // Slow Mo Debug toggle
+            if (input.isPressed("seven")){
+                this.mcp.slowMoDebug = !this.mcp.slowMoDebug;
+            }
         }
         if(this.mcp.arcadeModeEnabled) {
             if (input.isPressed("five")) {

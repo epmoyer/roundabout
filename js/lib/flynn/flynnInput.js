@@ -42,7 +42,6 @@ var FlynnInputHandler = Class.extend({
 			document.addEventListener(
 				'touchstart',
 				function(event){
-					console.log("DEV: touchstart event.");
 					event.preventDefault();
 					var touch=event.changedTouches[0];
 					var x = touch.pageX;
@@ -52,7 +51,6 @@ var FlynnInputHandler = Class.extend({
 						if ((x>region.left) && (x<region.right) && (y>region.top) && (y<region.bottom)){
 							self.down[name] = true;
 							region.touchStartIdentifier = touch.identifier;
-							console.log("DEV: Touch start:", name, x, y, touch);
 						}
 					}
 				},
@@ -61,7 +59,6 @@ var FlynnInputHandler = Class.extend({
 			document.addEventListener(
 				'touchend',
 				function(event){
-					console.log("DEV: touchstart event.");
 					event.preventDefault();
 					var touch=event.changedTouches[0];
 					var x = touch.pageX;
@@ -75,16 +72,13 @@ var FlynnInputHandler = Class.extend({
 							// Mark the virtual button as not down and not pressed
 							self.down[name] = false;
 							self.pressed[name] = false;
-							console.log("DEV: Touch end:", name, x, y, touch);
 						}
 					}
 				},
 				false
 			);
-			console.log("DEV: Registered touch event handlers.");
 		}
 		catch(err){
-			console.log("DEV: Could not register touch event handlers.");
 		}
 	},
 

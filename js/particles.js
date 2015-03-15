@@ -1,4 +1,4 @@
-var ExplosionMaxVelocity = 0.5;
+var DefaultExplosionMaxVelocity = 0.5;
 var ParticleLife = 50;
 var ParticleLifeVariation = 20;
 var ParticleFriction = 0.99;
@@ -70,10 +70,13 @@ var Particles = Class.extend({
         this.particles=[];
     },
 
-    explosion: function(radius, angle, quantity, color) {
+    explosion: function(radius, angle, quantity, color, maxVelocity) {
+        if(typeof(maxVelocity)==='undefined'){
+            maxVelocity = DefaultExplosionMaxVelocity;
+        }
         for(var i=0; i<quantity; i++){
             theta = Math.random() * Math.PI * 2;
-            velocity = Math.random() * ExplosionMaxVelocity;
+            velocity = Math.random() * maxVelocity;
             this.particles.push(new Particle(
                 this,
                 radius,
