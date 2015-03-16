@@ -147,7 +147,7 @@ var FlynnCanvas = Class.extend({
 				var render_angle_step = Math.asin(FlynnTextSpacing*scale/radius);
 				var renderAngleOffset = 0;
 				if (isCentered){
-					renderAngleOffset = render_angle_step * text.length / 2;
+					renderAngleOffset = render_angle_step * (text.length / 2 - 0.5);
 					if(isReversed){
 						renderAngleOffset = -renderAngleOffset;
 					}

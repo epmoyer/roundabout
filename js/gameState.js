@@ -25,6 +25,10 @@ var VortexShieldEndScore = 500;
 
 var ShipNumExplosionParticles = 50;
 var ShipRespawnDelayTicks = 60 * 3;
+var ShipRespawnAnimationTicks = 60 * 1.5;
+var ShipRespawnScaleMax = 35;
+var ShipRespawnScaleMin = 0.1;
+var ShipRespawnAngleMax = Math.PI * 2 * .8;
 
 var PopUpTextLife = 3 * 60;
 var PopUpThrustPromptTime = 2 * 60;
@@ -51,12 +55,18 @@ var GameState = FlynnState.extend({
 			ShipStartRadius, ShipStartAngle, FlynnColors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
 		this.ship.maxX = this.canvasWidth;
 		this.ship.maxY = this.canvasHeight;
+		this.ship.visible = false; // Start invisible, to force respawn animation
+
+		this.respawnPolygon = new FlynnPolygon(Points.RESPAWN, FlynnColors.YELLOW);
+		this.respawnPolygon.setScale(1);
+		this.shipRespawnX = this.center_x + ShipStartRadius * Math.cos(ShipStartAngle);
+		this.shipRespawnY = this.center_y + ShipStartRadius * Math.sin(ShipStartAngle);
 
 		this.gameOver = false;
 		this.lives = 3;
 		this.lifepolygon = new FlynnPolygon(Points.WIDE_SHIP, FlynnColors.YELLOW);
 		this.lifepolygon.setScale(1.2);
-		this.lifepolygon.setAngle(-Math.PI/2);
+        this.lifepolygon.setAngle(-Math.PI/2);
 
 		this.score = 0;
 		this.highscore = this.mcp.highscores[0][1];
@@ -99,6 +109,7 @@ var GameState = FlynnState.extend({
 
 		// Timers
 		this.mcp.timers.add('shipRespawnDelay', 0);
+		this.mcp.timers.add('shipRespawnAnimation', 0);
 
 		// Aliens
 		this.drifters = [];
@@ -173,6 +184,7 @@ var GameState = FlynnState.extend({
 			this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles,
 			this.ship.color, ShipExplosionMaxVelocity);
 		this.mcp.timers.set('shipRespawnDelay', ShipRespawnDelayTicks);
+		this.mcp.timers.set('shipRespawnAnimation', 0); // Set to zero to deactivate it
 	},
 
 	handleInputs: function(input) {
@@ -284,14 +296,26 @@ var GameState = FlynnState.extend({
 			}
 		}
 		else{
-			// Respawn after all enmies have cleared the playfield
+			// Respawn after all enmies have cleared the playfield, and min delay is met
 			if(!this.gameOver && this.mcp.timers.isExpired('shipRespawnDelay')){
 				if((this.drifters.length === 0) && (this.blockers.length === 0)){
-					this.ship.radius = ShipStartRadius;
-					this.ship.radialAngle = ShipStartAngle;
-					this.ship.ascentVelocity = 0;
-					this.ship.visible = true;
-					this.ship.vortexDeath = false;
+					if(!this.mcp.timers.isActive('shipRespawnAnimation')){
+						// Start the respawn animation timer (which also triggers the animation)
+						this.mcp.timers.set('shipRespawnAnimation', ShipRespawnAnimationTicks);
+					}
+					else{
+						// Timer is active; if has expired...
+						if(this.mcp.timers.isExpired('shipRespawnAnimation')){
+							// Deactivate the timer
+							this.mcp.timers.set('shipRespawnAnimation', 0);
+							// Respawn the ship
+							this.ship.radius = ShipStartRadius;
+							this.ship.radialAngle = ShipStartAngle;
+							this.ship.ascentVelocity = 0;
+							this.ship.visible = true;
+							this.ship.vortexDeath = false;
+						}
+					}
 				}
 			}
 		}
@@ -673,5 +697,22 @@ var GameState = FlynnState.extend({
 
 		// Particles
 		this.particles.draw(ctx);
+
+		// Ship respawn animation
+		if(this.mcp.timers.isActive('shipRespawnAnimation')){
+			var animationPercentage = this.mcp.timers.get('shipRespawnAnimation') / ShipRespawnAnimationTicks;
+			var sizePercentageStep = 0.005;
+			var rotationPercentageStep = 0.1;
+			for(i=0; i<9; i++){
+				var sizePercentage = animationPercentage + i*sizePercentageStep;
+				var rotationPercentage = animationPercentage + i*rotationPercentageStep;
+				//if (percentage < 0){
+				//	percentage = 0.1;
+				//}
+				this.respawnPolygon.setScale((ShipRespawnScaleMin + (ShipRespawnScaleMax - ShipRespawnScaleMin)*sizePercentage));
+				this.respawnPolygon.setAngle(ShipRespawnAngleMax * rotationPercentage);
+				ctx.drawPolygon(this.respawnPolygon, this.shipRespawnX, this.shipRespawnY);
+			}
+		}
 	}
 });
