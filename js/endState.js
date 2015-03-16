@@ -68,6 +68,10 @@ var EndState = FlynnState.extend({
 			if (this.nick === this.namefield.value) {
 				return;
 			}
+
+			// Remove leading spaces
+			this.namefield.value = this.namefield.value.replace(/^\s+/, "");
+
 			// clean namefield value and set to nick variable
 			this.namefield.value = this.namefield.value.replace(/[^a-zA-Z0-9\s]/g, "");
 			this.nick = this.namefield.value;

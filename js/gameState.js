@@ -25,14 +25,15 @@ var VortexShieldEndScore = 500;
 
 var ShipNumExplosionParticles = 50;
 var ShipRespawnDelayTicks = 60 * 3;
+var ShipRespawnDelayGameStartTicks = 60 * 1.25; // Respawn delay at inital start
 var ShipRespawnAnimationTicks = 60 * 1.5;
 var ShipRespawnScaleMax = 35;
 var ShipRespawnScaleMin = 0.1;
-var ShipRespawnAngleMax = Math.PI * 2 * .8;
+var ShipRespawnAngleMax = Math.PI * 2 * 0.8;
 
 var PopUpTextLife = 3 * 60;
-var PopUpThrustPromptTime = 2 * 60;
-var PopUpFirePromptTime = 5 * 60;
+var PopUpThrustPromptTime = 4 * 60; //2 * 60;
+var PopUpFirePromptTime = 7 * 60; //5 * 60;
 var PopUpCancelTime = 15; // Ticks to remove a pop-up when canceled
 
 var BulletsMax = 4;
@@ -100,6 +101,10 @@ var GameState = FlynnState.extend({
 			src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
 			volume: 0.25,
 		});
+		this.ship_respawn_sound = new Howl({
+			src: ['sounds/ShipRespawn.ogg','sounds/ShipRespawn.mp3'],
+			volume: 0.25,
+		});
 		this.engine_sound_playing = false;
 
 		this.vortexCollapse = false;
@@ -108,7 +113,7 @@ var GameState = FlynnState.extend({
 		this.gameClock = 0;
 
 		// Timers
-		this.mcp.timers.add('shipRespawnDelay', 0);
+		this.mcp.timers.add('shipRespawnDelay', ShipRespawnDelayGameStartTicks);  // Start game with a delay (for start sound to finish)
 		this.mcp.timers.add('shipRespawnAnimation', 0);
 
 		// Aliens
@@ -302,6 +307,7 @@ var GameState = FlynnState.extend({
 					if(!this.mcp.timers.isActive('shipRespawnAnimation')){
 						// Start the respawn animation timer (which also triggers the animation)
 						this.mcp.timers.set('shipRespawnAnimation', ShipRespawnAnimationTicks);
+						this.ship_respawn_sound.play();
 					}
 					else{
 						// Timer is active; if has expired...
