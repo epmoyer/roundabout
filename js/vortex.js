@@ -52,7 +52,7 @@ var Vortex = Class.extend({
 			shieldPoints.push(Math.sin(theta-Math.PI/2));
 		}
 		this.shieldPolygon = new FlynnPolygon(shieldPoints, FlynnColors.CYAN);
-		this.shieldAngle = 0;
+		this.shieldAngle = -Math.PI/2;
 		this.shieldActive = true;
 		this.shieldPolygon.setAngle(this.shieldAngle);
 		this.shieldErodeTimer = VortexShieldErodeTime;
@@ -147,11 +147,6 @@ var Vortex = Class.extend({
 		}
 
 		// Update shield
-		if(this.shieldActive){
-			// this.shieldAngle += VortexShieldRotationSpeed * paceFactor;
-			// this.shieldAngle += VortexShieldRotationSpeed * paceFactor;
-			// this.shieldPolygon.setAngle(this.shieldAngle);
-		}
 		if(this.shieldErode && this.shieldActive){
 			this.shieldErodeTimer -= paceFactor;
 			if(this.shieldErodeTimer <= 0){

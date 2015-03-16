@@ -299,6 +299,13 @@ var GameState = FlynnState.extend({
 					this.blockers[i].deathDive = true;
 				}
 			}
+			else{
+				// Update ship
+				this.ship.update(
+					paceFactor,
+					this.vortex.radiusToAngularVelocity(this.ship.radius, true),
+					this.vortex.radius);
+			}
 		}
 		else{
 			// Respawn after all enmies have cleared the playfield, and min delay is met
@@ -388,12 +395,6 @@ var GameState = FlynnState.extend({
 				i--;
 			}
 		}
-
-		// Update ship
-		this.ship.update(
-			paceFactor,
-			this.vortex.radiusToAngularVelocity(this.ship.radius, true),
-			this.vortex.radius);
 
 		// Update vortex
 		var isCollapsed = this.vortex.update(paceFactor, this.vortexCollapse);
