@@ -139,7 +139,7 @@ var Ship = FlynnPolygon.extend({
 		this.radial_to_cardinal();
 
 		// Update vortex shield angle to match ship
-		this.vortex.shieldPolygon.setAngle(this.radialAngle);
+		this.vortex.shieldAngleTarget = flynnUtilAngleBound2Pi(this.radialAngle);
 	},
 
 	draw: function(ctx){

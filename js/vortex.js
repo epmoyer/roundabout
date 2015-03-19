@@ -14,6 +14,7 @@ var VortexShieldPoints = 18;
 var VortexShieldMargin = 15;
 var VortexShieldDrawMargin = 3;
 var VortexShieldErodeTime = 30;
+var VortexShieldAngularSpeed = Math.PI/40;
 
 var StarMaxRadius = 1024/2;
 var StarfallSpeed = 0.3;
@@ -52,6 +53,7 @@ var Vortex = Class.extend({
 			shieldPoints.push(Math.sin(theta-Math.PI/2));
 		}
 		this.shieldPolygon = new FlynnPolygon(shieldPoints, FlynnColors.CYAN);
+		this.shieldAngleTarget = -Math.PI/2;
 		this.shieldAngle = -Math.PI/2;
 		this.shieldActive = true;
 		this.shieldPolygon.setAngle(this.shieldAngle);
@@ -109,6 +111,16 @@ var Vortex = Class.extend({
 		isCollapsed = false;
 
 		this.angle += VortexRadialSpeed * paceFactor;
+
+		if(this.shieldAngle != this.shieldAngleTarget){
+			var angleStep = -VortexShieldAngularSpeed * paceFactor;
+			var separation = this.shieldAngleTarget - this.shieldAngle;
+			if((separation > 0) && (separation < Math.PI*5/6)){
+				angleStep = -angleStep;
+			}
+			this.shieldAngle = flynnUtilAngleBound2Pi(this.shieldAngle + angleStep);
+			this.shieldPolygon.setAngle(this.shieldAngle);
+		}
 
 		if (doCollapse){
 			this.target_radius = VortexStartRadius;

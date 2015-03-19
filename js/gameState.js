@@ -147,14 +147,6 @@ var GameState = FlynnState.extend({
 		this.blockers = [];
 	},
 
-	angleBound2Pi: function(angle){
-		boundAngle = angle % (Math.PI * 2);
-		if(boundAngle<0){
-			boundAngle += (Math.PI * 2);
-		}
-		return (boundAngle);
-	},
-
 	addPoints: function(points){
 		// Points only count when not dead
 		if(this.ship.visible){
@@ -317,7 +309,10 @@ var GameState = FlynnState.extend({
 						this.ship_respawn_sound.play();
 					}
 					else{
-						// Timer is active; if has expired...
+						// Respawn animation timer is active
+						this.vortex.shieldAngleTarget = flynnUtilAngleBound2Pi(ShipStartAngle);
+
+						// If respawn animation has finished...
 						if(this.mcp.timers.isExpired('shipRespawnAnimation')){
 							// Deactivate the timer
 							this.mcp.timers.set('shipRespawnAnimation', 0);
@@ -446,13 +441,13 @@ var GameState = FlynnState.extend({
 					outsideEnemyAngles = [];
 					for(i=0, len=this.drifters.length; i<len; i++){
 						if(this.drifters[i].radius > drifterRadius - (DrifterCollisionRadius * 2)){
-							outsideEnemyAngles.push(this.angleBound2Pi(this.drifters[i].radialAngle));
+							outsideEnemyAngles.push(flynnUtilAngleBound2Pi(this.drifters[i].radialAngle));
 							++numOusideEnemies;
 						}
 					}
 					for(i=0, len=this.blockers.length; i<len; i++){
 						if(this.blockers[i].radius > drifterRadius - (BlockerCollisionRadius + DrifterCollisionRadius)){
-							outsideEnemyAngles.push(this.angleBound2Pi(this.blockers[i].radialAngle));
+							outsideEnemyAngles.push(flynnUtilAngleBound2Pi(this.blockers[i].radialAngle));
 							++numOusideEnemies;
 						}
 					}
@@ -469,7 +464,7 @@ var GameState = FlynnState.extend({
 								break;
 							}
 							else {
-								drifterAngle = this.angleBound2Pi(drifterAngle + OverlapAngleSpacing);
+								drifterAngle = flynnUtilAngleBound2Pi(drifterAngle + OverlapAngleSpacing);
 								//console.log("DEV: Advancing drifter spawn.");
 							}
 						}
@@ -525,13 +520,13 @@ var GameState = FlynnState.extend({
 				outsideEnemyAngles = [];
 				for(i=0, len=this.drifters.length; i<len; i++){
 					if(this.drifters[i].radius > blockerRadius - (DrifterCollisionRadius + BlockerCollisionRadius)){
-						outsideEnemyAngles.push(this.angleBound2Pi(this.drifters[i].radialAngle));
+						outsideEnemyAngles.push(flynnUtilAngleBound2Pi(this.drifters[i].radialAngle));
 						++numOusideEnemies;
 					}
 				}
 				for(i=0, len=this.blockers.length; i<len; i++){
 					if(this.blockers[i].radius > blockerRadius - (BlockerCollisionRadius*2)){
-						outsideEnemyAngles.push(this.angleBound2Pi(this.blockers[i].radialAngle));
+						outsideEnemyAngles.push(flynnUtilAngleBound2Pi(this.blockers[i].radialAngle));
 						++numOusideEnemies;
 					}
 				}
@@ -548,7 +543,7 @@ var GameState = FlynnState.extend({
 							break;
 						}
 						else {
-							blockerAngle = this.angleBound2Pi(blockerAngle + OverlapAngleSpacing);
+							blockerAngle = flynnUtilAngleBound2Pi(blockerAngle + OverlapAngleSpacing);
 						}
 					}
 				}

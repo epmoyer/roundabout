@@ -8,3 +8,11 @@ function flynnGetUrlValue(VarSearch){
         }
     }
 }
+
+function flynnUtilAngleBound2Pi(angle){
+	var boundAngle = angle % (Math.PI * 2);
+	if(boundAngle<0){
+		boundAngle += (Math.PI * 2);
+	}
+	return (boundAngle);
+}
