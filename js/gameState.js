@@ -26,7 +26,7 @@ var VortexShieldEndScore = 500;
 var ShipNumExplosionParticles = 50;
 var ShipRespawnDelayTicks = 60 * 3;
 var ShipRespawnDelayGameStartTicks = 60 * 1.25; // Respawn delay at inital start
-var ShipRespawnAnimationTicks = 60 * 1.5;
+var ShipRespawnAnimationTicks = 60 * 1.8;
 var ShipRespawnScaleMax = 35;
 var ShipRespawnScaleMin = 0.1;
 var ShipRespawnAngleMax = Math.PI * 2 * 0.8;
@@ -327,6 +327,10 @@ var GameState = FlynnState.extend({
 							this.ship.ascentVelocity = 0;
 							this.ship.visible = true;
 							this.ship.vortexDeath = false;
+							this.ship.update(
+								paceFactor,
+								this.vortex.radiusToAngularVelocity(this.ship.radius, true),
+								this.vortex.radius);
 						}
 					}
 				}
@@ -710,15 +714,28 @@ var GameState = FlynnState.extend({
 			var animationPercentage = this.mcp.timers.get('shipRespawnAnimation') / ShipRespawnAnimationTicks;
 			var sizePercentageStep = 0.005;
 			var rotationPercentageStep = 0.1;
-			for(i=0; i<9; i++){
-				var sizePercentage = animationPercentage + i*sizePercentageStep;
-				var rotationPercentage = animationPercentage + i*rotationPercentageStep;
-				//if (percentage < 0){
-				//	percentage = 0.1;
-				//}
-				this.respawnPolygon.setScale((ShipRespawnScaleMin + (ShipRespawnScaleMax - ShipRespawnScaleMin)*sizePercentage));
-				this.respawnPolygon.setAngle(ShipRespawnAngleMax * rotationPercentage);
-				ctx.drawPolygon(this.respawnPolygon, this.shipRespawnX, this.shipRespawnY);
+			// for(i=0; i<9; i++){
+			// 	var sizePercentage = animationPercentage + i*sizePercentageStep;
+			// 	var rotationPercentage = animationPercentage + i*rotationPercentageStep;
+			// 	//if (percentage < 0){
+			// 	//	percentage = 0.1;
+			// 	//}
+			// 	this.respawnPolygon.setScale((ShipRespawnScaleMin + (ShipRespawnScaleMax - ShipRespawnScaleMin)*sizePercentage));
+			// 	this.respawnPolygon.setAngle(ShipRespawnAngleMax * rotationPercentage);
+			// 	ctx.drawPolygon(this.respawnPolygon, this.shipRespawnX, this.shipRespawnY);
+			// }
+			var startRadius = 200 * animationPercentage;
+			var numParticles = 100 * (1-animationPercentage);
+			var startAngle = Math.PI * 1 * animationPercentage;
+			var angleStep = Math.PI * 8 / 100;
+			var radiusStep = 2 * animationPercentage;
+			ctx.fillStyle=FlynnColors.YELLOW;
+			for(i=0; i<numParticles; i++){
+				var angle = startAngle + i * angleStep;
+				var radius = startRadius + radiusStep * i;
+				var x = this.shipRespawnX + Math.cos(angle) * radius;
+				var y = this.shipRespawnY + Math.sin(angle) * radius;
+				ctx.fillRect(x,y,2,2);
 			}
 		}
 	}

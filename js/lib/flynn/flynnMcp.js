@@ -59,6 +59,7 @@ var FlynnMcp = Class.extend({
 		//--------------------------
 		// Resize handler
 		//--------------------------
+		var self = this;
 		this.resize = function(){
 			// Get the dimensions of the viewport
 			var viewport = {
@@ -82,8 +83,8 @@ var FlynnMcp = Class.extend({
 			element.style.top = top + "px";
 			element.style.left = left + "px";
 
-			if(this.resizeFunc){
-				this.resizeFunc(viewport.width, viewport.height);
+			if(self.resizeFunc){
+				self.resizeFunc(viewport.width, viewport.height);
 			}
 		};
 		window.addEventListener("resize", this.resize);
