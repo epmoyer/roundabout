@@ -14,7 +14,7 @@ var FlynnMcp = Class.extend({
 		this.nextState = noChangeState;
 		this.currentState = null;
 
-		this.version = 'v1.0';
+		this.version = 'v2.0';
 
 		this.stateBuilderFunc = null;
 		this.resizeFunc = null;

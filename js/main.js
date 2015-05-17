@@ -1,11 +1,12 @@
-var GameCanvasHeight = 1024;
-var GameCanvasWidth = 768;
+var GameCanvasHeight = 768;
+var GameCanvasWidth = 1024;
 
 var States = {
 	NO_CHANGE: 0,
-	MENU: 1,
-	GAME: 2,
-	END: 3
+	MENU:      1,
+	CONFIG:    2,
+	GAME:      3,
+	END:       4
 };
 
 var Game = Class.extend({
@@ -15,48 +16,26 @@ var Game = Class.extend({
 
 		var self = this;
 
-		this.input = new FlynnInputHandler({
-			//left:		37,
-			//up:       38,
-			//right:	39,
-			//down:		40,
-			spacebar:	32,
-			enter:		13,
-			//a:		65,
-			//s:        83,
-			//d:        68,
-            //q:        81,
-			//w:        87,
-			z:          90,
-			one:        49,  // ARCADE    Mode: Start
-			//two:      50,
-			//three:    51,
-			//four:     52,
-			five:       53,  // ARCADE    Mode: Quarters
-            six:        54,  // DEVELOPER Mode: Toggle metrics display
-            seven:      55,  // DEVELOPER Mode: Toggle slow motion
-            eight:      56,  // DEVELOPER Mode: Add points
-            nine:       57,  // DEVELOPER Mode: Die
-            zero:       48,  // DEVELOPER Mode: Grow vortex
-            //dash:     189
-		});
-
         // Detect developer mode from URL arguments ("?develop=true")
         var developerModeEnabled = false;
         if(flynnGetUrlValue("develop")=='true'){
             developerModeEnabled = true;
         }
 
-		this.mcp = new FlynnMcp(GameCanvasHeight, GameCanvasWidth, this.input, States.NO_CHANGE, developerModeEnabled);
+        this.input = new FlynnInputHandler();
+
+		this.mcp = new FlynnMcp(GameCanvasWidth, GameCanvasHeight, this.input, States.NO_CHANGE, developerModeEnabled);
 		this.mcp.setStateBuilderFunc(
 			function(state){
 				switch(state){
 					case States.MENU:
-						return new MenuState(self.mcp);
+						return new StateMenu(self.mcp);
 					case States.GAME:
-						return new GameState(self.mcp);
+						return new StateGame(self.mcp);
 					case States.END:
-						return new EndState(self.mcp);
+						return new StateEnd(self.mcp);
+					case States.CONFIG:
+						return new StateConfig(self.mcp);
 				}
 			}
 		);
@@ -71,22 +50,45 @@ var Game = Class.extend({
             this.mcp.arcadeModeEnabled = false;
         }
 
+        // Setup inputs
+		this.input.addVirtualButton('fire', FlynnKeyboardMap['z'], FlynnConfigurable);
+		this.input.addVirtualButton('thrust', FlynnKeyboardMap['spacebar'], FlynnConfigurable);
+
+		this.input.addVirtualButton('enter', FlynnKeyboardMap['enter'], FlynnNotConfigurable);
+		this.input.addVirtualButton('config', FlynnKeyboardMap['escape'], FlynnNotConfigurable);
+		this.input.addVirtualButton('up', FlynnKeyboardMap['up'], FlynnNotConfigurable);
+		this.input.addVirtualButton('down', FlynnKeyboardMap['down'], FlynnNotConfigurable);
+		if(developerModeEnabled){
+			this.input.addVirtualButton('dev_metrics', FlynnKeyboardMap['6'], FlynnNotConfigurable);
+			this.input.addVirtualButton('dev_slow_mo', FlynnKeyboardMap['7'], FlynnNotConfigurable);
+			this.input.addVirtualButton('dev_add_points', FlynnKeyboardMap['8'], FlynnNotConfigurable);
+			this.input.addVirtualButton('dev_die', FlynnKeyboardMap['9'], FlynnNotConfigurable);
+			this.input.addVirtualButton('vortex_grow', FlynnKeyboardMap['0'], FlynnNotConfigurable);
+		}
+		if(this.mcp.arcadeModeEnabled){
+			this.input.addVirtualButton('quarter', FlynnKeyboardMap['5'], FlynnConfigurable);
+			this.input.addVirtualButton('start_1', FlynnKeyboardMap['1'], FlynnConfigurable);
+		}
+
 		// Scores
 		this.mcp.highscores = [
-			["Dio", 2000],
-			["Jotaro", 1300],
-			["Joseph", 1200],
-			["Jonathan", 1100],
-			["FLOATINHEAD", 600],
-			["FIENDFODDER", 500],
+			["FLOATINHEAD", 2200],
+			["FIENDFODDER", 2100],
+			["Dio",         2000],
+			["Jotaro",      1300],
+			["Joseph",      1200],
+			["Jonathan",    1100],
 		];
 		this.mcp.custom.score = 0;
 
 		
 		// Set resize handler and force a resize
 		this.mcp.setResizeFunc( function(width, height){
-			self.input.addTouchRegion("touchThrust",0,0,width/2,height); // Left side of screen
-			self.input.addTouchRegion("touchFire",width/2+1,0,width,height); // Right side of screen
+			if(self.browserSupportsTouch){
+				self.input.addTouchRegion("thrust",0,0,width/2,height); // Left side of screen
+				self.input.addTouchRegion("fire",width/2+1,0,width,height); // Right side of screen
+				self.input.addTouchRegion("enter",0,0,width,height); // Whole screen
+			}
 		});
 		this.mcp.resize();
 
@@ -96,7 +98,7 @@ var Game = Class.extend({
 			src: ['sounds/ThemeIntroRDB.ogg', 'sounds/ThemeIntroRDB.mp3'],
 			loop: true,
 			buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
-			volume: 0.5,
+			volume: 0.4,
 		}).play();
 	},
 

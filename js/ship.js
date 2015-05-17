@@ -84,21 +84,23 @@ var Ship = FlynnPolygon.extend({
 
 	shoot: function() {
 		this.shoot_sound.play();
-		var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
-		var b_x = this.center_x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0];
-		var b_y = this.center_y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1];
-		var b = new FlynnBullet(
-            b_x, b_y, this.radialAngle + b_advance_angle,
-            ShipBulletVelocity, ShipBulletLife, this.color
-        ); // start bullet angle one animation frame forward
 
-		b.maxX = this.maxX;
-		b.maxY = this.maxY;
-		b.update(1.0); // Move the bullet one frame to get it away from the ship
+		var projectile_info = {};
+		var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
+		projectile_info.world_position_v = new Victor(
+			this.center_x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0],
+			this.center_y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1]);
+		projectile_info.velocity_v = new Victor(
+			Math.cos(this.radialAngle + b_advance_angle) * ShipBulletVelocity,
+			Math.sin(this.radialAngle + b_advance_angle) * ShipBulletVelocity);
+		projectile_info.lifetime = ShipBulletLife;
+		projectile_info.color = this.color;
+		projectile_info.maxX = this.maxX;
+		projectile_info.maxY = this.maxY;
 
 		//Recoil
 		this.ascentVelocity -= ShipRecoil;
-		return b;
+		return projectile_info;
 	},
 
 	addVel: function() {

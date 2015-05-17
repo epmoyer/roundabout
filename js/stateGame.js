@@ -17,7 +17,7 @@ var BlockerCoreExplosionParticles = 10;
 var SpawnOverlapRetries = 16;
 var OverlapAngleSpacing = Math.PI/16;
 
-var ReflectedBulletLife = 15;
+var ReflectedProjectileLife = 15;
 
 var ShipBounceMinVelocity = 1.5;
 
@@ -36,11 +36,12 @@ var PopUpThrustPromptTime = 4 * 60; //2 * 60;
 var PopUpFirePromptTime = 7 * 60; //5 * 60;
 var PopUpCancelTime = 15; // Ticks to remove a pop-up when canceled
 
-var BulletsMax = 4;
-
 var ExtraLifeScore = 5000;
 
-var GameState = FlynnState.extend({
+var ProjectilesMax = 4;
+var ProjectileSize = 3;
+
+var StateGame = FlynnState.extend({
 
 	init: function(mcp) {
 		this._super(mcp);
@@ -49,6 +50,7 @@ var GameState = FlynnState.extend({
 		this.canvasHeight = mcp.canvas.ctx.height;
 		this.center_x = this.canvasWidth/2;
 		this.center_y = this.canvasHeight/2;
+		this.viewport_v = new Victor(0,0);
 
 		this.vortex = new Vortex(this.center_x, this.center_y);
 
@@ -142,7 +144,7 @@ var GameState = FlynnState.extend({
 		this.ship.radius = ShipStartRadius;
 		this.ship.radialAngle = ShipStartAngle;
 
-		this.bullets = [];
+		this.projectiles = new FlynnProjectiles( new Victor(0,0), new Victor(this.canvasWidth, this.canvasHeight));
 		this.drifters = [];
 		this.blockers = [];
 	},
@@ -188,33 +190,33 @@ var GameState = FlynnState.extend({
 
 		if(this.mcp.developerModeEnabled){
 			// Metrics toggle
-			if (input.isPressed("six")){
+			if (input.virtualButtonIsPressed("dev_metrics")){
 				this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
 			}
 
 			// Slow Mo Debug toggle
-			if (input.isPressed("seven")){
+			if (input.virtualButtonIsPressed("dev_slow_mo")){
 				this.mcp.slowMoDebug = !this.mcp.slowMoDebug;
 			}
 
 			// Points
-			if (input.isPressed("eight")){
+			if (input.virtualButtonIsPressed("dev_add_points")){
 				this.addPoints(100);
 			}
 
 			// Die
-			if (input.isPressed("nine")){
+			if (input.virtualButtonIsPressed("dev_die")){
 				this.ship.vortexDeath = true;
 			}
 
 			// Grow vortex
-			if (input.isPressed("zero")){
+			if (input.virtualButtonIsPressed("vortex_grow")){
 				this.vortex.grow(1);
 			}
 		}
 		
 		if(!this.ship.visible){
-			if (input.isPressed("spacebar") || input.isPressed("touchFire") || input.isPressed("touchThrust")){
+			if (input.virtualButtonIsPressed("enter")){
 				if (this.gameOver){
 					if(this.mcp.browserSupportsTouch){
 						// On touch devices just update high score and go back to menu
@@ -232,7 +234,7 @@ var GameState = FlynnState.extend({
 		}
 
 
-		if (input.isDown("z") || input.isDown("touchThrust")){
+		if (input.virtualButtonIsDown("thrust")){
 			this.thrustHasOccurred = true;
 			this.popUpThrustPending = false;
 			this.ship.addVel();
@@ -252,12 +254,20 @@ var GameState = FlynnState.extend({
 			}
 		}
 
-		if (input.isPressed("spacebar") || input.isPressed("touchFire")){
+		if (input.virtualButtonIsPressed("fire")){
 			this.popUpFirePending = false;
 
 			// Limit max shots on screen 
-			if(this.bullets.length < BulletsMax){
-				this.bullets.push(this.ship.shoot());
+			if(this.projectiles.projectiles.length < ProjectilesMax){
+				var projectile = this.ship.shoot();
+				this.projectiles.add(
+					projectile.world_position_v,
+					projectile.velocity_v,
+					projectile.lifetime,
+					ProjectileSize,
+					projectile.color
+					);
+				this.projectiles.advanceFrame(); // Move the projectile one frame to get it away from the ship
 			}
 
 			// Cancel PopUp
@@ -332,20 +342,20 @@ var GameState = FlynnState.extend({
 			}
 		}
 
-		// Check bullet collisions
-		for(var j=0, len2 = this.bullets.length; j<len2; j++){
-			b = this.bullets[j];
+		// Check projectile collisions
+		for(var j=0, len2 = this.projectiles.projectiles.length; j<len2; j++){
+			b = this.projectiles.projectiles[j];
 			var bulletRemove = false;
 
 			// Remove shots that reflect back into vortex
-			if (Math.sqrt(Math.pow(b.x - this.center_x, 2) + Math.pow(b.y - this.center_y,2)) <= this.vortex.radius){
+			if (Math.sqrt(Math.pow(b.world_position_v.x - this.center_x, 2) + Math.pow(b.world_position_v.y - this.center_y,2)) <= this.vortex.radius){
 				bulletRemove = true;
 			}
 
 			// Shoot drifters
 			for(var k=0, len3 =this.drifters.length; k<len3; k++){
 				drifter = this.drifters[k];
-				if (Math.sqrt(Math.pow(drifter.x - b.x, 2) + Math.pow(drifter.y - b.y,2)) < DrifterCollisionRadius){
+				if (Math.sqrt(Math.pow(drifter.x - b.world_position_v.x, 2) + Math.pow(drifter.y - b.world_position_v.y,2)) < DrifterCollisionRadius){
 
 					this.addPoints(DrifterPoints);
 
@@ -364,36 +374,27 @@ var GameState = FlynnState.extend({
 			// Shoot blockers
 			for(k=0, len3 =this.blockers.length; k<len3; k++){
 				blocker = this.blockers[k];
-				if (Math.sqrt(Math.pow(blocker.x - b.x, 2) + Math.pow(blocker.y - b.y,2)) < BlockerCollisionRadius){
+				if (Math.sqrt(Math.pow(blocker.x - b.world_position_v.x, 2) + Math.pow(blocker.y - b.world_position_v.y,2)) < BlockerCollisionRadius){
 					// Reverse bullet direction
-					b.vel.x =- b.vel.x;
-					b.vel.y =- b.vel.y;
+					b.velocity_v.x =- b.velocity_v.x;
+					b.velocity_v.y =- b.velocity_v.y;
 					// Move the bullet after reflect, so that it cannot bounce around inside the blocker
-					b.x += b.vel.x;
-					b.y += b.vel.y;
-					b.life = ReflectedBulletLife;
+					b.world_position_v.x += b.velocity_v.x;
+					b.world_position_v.y += b.velocity_v.y;
+					b.lifetime = ReflectedProjectileLife;
 					this.shot_reflect_sound.play();
 				}
 			}
 			if(bulletRemove){
-				this.bullets.splice(j, 1);
+				this.projectiles.projectiles.splice(j, 1);
 				len2--;
 				j--;
 			}
 		}
 
 
-		// Update bullets
-		for (i=0, len=this.bullets.length; i < len; i++){
-			b = this.bullets[i];
-			b.update(paceFactor);
-
-			if(b.shallRemove) {
-				this.bullets.splice(i, 1);
-				len--;
-				i--;
-			}
-		}
+		// Update projectiles
+		this.projectiles.update(paceFactor);
 
 		// Update vortex
 		var isCollapsed = this.vortex.update(paceFactor, this.vortexCollapse);
@@ -674,15 +675,8 @@ var GameState = FlynnState.extend({
 			}
 		}
 
-		// Bullets
-		for (i=0, len=this.bullets.length; i < len; i++){
-			this.bullets[i].draw(ctx);
-		}
-
-		// Game OVer
-		if(this.gameOver){
-			ctx.vectorText("Game Over", 6, null, 200, null, FlynnColors.GREEN);
-		}
+		// projectiles
+		this.projectiles.draw(ctx, this.viewport_v);
 
 		// Drifters
 		for(i=0, len=this.drifters.length; i<len; i++){
@@ -732,6 +726,12 @@ var GameState = FlynnState.extend({
 				var y = this.shipRespawnY + Math.sin(angle) * radius;
 				ctx.fillRect(x,y,2,2);
 			}
+		}
+
+		// Game OVer
+		if(this.gameOver){
+			ctx.vectorText("GAME OVER", 6, null, 200, null, FlynnColors.GREEN);
+			ctx.vectorText("PRESS <ENTER>", 2, null, 250, null, FlynnColors.GREEN);
 		}
 	}
 });

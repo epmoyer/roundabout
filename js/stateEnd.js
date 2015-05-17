@@ -1,10 +1,11 @@
 /**
- * EndState class, called when game is over
+ * StateEnd class, called when game is over
  */
 
 var CursorBlinkRate = 2;
+var EndScreenColor = FlynnColors.GREEN;
 
-var EndState = FlynnState.extend({
+var StateEnd = FlynnState.extend({
 
 	/**
 	 * Constructor
@@ -37,12 +38,12 @@ var EndState = FlynnState.extend({
 	 */
 	handleInputs: function(input) {
 		if (this.hasEnteredName) {
-			if (input.isPressed("spacebar")) {
+			if (input.virtualButtonIsPressed("enter")) {
 				// change the game state
 				this.mcp.nextState = States.MENU;
 			}
 		} else {
-			if (input.isPressed("enter")) {
+			if (input.virtualButtonIsPressed("enter")) {
 				// take sate to next stage
 				this.hasEnteredName = true;
 				this.namefield.blur();
@@ -89,24 +90,24 @@ var EndState = FlynnState.extend({
 		if (this.hasEnteredName) {
 			// manually tweaked positions for, straightforward text
 			// positioning
-			ctx.vectorText("HALL OF FAME", 3, null, 130);
+			ctx.vectorText("HALL OF FAME", 3, null, 130, null, EndScreenColor);
 			for (var i = 0, len = this.mcp.highscores.length; i < len; i++) {
 				var hs = this.mcp.highscores[i];
-				ctx.vectorText(hs[0], 2, 390, 200+25*i);
-				ctx.vectorText(hs[1], 2, 520, 200+25*i, 10);
+				ctx.vectorText(hs[0], 2, 390, 200+25*i, null, EndScreenColor);
+				ctx.vectorText(hs[1], 2, 520, 200+25*i,   10, EndScreenColor);
 			}
-			ctx.vectorText("press space to continue", 1, null, 450);
+			ctx.vectorText("PRESS <ENTER> TO CONTINUE", 2, null, 450, null, EndScreenColor);
 
 		} else {
 
-			ctx.vectorText("YOU MADE IT TO THE HALL OF FAME!", 4, null, 100);
-			ctx.vectorText("TYPE YOUR NAME AND PRESS ENTER", 2, null, 180);
+			ctx.vectorText("YOU MADE IT TO THE HALL OF FAME!", 4, null, 100, null, EndScreenColor);
+			ctx.vectorText("TYPE YOUR NAME AND PRESS ENTER", 2, null, 180, null, EndScreenColor);
 			if(this.cursorBlinkTimer%2 > 1){
-				ctx.vectorText(" " + this.nick + "_", 3, null, 220);
+				ctx.vectorText(" " + this.nick + "_", 3, null, 220, null, EndScreenColor);
 			} else{
-				ctx.vectorText(this.nick, 3, null, 220);
+				ctx.vectorText(this.nick, 3, null, 220, null, EndScreenColor);
 			}
-			ctx.vectorText(this.score, 3, null, 300);
+			ctx.vectorText(this.score, 3, null, 300, null, EndScreenColor);
 		}
 	}
 });

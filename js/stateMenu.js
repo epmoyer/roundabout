@@ -5,7 +5,7 @@ var CreditsAngularVelocity2B = -0.015;
 var CreditsAngularVelocity3 = -0.020;
 var CreditsAngularVelocity4 = -0.027;
 
-var MenuState = FlynnState.extend({
+var StateMenu = FlynnState.extend({
 
 	init: function(mcp){
 		this._super(mcp);
@@ -37,31 +37,33 @@ var MenuState = FlynnState.extend({
 	handleInputs: function(input) {
 		// Metrics toggle
         if(this.mcp.developerModeEnabled) {
-            if (input.isPressed("six")) {
+            if (input.virtualButtonIsPressed("dev_metrics")) {
                 this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
             }
             
             // Slow Mo Debug toggle
-            if (input.isPressed("seven")){
+            if (input.virtualButtonIsPressed("dev_slow_mo")){
                 this.mcp.slowMoDebug = !this.mcp.slowMoDebug;
             }
         }
         if(this.mcp.arcadeModeEnabled) {
-            if (input.isPressed("five")) {
+            if (input.virtualButtonIsPressed("quarter")) {
                 this.mcp.credits += 1;
                 this.insert_coin_sound.play();
             }
         }
 
-		if (  ( input.isPressed("spacebar") && !this.mcp.arcadeModeEnabled)
-           || ( input.isPressed("one")      &&  this.mcp.arcadeModeEnabled && this.mcp.credits > 0)
-           || input.isPressed("touchThrust")
-           || input.isPressed("touchFire"))
+        if (  ( !this.mcp.arcadeModeEnabled && input.virtualButtonIsPressed("enter")) ||
+            ( this.mcp.arcadeModeEnabled && (this.mcp.credits > 0) && input.virtualButtonIsPressed("start_1")))
         {
             this.mcp.credits -= 1;
 			this.mcp.nextState = States.GAME;
 			this.start_sound.play();
 		}
+
+        if (input.virtualButtonIsPressed("config")) {
+            this.mcp.nextState = States.CONFIG;
+        }
 	},
 
 	update: function(paceFactor) {
@@ -92,7 +94,7 @@ var MenuState = FlynnState.extend({
             ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle - 0.01 + angle, 297, FlynnColors.CYAN);
         }
 
-        ctx.vectorTextArc("VERSION 6.0",
+        ctx.vectorTextArc("VERSION 7.0",
             2, this.vortex.center_x, this.vortex.center_y,
             this.creditsAngle3, 100, FlynnColors.GREEN);
         var startText;
