@@ -110,9 +110,11 @@ var StateMenu = FlynnState.extend({
         else {
             if (!this.mcp.browserSupportsTouch) {
                 startText = "PUSH SPACE TO START";
-                controlsText = "Z TO THRUST        SPACE TO SHOOT";
-                this.mcp.custom.thrustPrompt = "PRESS Z TO THRUST";
-                this.mcp.custom.shootPrompt = "PRESS SPACE TO SHOOT";
+                var thrustButtonName = this.mcp.input.getVirtualButtonBoundKeyName("thrust");
+                var fireButtonName = this.mcp.input.getVirtualButtonBoundKeyName("fire");
+                controlsText = thrustButtonName + " TO THRUST        " + fireButtonName + " TO SHOOT";
+                this.mcp.custom.thrustPrompt = "PRESS " + thrustButtonName + " TO THRUST";
+                this.mcp.custom.shootPrompt = "PRESS " + fireButtonName + " TO SHOOT";
             } else {
                 startText = "TAP ANYWHERE TO START";
                 //              #########################################
