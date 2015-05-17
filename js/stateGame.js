@@ -157,7 +157,7 @@ var StateGame = FlynnState.extend({
 				this.lives++;
 				this.extra_life_sound.play();
 			}
-			this.score += DrifterPoints;
+			this.score += points;
 		}
 
 		// Update highscore if exceeded

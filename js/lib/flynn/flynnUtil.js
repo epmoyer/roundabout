@@ -27,6 +27,19 @@ function flynnRgbToHex(r, g, b) {
     return "#" + flynnComponentToHex(r) + flynnComponentToHex(g) + flynnComponentToHex(b);
 }
 
+function flynnRgbOverdirve(rgb, overdrive) {
+    // Inputs:
+    //   rgb:       Object with r,g,b components
+    //   overdrive: Float between 0 and 1.
+    // Returns an rgb object in with the color overdiven toward white.  Calling with an overdirve of 1.0 will return white.
+    var rgb_retutn = {
+        r: Math.floor(rgb.r + (255 - rgb.r)*overdrive),
+        g: Math.floor(rgb.g + (255 - rgb.g)*overdrive),
+        b: Math.floor(rgb.b + (255 - rgb.b)*overdrive),
+    };
+    return rgb_retutn;
+}
+
 function flynnUtilAngleBound2Pi(angle){
 	var boundAngle = angle % (Math.PI * 2);
 	if(boundAngle<0){

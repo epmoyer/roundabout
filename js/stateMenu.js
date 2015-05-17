@@ -4,6 +4,7 @@ var CreditsAngularVelocity2 = -0.014;
 var CreditsAngularVelocity2B = -0.015;
 var CreditsAngularVelocity3 = -0.020;
 var CreditsAngularVelocity4 = -0.027;
+var CreditsAngularVelocity5 = -0.031;
 
 var StateMenu = FlynnState.extend({
 
@@ -22,6 +23,7 @@ var StateMenu = FlynnState.extend({
 		this.creditsAngle2B = 3 * Math.PI/4;
 		this.creditsAngle3 = Math.PI/4;
 		this.creditsAngle4 = Math.PI/4;
+        this.creditsAngle5 = Math.PI/4;
 
 		this.start_sound = new Howl({
 			src: ['sounds/Tripple_blip.ogg','sounds/Tripple_blip.mp3'],
@@ -74,7 +76,8 @@ var StateMenu = FlynnState.extend({
 		this.creditsAngle2 += CreditsAngularVelocity2 * paceFactor;
 		this.creditsAngle2B += CreditsAngularVelocity2B * paceFactor;
 		this.creditsAngle3 += CreditsAngularVelocity3 * paceFactor;
-		this.creditsAngle4 += CreditsAngularVelocity4 * paceFactor;
+        this.creditsAngle4 += CreditsAngularVelocity4 * paceFactor;
+		this.creditsAngle5 += CreditsAngularVelocity5 * paceFactor;
 	},
 
 	render: function(ctx) {
@@ -96,29 +99,35 @@ var StateMenu = FlynnState.extend({
 
         ctx.vectorTextArc("VERSION 7.0",
             2, this.vortex.center_x, this.vortex.center_y,
-            this.creditsAngle3, 100, FlynnColors.GREEN);
+            this.creditsAngle3, 100, FlynnColors.GREEN, FlynnIsCentered);
         var startText;
-        var controlsText;
+        var controlsText1, controlsText2;
         if (this.mcp.arcadeModeEnabled) {
             startText =     "        PRESS START";
             //              #########################################
-            controlsText = "LEFT/RIGHT BUTTON TO THRUST/SHOOT";
+            controlsText1 = "LEFT BUTTON THRUST";
+            controlsText2 = "RIGHT BUTTON SHOOT";
             this.mcp.custom.thrustPrompt = "PRESS LEFT BUTTON TO THRUST";
             this.mcp.custom.shootPrompt = "PRESS RIGHT BUTTON TO SHOOT";
             ctx.vectorText(this.mcp.credits + " Credits", 2, 10, this.canvasHeight - 20, null, FlynnColors.YELLOW);
         }
         else {
             if (!this.mcp.browserSupportsTouch) {
-                startText = "PUSH SPACE TO START";
+                startText = "PRESS ENTER TO START";
                 var thrustButtonName = this.mcp.input.getVirtualButtonBoundKeyName("thrust");
                 var fireButtonName = this.mcp.input.getVirtualButtonBoundKeyName("fire");
-                controlsText = thrustButtonName + " TO THRUST        " + fireButtonName + " TO SHOOT";
+                controlsText1 = thrustButtonName + " TO THRUST";
+                controlsText2 = fireButtonName + " TO SHOOT";
                 this.mcp.custom.thrustPrompt = "PRESS " + thrustButtonName + " TO THRUST";
                 this.mcp.custom.shootPrompt = "PRESS " + fireButtonName + " TO SHOOT";
+                ctx.vectorTextArc("PRESS ESCAPE TO CONFIGURE",
+                    2, this.vortex.center_x, this.vortex.center_y,
+                    this.creditsAngle5, 60, FlynnColors.GREEN, FlynnIsCentered);
             } else {
                 startText = "TAP ANYWHERE TO START";
                 //              #########################################
-                controlsText = "TAP LEFT TO THRUST   TAP RIGHT TO SHOOT";
+                controlsText1 = "TAP LEFT TO THRUST";
+                controlsText2 = "TAP RIGHT TO SHOOT";
                 this.mcp.custom.thrustPrompt = "TAP LEFT TO THRUST";
                 this.mcp.custom.shootPrompt = "TAP RIGHT TO SHOOT";
             }
@@ -127,12 +136,15 @@ var StateMenu = FlynnState.extend({
             if (Math.floor(this.mcp.clock / 40) % 2 == 1) {
                 ctx.vectorTextArc(startText,
                     2, this.vortex.center_x, this.vortex.center_y,
-                    this.creditsAngle3 + 270 * Math.PI / 360, 100, FlynnColors.CYAN);
+                    this.creditsAngle3 + Math.PI, 100, FlynnColors.CYAN, FlynnIsCentered);
             }
         }
-		ctx.vectorTextArc(controlsText,
+		ctx.vectorTextArc(controlsText1,
 			2, this.vortex.center_x, this.vortex.center_y,
-			this.creditsAngle4, 80, FlynnColors.YELLOW);
+			this.creditsAngle4, 80, FlynnColors.YELLOW, FlynnIsCentered);
+        ctx.vectorTextArc(controlsText2,
+            2, this.vortex.center_x, this.vortex.center_y,
+            this.creditsAngle4 + Math.PI, 80, FlynnColors.YELLOW, FlynnIsCentered);
 
 		ctx.vectorTextArc(
 			"WRITTEN BY TRAYTON MOYER (FLOATIN' HEAD) AND ERIC MOYER (FIENDFODDER) FOR LUDAM MINI DARE 56",

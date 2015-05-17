@@ -200,28 +200,27 @@ var Vortex = Class.extend({
 
 	draw: function(ctx, doCollapse) {
 		// Vortex
-		ctx.beginPath();
 		if (doCollapse){
 			// Collapsing
-			ctx.strokeStyle=FlynnColors.CYAN;
+			ctx.vectorStart(FlynnColors.CYAN);
 		}
 		else if(this.radius < this.target_radius){
 			// Growing
-			ctx.strokeStyle=FlynnColors.MAGENTA;
+			ctx.vectorStart(FlynnColors.MAGENTA);
 		}
 		else{
 			// Stable
-			ctx.strokeStyle=FlynnColors.GREEN;
+			ctx.vectorStart(FlynnColors.GREEN);
 		}
 		for(theta = 0, angle_delta = (Math.PI * 2)/VortexLines; theta < ((Math.PI * 2)-0.001); theta += angle_delta){
 			var sx = this.center_x + Math.cos(theta+this.angle - VortexTwist) * (this.radius - VortexThickness/2);
 			var sy = this.center_y + Math.sin(theta+this.angle - VortexTwist) * (this.radius - VortexThickness/2);
 			var ex = this.center_x + Math.cos(theta+this.angle + VortexTwist) * (this.radius + VortexThickness/2);
 			var ey = this.center_y + Math.sin(theta+this.angle + VortexTwist) * (this.radius + VortexThickness/2);
-			ctx.moveTo(sx,sy);
-			ctx.lineTo(ex,ey);
+			ctx.vectorMoveTo(sx,sy);
+			ctx.vectorLineTo(ex,ey);
 		}
-		ctx.stroke();
+		ctx.vectorEnd();
 
 		// Stars
 		ctx.fillStyle="#808080";

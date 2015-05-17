@@ -98,7 +98,7 @@ var Game = Class.extend({
 			src: ['sounds/ThemeIntroRDB.ogg', 'sounds/ThemeIntroRDB.mp3'],
 			loop: true,
 			buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
-			volume: 0.4,
+			volume: 0.1,
 		}).play();
 	},
 
