@@ -136,9 +136,6 @@ var MenuState = FlynnState.extend({
 		ctx.vectorTextArc(
 			"BASED ON THE ASTEROIDS VECTOR FRAMEWORK DEVELOPED BY MAX WIHLBORG",
 			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2 , 220, FlynnColors.GREEN);
-		ctx.vectorTextArc(
-			"MUSIC ROUNDABOUT 8 BIT BY STUDIO MEGAANE",
-			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2B , 200, FlynnColors.GREEN);
 
 		this.vortex.draw(ctx);
 	}
