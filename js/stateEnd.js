@@ -36,7 +36,7 @@ var StateEnd = FlynnState.extend({
 	 *
 	 * @param  {InputHandeler} input keeps track of all pressed keys
 	 */
-	handleInputs: function(input) {
+	handleInputs: function(input, paceFactor) {
 		if (this.hasEnteredName) {
 			if (input.virtualButtonIsPressed("enter")) {
 				// change the game state

@@ -7,17 +7,23 @@ var FlynnTextCenterOffsetY = FlynnCharacterHeight/2;
 var FlynnVectorDimFactorThick = 0.75; // Brightness dimming for vector lines
 var FlynnVectorDimFactorThin = 0.65;
 var FlynnVectorOverdriveFactor = 0.2; // White overdrive for vertex point artifacts
-var FlynnVectorDrawThick = false;      // Vector mode (Thick/Thin)
 
 var FlynnIsCentered = true;
 var FlynnIsNotCentered = false;
 var FlynnIsReversed = true;
 var FlynnIsNotReversed = false;
 
+// Vector rendering emulation modes
+var FlynnVectorMode = {
+	PLAIN:   0,		// No Vector rendering emulation (plain lines)
+	V_THIN:  1,		// Thin Vector rendering 
+	V_THICK: 2,     // Thick Vector rendering
+};
+
 var FlynnCanvas = Class.extend({
 
-	init: function(game, width, height) {
-		this.game = game;
+	init: function(mcp, width, height) {
+		this.mcp = mcp;
 
 		this.showMetrics = false;
 		this.canvas = document.getElementById("gameCanvas");
@@ -35,13 +41,7 @@ var FlynnCanvas = Class.extend({
 			ctx.fpsFrameCount = 0;
 			ctx.fpsMsecCount = 0;
 			ctx.vectorVericies = [];
-
-			ctx.vectorDrawThick = FlynnVectorDrawThick;
-			if(ctx.vectorDrawThick){
-				ctx.vectorDimFactor = FlynnVectorDimFactorThick;
-			} else{
-				ctx.vectorDimFactor = FlynnVectorDimFactorThin;
-			}
+			ctx.mcp = mcp;
 
 			ctx.ACODE = "A".charCodeAt(0);
 			ctx.ZEROCODE = "0".charCodeAt(0);
@@ -95,9 +95,25 @@ var FlynnCanvas = Class.extend({
 
 				// Determine vector line color
 				var dim_color_rgb = flynnHexToRgb(color);
-				dim_color_rgb.r *= this.vectorDimFactor;
-				dim_color_rgb.g *= this.vectorDimFactor;
-				dim_color_rgb.b *= this.vectorDimFactor;
+				var vectorDimFactor = 1;
+				var lineWidth = 1;
+				switch(this.mcp.vectorMode){
+					case FlynnVectorMode.PLAIN:
+						vectorDimFactor = 1;
+						lineWidth = 1;
+						break;
+					case FlynnVectorMode.V_THICK:
+						vectorDimFactor = FlynnVectorDimFactorThick;
+						lineWidth = 3;
+						break;
+					case FlynnVectorMode.V_THIN:
+						vectorDimFactor = FlynnVectorDimFactorThin;
+						lineWidth = 1;
+						break;
+				}
+				dim_color_rgb.r *= vectorDimFactor;
+				dim_color_rgb.g *= vectorDimFactor;
+				dim_color_rgb.b *= vectorDimFactor;
 				var dim_color = flynnRgbToHex(dim_color_rgb.r, dim_color_rgb.g, dim_color_rgb.b);
 
 				// Determine vector vertex color
@@ -108,12 +124,7 @@ var FlynnCanvas = Class.extend({
 				this.beginPath();
 				this.strokeStyle = dim_color;
 				this.lineJoin = 'round';  // Get rid of long mitres on sharp angles
-				if(this.vectorDrawThick){
-					this.lineWidth = 2;
-				}
-				else{
-					this.lineWidth = 1;
-				}
+				this.lineWidth = lineWidth;
 
 				//this.lineWidth = "6"; // Fat lines for screenshot thumbnail generation
 			};
@@ -122,7 +133,7 @@ var FlynnCanvas = Class.extend({
 				x = Math.floor(x);
 				y = Math.floor(y);
 				this.vectorVericies.push(x, y);
-				if(this.vectorDrawThick){
+				if(this.mcp.vectorMode === FlynnVectorMode.V_THICK){
 					this.lineTo(x, y);
 				}
 				else{
@@ -134,7 +145,7 @@ var FlynnCanvas = Class.extend({
 				x = Math.floor(x);
 				y = Math.floor(y);
 				this.vectorVericies.push(x, y);
-				if(this.vectorDrawThick){
+				if(this.mcp.vectorMode === FlynnVectorMode.V_THICK){
 					this.moveTo(x, y);
 				}
 				else{
@@ -146,19 +157,21 @@ var FlynnCanvas = Class.extend({
 				// Finish the line drawing 
 				this.stroke();
 
-				// Draw the (bright) vector vertex points
-				var offset, size;
-				if(this.vectorDrawThick){
-					offset = 1;
-					size = 2;
-				}
-				else{
-					offset = 0;
-					size = 1;
-				}
-				this.fillStyle = this.vectorVertexColor;
-				for(var i=0, len=this.vectorVericies.length; i<len; i+=2) {
-					ctx.fillRect(this.vectorVericies[i]-offset, this.vectorVericies[i+1]-offset, size, size);
+				if(this.mcp.vectorMode != FlynnVectorMode.PLAIN){
+					// Draw the (bright) vector vertex points
+					var offset, size;
+					if(this.mcp.vectorMode === FlynnVectorMode.V_THICK){
+						offset = 1;
+						size = 2;
+					}
+					else{
+						offset = 0;
+						size = 1;
+					}
+					this.fillStyle = this.vectorVertexColor;
+					for(var i=0, len=this.vectorVericies.length; i<len; i+=2) {
+						ctx.fillRect(this.vectorVericies[i]-offset, this.vectorVericies[i+1]-offset, size, size);
+					}
 				}
 			};
 
@@ -245,9 +258,6 @@ var FlynnCanvas = Class.extend({
 
 				text = text.toString().toUpperCase();
 				var step = scale*FlynnCharacterSpacing;
-
-				// center_x += 0.5;
-				// center_y += 0.5;
 
 				var render_angle = angle;
 				var render_angle_step = Math.asin(FlynnCharacterSpacing*scale/radius);
@@ -349,7 +359,7 @@ var FlynnCanvas = Class.extend({
 			// Calculate FPS and pacing
 			//---------------------------
 			var timeNow;
-			if(self.game.browserSupportsPerformance){
+			if(self.mcp.browserSupportsPerformance){
 				timeNow = performance.now();
 			}
 			else{
@@ -377,19 +387,19 @@ var FlynnCanvas = Class.extend({
 			//---------------------------
 			var start;
 			var end;
-			if(self.game.browserSupportsPerformance){
+			if(self.mcp.browserSupportsPerformance){
 				start = performance.now();
 			}
 			
 			animation_callback_f(paceFactor);
 			
-			if(self.game.browserSupportsPerformance){
+			if(self.mcp.browserSupportsPerformance){
 				end = performance.now();
 			}
 
 			if (self.showMetrics){
 				self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-10, FlynnColors.GREEN, self.ctx.fps/120);
-				if(self.game.browserSupportsPerformance){
+				if(self.mcp.browserSupportsPerformance){
 					self.ctx.drawFpsGague(self.canvas.width-65, self.canvas.height-16, FlynnColors.YELLOW, (end-start)/(1000/120));
 				}
 			}

@@ -1,5 +1,6 @@
 var GameCanvasHeight = 768;
 var GameCanvasWidth = 1024;
+var GameSpeedFactor = 0.7;
 
 var States = {
 	NO_CHANGE: 0,
@@ -16,15 +17,9 @@ var Game = Class.extend({
 
 		var self = this;
 
-        // Detect developer mode from URL arguments ("?develop=true")
-        var developerModeEnabled = false;
-        if(flynnGetUrlValue("develop")=='true'){
-            developerModeEnabled = true;
-        }
-
         this.input = new FlynnInputHandler();
 
-		this.mcp = new FlynnMcp(GameCanvasWidth, GameCanvasHeight, this.input, States.NO_CHANGE, developerModeEnabled);
+		this.mcp = new FlynnMcp(GameCanvasWidth, GameCanvasHeight, this.input, States.NO_CHANGE, GameSpeedFactor);
 		this.mcp.setStateBuilderFunc(
 			function(state){
 				switch(state){
@@ -41,15 +36,6 @@ var Game = Class.extend({
 		);
 		this.mcp.nextState = States.MENU;
 
-        // Detect arcade mode from URL arguments ("?arcade=true")
-        this.mcp.credits=0;
-        if(flynnGetUrlValue("arcade")=='true'){
-            this.mcp.arcadeModeEnabled = true;
-        }
-        else{
-            this.mcp.arcadeModeEnabled = false;
-        }
-
         // Setup inputs
 		this.input.addVirtualButton('fire', FlynnKeyboardMap['z'], FlynnConfigurable);
 		this.input.addVirtualButton('thrust', FlynnKeyboardMap['spacebar'], FlynnConfigurable);
@@ -58,9 +44,10 @@ var Game = Class.extend({
 		this.input.addVirtualButton('config', FlynnKeyboardMap['escape'], FlynnNotConfigurable);
 		this.input.addVirtualButton('up', FlynnKeyboardMap['up'], FlynnNotConfigurable);
 		this.input.addVirtualButton('down', FlynnKeyboardMap['down'], FlynnNotConfigurable);
-		if(developerModeEnabled){
+		if(this.mcp.developerModeEnabled){
 			this.input.addVirtualButton('dev_metrics', FlynnKeyboardMap['6'], FlynnNotConfigurable);
 			this.input.addVirtualButton('dev_slow_mo', FlynnKeyboardMap['7'], FlynnNotConfigurable);
+			this.input.addVirtualButton('dev_fps_20', FlynnKeyboardMap['\\'], FlynnNotConfigurable);
 			this.input.addVirtualButton('dev_add_points', FlynnKeyboardMap['8'], FlynnNotConfigurable);
 			this.input.addVirtualButton('dev_die', FlynnKeyboardMap['9'], FlynnNotConfigurable);
 			this.input.addVirtualButton('vortex_grow', FlynnKeyboardMap['0'], FlynnNotConfigurable);

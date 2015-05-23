@@ -1,5 +1,5 @@
 var ShipGravity = 0.08;
-var ShipThrust = 0.40;
+var ShipThrust = 0.57; //0.4
 var ShipRecoil = 1.0;
 var ShipMaxRadius = 370;
 var ShipBulletVelocity = 5;
@@ -103,8 +103,8 @@ var Ship = FlynnPolygon.extend({
 		return projectile_info;
 	},
 
-	addVel: function() {
-		this.ascentVelocity += ShipThrust;
+	addVel: function(paceFactor) {
+		this.ascentVelocity += ShipThrust * paceFactor;
 		this.drawFlames = true;
 	},
 

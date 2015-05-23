@@ -186,7 +186,7 @@ var StateGame = FlynnState.extend({
 		this.mcp.timers.set('shipRespawnAnimation', 0); // Set to zero to deactivate it
 	},
 
-	handleInputs: function(input) {
+	handleInputs: function(input, paceFactor) {
 
 		if(this.mcp.developerModeEnabled){
 			// Metrics toggle
@@ -194,9 +194,14 @@ var StateGame = FlynnState.extend({
 				this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
 			}
 
-			// Slow Mo Debug toggle
+			// Toggle DEV pacing mode slow mo
 			if (input.virtualButtonIsPressed("dev_slow_mo")){
-				this.mcp.slowMoDebug = !this.mcp.slowMoDebug;
+				this.mcp.toggleDevPacingSlowMo();
+			}
+
+			// Toggle DEV pacing mode fps 20
+			if (input.virtualButtonIsPressed("dev_fps_20")){
+				this.mcp.toggleDevPacingFps20();
 			}
 
 			// Points
@@ -237,7 +242,7 @@ var StateGame = FlynnState.extend({
 		if (input.virtualButtonIsDown("thrust")){
 			this.thrustHasOccurred = true;
 			this.popUpThrustPending = false;
-			this.ship.addVel();
+			this.ship.addVel(paceFactor);
 			if(!this.engine_sound_playing){
 				this.engine_sound.play();
 				this.engine_sound_playing = true;

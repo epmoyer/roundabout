@@ -32,7 +32,7 @@ var StateConfig = FlynnState.extend({
 		this.keyAssignmentInProgress = false;
 	},
 
-	handleInputs: function(input) {
+	handleInputs: function(input, paceFactor) {
 		if(this.keyAssignmentInProgress){
 			var capturedKeyCode = input.getCapturedKeyCode();
 			if (capturedKeyCode){

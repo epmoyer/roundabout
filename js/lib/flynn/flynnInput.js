@@ -66,10 +66,12 @@ var FlynnInputHandler = Class.extend({
 					var touch=event.changedTouches[0];
 					var x = touch.pageX;
 					var y = touch.pageY;
+					//console.log("DEV: Touch ",x,y);
 					for(var name in self.touchRegions){
 						var region = self.touchRegions[name];
 						if ((x>region.left) && (x<region.right) && (y>region.top) && (y<region.bottom)){
 							// A touch event was detected in the region 'name'
+							//console.log("DEV: Touch in region:", name);
 							if(self.virtualButtons[name]){
 								self.virtualButtons[name].isDown = true;
 							} else {
@@ -213,7 +215,7 @@ var FlynnInputHandler = Class.extend({
 		// The 'name' must match a virtual button for touches to be reported.
 		// All touches are reported as virtual buttons.
 		// Touch regions can be bound to virtual buttons which are also bound to keys.
-
+		//console.log("DEV: Added touch region ", name);
 		if (name in this.touchRegions){
 			// Remove old region if it exists.  Regions can thus be 
 			// redefined by calling addTouchRegion again with the 

@@ -15,6 +15,8 @@ var FlynnColors = {
 	ORANGE:     "#E55300",
 	BROWN:      "#8B4513",
 	YELLOW_DK:  "#808000",
+	GRAY:       "#808080",
+	GRAY_DK:    "#404040"
 };
 
 //------------
