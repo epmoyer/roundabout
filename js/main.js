@@ -30,7 +30,7 @@ var Game = Class.extend({
 					case States.END:
 						return new StateEnd(self.mcp);
 					case States.CONFIG:
-						return new StateConfig(self.mcp);
+						return new FlynnStateConfig(self.mcp, FlynnColors.CYAN, FlynnColors.YELLOW, FlynnColors.GREEN, FlynnColors.MAGENTA);
 				}
 			}
 		);
@@ -44,6 +44,8 @@ var Game = Class.extend({
 		this.input.addVirtualButton('config', FlynnKeyboardMap['escape'], FlynnNotConfigurable);
 		this.input.addVirtualButton('up', FlynnKeyboardMap['up'], FlynnNotConfigurable);
 		this.input.addVirtualButton('down', FlynnKeyboardMap['down'], FlynnNotConfigurable);
+		this.input.addVirtualButton('right', FlynnKeyboardMap['right'], FlynnNotConfigurable);
+		this.input.addVirtualButton('left', FlynnKeyboardMap['left'], FlynnNotConfigurable);
 		if(this.mcp.developerModeEnabled){
 			this.input.addVirtualButton('dev_metrics', FlynnKeyboardMap['6'], FlynnNotConfigurable);
 			this.input.addVirtualButton('dev_slow_mo', FlynnKeyboardMap['7'], FlynnNotConfigurable);
@@ -57,17 +59,15 @@ var Game = Class.extend({
 			this.input.addVirtualButton('start_1', FlynnKeyboardMap['1'], FlynnConfigurable);
 		}
 
-		// Scores
-		this.mcp.highscores = [
-			["FLOATINHEAD", 2200],
-			["FIENDFODDER", 2100],
-			["Dio",         2000],
-			["Jotaro",      1300],
-			["Joseph",      1200],
-			["Jonathan",    1100],
-		];
-		this.mcp.custom.score = 0;
+		// Options
+		this.mcp.optionManager.addOptionFromVirtualButton('fire');
+		this.mcp.optionManager.addOptionFromVirtualButton('thrust');
+		this.mcp.optionManager.addOption('musicEnabled', FlynnOptionType.BOOLEAN, true, true, 'MUSIC', null, null);
+		this.mcp.optionManager.addOption('resetScores', FlynnOptionType.COMMAND, true, true, 'RESET HIGH SCORES', null,
+			function(){self.resetScores();});
 
+		// Reset Scores
+		this.resetScores();
 		
 		// Set resize handler and force a resize
 		this.mcp.setResizeFunc( function(width, height){
@@ -87,6 +87,18 @@ var Game = Class.extend({
 			buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
 			volume: 0.5,
 		}).play();
+	},
+
+	resetScores: function(){
+		this.mcp.highscores = [
+			["FLOATINHEAD", 2200],
+			["FIENDFODDER", 2100],
+			["Dio",         2000],
+			["Jotaro",      1300],
+			["Joseph",      1200],
+			["Jonathan",    1100],
+		];
+		this.mcp.custom.score = 0;
 	},
 
 	run: function() {

@@ -97,7 +97,7 @@ var FlynnCanvas = Class.extend({
 				var dim_color_rgb = flynnHexToRgb(color);
 				var vectorDimFactor = 1;
 				var lineWidth = 1;
-				switch(this.mcp.vectorMode){
+				switch(this.mcp.options.vectorMode){
 					case FlynnVectorMode.PLAIN:
 						vectorDimFactor = 1;
 						lineWidth = 1;
@@ -133,7 +133,7 @@ var FlynnCanvas = Class.extend({
 				x = Math.floor(x);
 				y = Math.floor(y);
 				this.vectorVericies.push(x, y);
-				if(this.mcp.vectorMode === FlynnVectorMode.V_THICK){
+				if(this.mcp.options.vectorMode === FlynnVectorMode.V_THICK){
 					this.lineTo(x, y);
 				}
 				else{
@@ -145,7 +145,7 @@ var FlynnCanvas = Class.extend({
 				x = Math.floor(x);
 				y = Math.floor(y);
 				this.vectorVericies.push(x, y);
-				if(this.mcp.vectorMode === FlynnVectorMode.V_THICK){
+				if(this.mcp.options.vectorMode === FlynnVectorMode.V_THICK){
 					this.moveTo(x, y);
 				}
 				else{
@@ -157,10 +157,10 @@ var FlynnCanvas = Class.extend({
 				// Finish the line drawing 
 				this.stroke();
 
-				if(this.mcp.vectorMode != FlynnVectorMode.PLAIN){
+				if(this.mcp.options.vectorMode != FlynnVectorMode.PLAIN){
 					// Draw the (bright) vector vertex points
 					var offset, size;
-					if(this.mcp.vectorMode === FlynnVectorMode.V_THICK){
+					if(this.mcp.options.vectorMode === FlynnVectorMode.V_THICK){
 						offset = 1;
 						size = 2;
 					}
@@ -202,7 +202,7 @@ var FlynnCanvas = Class.extend({
 
 				// Center x/y if they are not numbers
 				if (typeof x !== "number"){
-					x = Math.round((this.width - text.length*step)/2);
+					x = Math.round((this.width - (text.length*step-(FlynnCharacterGap*scale)))/2);
 				}
 				if (typeof y !== "number"){
 					y = Math.round((this.height - step)/2);

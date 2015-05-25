@@ -268,6 +268,7 @@ var FlynnInputHandler = Class.extend({
 	},
 
 	isKeyCodeAssigned: function(keyCode){
+		// Returns true if the keyCode is assigned to any virtual button
 		for(var name in this.virtualButtons){
 			if(this.virtualButtons[name].boundKeyCode == keyCode){
 				return true;
@@ -275,5 +276,17 @@ var FlynnInputHandler = Class.extend({
 		}
 		return false;
 	},
+
+	// isKeyCodeUnavailable: function(keyCode){
+	// 	// Returns true if the keyCode is assigned to any virtual button NOT INCLUDING
+	// 	// a small number of UI keys which are avaialble to be bound user buttons simultaneously with 
+	// 	// being bound to UI buttons.
+	// 	for(var name in this.virtualButtons){
+	// 		if(this.virtualButtons[name].boundKeyCode == keyCode){
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// },
 
 });

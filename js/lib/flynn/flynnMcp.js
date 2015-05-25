@@ -27,13 +27,17 @@ var FlynnMcp = Class.extend({
 		this.devLowFpsPaceFactor = 0;
 		this.devLowFpsFrameCount = 0;
 
-		this.version = 'v1.0';
+		this.version = 'v1.0';  // Flynn version
 
 		this.stateBuilderFunc = null;
 		this.resizeFunc = null;
 		this.slowMoDebug = false;
         this.clock = 0;
         this.timers = new FlynnTimers();
+
+        // Setup options
+        this.options = {};
+        this.optionManager = new FlynnOptionManager(this);
 
 		this.custom={}; // Container for custom game data which needs to be exchanged globally.
 
@@ -80,23 +84,29 @@ var FlynnMcp = Class.extend({
 		}
 
 		// Set Vector mode
-		this.vectorMode = null;
-		var vectorMode = flynnGetUrlValue("vector");
+		var vectorMode = null;
+		var vectorModeFromUrl = flynnGetUrlValue("vector");
 		for (var key in FlynnVectorMode){
-			if (vectorMode === key){
-				this.vectorMode = FlynnVectorMode[key];
+			if (vectorModeFromUrl === key){
+				vectorMode = FlynnVectorMode[key];
 			}
 		}
-		if (this.vectorMode === null){
+		if (vectorMode === null){
 			// No vector mode specified on command line (or no match)
 			if(this.browserSupportsTouch){
 				// Default to plain lines on phones/pads for visibility and performance
-				this.vectorMode = FlynnVectorMode.V_THICK;
+				vectorMode = FlynnVectorMode.V_THICK;
 			}
 			else{
-				this.vectorMode = FlynnVectorMode.V_THIN;
+				vectorMode = FlynnVectorMode.V_THIN;
 			}
 		}
+		this.optionManager.addOption('vectorMode', FlynnOptionType.MULTI, vectorMode, vectorMode, 'VECTOR DISPLAY EMULATION',
+			[	['NONE',FlynnVectorMode.PLAIN],
+				['NORMAL',FlynnVectorMode.V_THIN],
+				['THICK' ,FlynnVectorMode.V_THICK],
+			],
+			null);
 
 		//--------------------------
 		// Resize handler
