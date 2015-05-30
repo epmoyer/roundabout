@@ -115,8 +115,10 @@ var StateGame = FlynnState.extend({
 		this.gameClock = 0;
 
 		// Timers
-		this.mcp.timers.add('shipRespawnDelay', ShipRespawnDelayGameStartTicks);  // Start game with a delay (for start sound to finish)
-		this.mcp.timers.add('shipRespawnAnimation', 0);
+		this.mcp.timers.add('shipRespawnDelay', ShipRespawnDelayGameStartTicks, null);  // Start game with a delay (for start sound to finish)
+		this.mcp.timers.add('shipRespawnAnimation', 0, null);
+		this.shipRespawnDelayExpired = false;
+		this.shipRespawnAnimationStarted = false;
 
 		// Aliens
 		this.drifters = [];
@@ -177,13 +179,39 @@ var StateGame = FlynnState.extend({
 	},
 
 	doShipDie: function(){
-		this.ship.vortexDeath = true; // Mark the player as dead
+		// Visibility
+		this.ship.visible = false;
+
+		// Lives
+		this.lives--;
+		if(this.lives <= 0){
+			this.gameOver = true;
+		}
+
+		// Sounds
+		this.engine_sound.stop();
 		this.player_die_sound.play();
+
+		// Explosion
 		this.particles.explosion(
 			this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles,
 			this.ship.color, ShipExplosionMaxVelocity);
-		this.mcp.timers.set('shipRespawnDelay', ShipRespawnDelayTicks);
-		this.mcp.timers.set('shipRespawnAnimation', 0); // Set to zero to deactivate it
+
+		// Timers
+		this.mcp.timers.set('shipRespawnDelay', ShipRespawnDelayTicks, null);
+		this.mcp.timers.set('shipRespawnAnimation', 0, null); // Set to zero to deactivate it
+		this.shipRespawnDelayExpired = false;
+		this.shipRespawnAnimationStarted = false;
+
+		// Vorted
+		this.vortexCollapse = true;
+		// Make all enemies death dive to clear the play field
+		for(i=0, len=this.drifters.length; i<len; i++){
+			this.drifters[i].deathDive = true;
+		}
+		for(i=0, len=this.blockers.length; i<len; i++){
+			this.blockers[i].deathDive = true;
+		}
 	},
 
 	handleInputs: function(input, paceFactor) {
@@ -211,7 +239,7 @@ var StateGame = FlynnState.extend({
 
 			// Die
 			if (input.virtualButtonIsPressed("dev_die")){
-				this.ship.vortexDeath = true;
+				this.doShipDie();
 			}
 
 			// Grow vortex
@@ -289,60 +317,44 @@ var StateGame = FlynnState.extend({
 		this.gameClock += paceFactor;
 
 		if (this.ship.visible){
-			if (this.ship.vortexDeath){
-				this.engine_sound.stop();
-				this.lives--;
-				if(this.lives <= 0){
-					this.gameOver = true;
-				}
-				this.ship.visible = false;
-				this.ship.vortexDeath = false;
-				this.vortexCollapse = true;
-				// Make all enemies death dive to clear field
-				for(i=0, len=this.drifters.length; i<len; i++){
-					this.drifters[i].deathDive = true;
-				}
-				for(i=0, len=this.blockers.length; i<len; i++){
-					this.blockers[i].deathDive = true;
-				}
-			}
-			else{
-				// Update ship
-				this.ship.update(
-					paceFactor,
-					this.vortex.radiusToAngularVelocity(this.ship.radius, true),
-					this.vortex.radius);
-			}
+			// Update ship
+			this.ship.update(
+				paceFactor,
+				this.vortex.radiusToAngularVelocity(this.ship.radius, true),
+				this.vortex.radius);
 		}
 		else{
-			// Respawn after all enmies have cleared the playfield, and min delay is met
-			if(!this.gameOver && this.mcp.timers.isExpired('shipRespawnDelay')){
-				if((this.drifters.length === 0) && (this.blockers.length === 0)){
-					if(!this.mcp.timers.isActive('shipRespawnAnimation')){
-						// Start the respawn animation timer (which also triggers the animation)
-						this.mcp.timers.set('shipRespawnAnimation', ShipRespawnAnimationTicks);
-						this.ship_respawn_sound.play();
-					}
-					else{
-						// Respawn animation timer is active
-						this.vortex.shieldAngleTarget = flynnUtilAngleBound2Pi(ShipStartAngle);
+			// Ship not visible
+			if(!this.gameOver){
+				if(this.mcp.timers.hasExpired('shipRespawnDelay')){
+					this.shipRespawnDelayExpired = true;
+				}
 
-						// If respawn animation has finished...
-						if(this.mcp.timers.isExpired('shipRespawnAnimation')){
-							// Deactivate the timer
-							this.mcp.timers.set('shipRespawnAnimation', 0);
-							// Respawn the ship
-							this.ship.radius = ShipStartRadius;
-							this.ship.radialAngle = ShipStartAngle;
-							this.ship.ascentVelocity = 0;
-							this.ship.visible = true;
-							this.ship.vortexDeath = false;
-							this.ship.update(
-								paceFactor,
-								this.vortex.radiusToAngularVelocity(this.ship.radius, true),
-								this.vortex.radius);
-						}
-					}
+				if(	(this.drifters.length === 0) &&
+					(this.blockers.length === 0) &&
+					this.shipRespawnDelayExpired &&
+					!this.shipRespawnAnimationStarted){
+
+					this.mcp.timers.set('shipRespawnAnimation', ShipRespawnAnimationTicks);
+					this.shipRespawnAnimationStarted = true;
+					this.ship_respawn_sound.play();
+				}
+
+				if(this.mcp.timers.isRunning('shipRespawnAnimation')){
+					this.vortex.shieldAngleTarget = flynnUtilAngleBound2Pi(ShipStartAngle);
+				}
+
+				// If respawn animation has finished...
+				if(this.mcp.timers.hasExpired('shipRespawnAnimation')){
+					// Respawn the ship
+					this.ship.radius = ShipStartRadius;
+					this.ship.radialAngle = ShipStartAngle;
+					this.ship.ascentVelocity = 0;
+					this.ship.visible = true;
+					this.ship.update(
+						paceFactor,
+						this.vortex.radiusToAngularVelocity(this.ship.radius, true),
+						this.vortex.radius);
 				}
 			}
 		}
@@ -704,7 +716,7 @@ var StateGame = FlynnState.extend({
 		this.particles.draw(ctx);
 
 		// Ship respawn animation
-		if(this.mcp.timers.isActive('shipRespawnAnimation')){
+		if(this.mcp.timers.isRunning('shipRespawnAnimation')){
 			var animationPercentage = this.mcp.timers.get('shipRespawnAnimation') / ShipRespawnAnimationTicks;
 			var sizePercentageStep = 0.005;
 			var rotationPercentageStep = 0.1;
