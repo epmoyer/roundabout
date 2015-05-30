@@ -32,29 +32,54 @@ var FlynnInputHandler = Class.extend({
 		this.touchRegions = {};
 		this.keyCodeToVirtualButtonName = {};
 
+		this.uiButtons = {};
+		this.keyCodeToUiButtonName = {};
+
 		// Key Code capture support for user configuration of key assignments
 		this.keyCodeCaptureArmed = false;
 		this.capturedKeyCode = null;
 
+		// Add UI Buttons
+		this.addUiButton('UI_enter',  FlynnKeyboardMap['enter']);
+		this.addUiButton('UI_escape', FlynnKeyboardMap['escape']);
+		this.addUiButton('UI_up',     FlynnKeyboardMap['up']);
+		this.addUiButton('UI_down',   FlynnKeyboardMap['down']);
+		this.addUiButton('UI_right',  FlynnKeyboardMap['right']);
+		this.addUiButton('UI_left',   FlynnKeyboardMap['left']);
+
 		var self = this;
 		document.addEventListener("keydown", function(evt) {
 			//console.log("Key Code:" + evt.keyCode); 
-			if (self.keyCodeToVirtualButtonName[evt.keyCode]){
-				var name = self.keyCodeToVirtualButtonName[evt.keyCode];
-				self.virtualButtons[name].isDown = true;
-			}
 
-			// Capture key codes (for user configuration of virualButtons)
-			if(self.keyCodeCaptureArmed){
+			// Capture key codes (for user configuration of virualButtons).  Ignore <escape>.
+			if(self.keyCodeCaptureArmed && evt.keyCode != FlynnKeyboardMap['escape']){
 				self.capturedKeyCode = evt.keyCode;
 				self.keyCodeCaptureArmed = false;
+				// Exit without recording any .isDown events
+				return;
+			}
+
+			var name;
+			if (self.keyCodeToVirtualButtonName[evt.keyCode]){
+				name = self.keyCodeToVirtualButtonName[evt.keyCode];
+				self.virtualButtons[name].isDown = true;
+			}
+			if (self.keyCodeToUiButtonName[evt.keyCode]){
+				name = self.keyCodeToUiButtonName[evt.keyCode];
+				self.uiButtons[name].isDown = true;
 			}
 		});
 		document.addEventListener("keyup", function(evt) {
+			var name;
 			if (self.keyCodeToVirtualButtonName[evt.keyCode]){
-				var name = self.keyCodeToVirtualButtonName[evt.keyCode];
+				name = self.keyCodeToVirtualButtonName[evt.keyCode];
 				self.virtualButtons[name].isDown = false;
 				self.virtualButtons[name].pressWasReported = false;
+			}
+			if (self.keyCodeToUiButtonName[evt.keyCode]){
+				name = self.keyCodeToUiButtonName[evt.keyCode];
+				self.uiButtons[name].isDown = false;
+				self.uiButtons[name].pressWasReported = false;
 			}
 		});
 
@@ -110,6 +135,18 @@ var FlynnInputHandler = Class.extend({
 		}
 		catch(err){
 		}
+	},
+
+	addUiButton: function(name, keyCode){
+		if (this.uiButtons[name]){
+			console.log(
+				'Flynn: Warning: addUiButton() was called for UI button  "' + name +
+				'" but that UI button already exists. The old UI button will be removed first.');
+			delete(this.uiButtons[name]);
+		}
+		this.uiButtons[name] = new FlynnVirtualButton(name, FlynnNotConfigurable);
+		this.uiButtons[name].boundKeyCode = keyCode;
+		this.keyCodeToUiButtonName[keyCode] = name;
 	},
 
 	addVirtualButton: function(name, keyCode, isConfigurable){
@@ -234,7 +271,11 @@ var FlynnInputHandler = Class.extend({
 	virtualButtonIsDown: function(name) {
 		if(this.virtualButtons[name]){
 			return this.virtualButtons[name].isDown;
-		} else {
+		}
+		else if (this.uiButtons[name]){
+			return this.uiButtons[name].isDown;
+		}
+		else {
 			console.log('Flynn: Warning: isDown() was called for virtual button  "' + name +
 				'" but no virtual button with that name exists.');
 		}
@@ -252,7 +293,20 @@ var FlynnInputHandler = Class.extend({
 			}
 			// Button is not down
 			return false;
-		} else {
+		}
+		else if(this.uiButtons[name]){
+			if (this.uiButtons[name].pressWasReported){
+				// The current press was already reported, so don't report it again.
+				return false;
+			} else if (this.uiButtons[name].isDown){
+				// The button is down and no press has (yet) been reported, so report this one.
+				this.uiButtons[name].pressWasReported = true;
+				return true;
+			}
+			// Button is not down
+			return false;
+		}
+		else {
 			console.log('Flynn: Warning: isDown() was called for virtual button  "' + name +
 				'" but no virtual button with that name exists.');
 		}

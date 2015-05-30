@@ -57,7 +57,7 @@ var FlynnStateConfig = FlynnState.extend({
 				}
 			}
 
-			if (input.virtualButtonIsPressed("config")) {
+			if (input.virtualButtonIsPressed("UI_escape")) {
 				this.keyAssignmentInProgress = false;
 			}
 			return;
@@ -71,22 +71,22 @@ var FlynnStateConfig = FlynnState.extend({
                 this.insert_coin_sound.play();
             }
         }
-		if (input.virtualButtonIsPressed("config")) {
+		if (input.virtualButtonIsPressed("UI_escape")) {
 			this.mcp.nextState = States.MENU;
 		}
-		if (input.virtualButtonIsPressed("down")) {
+		if (input.virtualButtonIsPressed("UI_down")) {
 			++this.selectedLineIndex;
 			if(this.selectedLineIndex >= this.numOptions){
 				this.selectedLineIndex = 0;
 			}
 		}
-		if (input.virtualButtonIsPressed("up")) {
+		if (input.virtualButtonIsPressed("UI_up")) {
 			--this.selectedLineIndex;
 			if(this.selectedLineIndex < 0){
 				this.selectedLineIndex = this.numOptions-1;
 			}
 		}
-		if (input.virtualButtonIsPressed("enter")) {
+		if (input.virtualButtonIsPressed("UI_enter")) {
 			switch(optionDescriptor.type){
 				case FlynnOptionType.BOOLEAN:
 					// Toggle boolean
@@ -107,10 +107,10 @@ var FlynnStateConfig = FlynnState.extend({
 			}
 		}
 		var optionIndexDelta = 0;
-		if (input.virtualButtonIsPressed("left")) {
+		if (input.virtualButtonIsPressed("UI_left")) {
 			optionIndexDelta = -1;
 		}
-		if (input.virtualButtonIsPressed("right")) {
+		if (input.virtualButtonIsPressed("UI_right")) {
 			optionIndexDelta = 1;
 		}
 		if(optionIndexDelta !== 0){

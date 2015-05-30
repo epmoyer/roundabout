@@ -38,12 +38,12 @@ var StateEnd = FlynnState.extend({
 	 */
 	handleInputs: function(input, paceFactor) {
 		if (this.hasEnteredName) {
-			if (input.virtualButtonIsPressed("enter")) {
+			if (input.virtualButtonIsPressed("UI_enter")) {
 				// change the game state
 				this.mcp.nextState = States.MENU;
 			}
 		} else {
-			if (input.virtualButtonIsPressed("enter")) {
+			if (input.virtualButtonIsPressed("UI_enter")) {
 				// take sate to next stage
 				this.hasEnteredName = true;
 				this.namefield.blur();

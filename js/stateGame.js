@@ -221,7 +221,7 @@ var StateGame = FlynnState.extend({
 		}
 		
 		if(!this.ship.visible){
-			if (input.virtualButtonIsPressed("enter")){
+			if (input.virtualButtonIsPressed("UI_enter")){
 				if (this.gameOver){
 					if(this.mcp.browserSupportsTouch){
 						// On touch devices just update high score and go back to menu
