@@ -32,6 +32,7 @@ var Ship = FlynnPolygon.extend({
 
 		this.drawFlames = false;
 		this.visible = true;
+		this.deathByVortex = false;
 
 		this.setScale(s);
 		this.radial_to_cardinal();
@@ -41,8 +42,6 @@ var Ship = FlynnPolygon.extend({
 			x: 0,
 			y: 0
 		};
-
-		this.vortexDeath = false;
 
 		this.shoot_sound = new Howl({
 			src: ['sounds/Laser_Shoot_sustained.ogg', 'sounds/Laser_Shoot_sustained.mp3'],
@@ -109,6 +108,8 @@ var Ship = FlynnPolygon.extend({
 	},
 
 	update: function(paceFactor, angularVelocity, vortexRadius) {
+		var isAlive = true;
+
 		//console.log(paceFactor);
 		this.angularVelocity = angularVelocity;
 		this.ascentVelocity -= ShipGravity * paceFactor;
@@ -124,11 +125,12 @@ var Ship = FlynnPolygon.extend({
 
 		// Die if fall into vortex
 		if (this.radius < vortexRadius){
-			if(!this.vortexDeath){
+			if(this.visible){
 				this.ascentVelocity = 0;
-				this.radius =vortexRadius;
-				this.vortexDeath = true;
+				this.radius = vortexRadius;
 				this.vortex_consume_player_sound.play();
+				this.deathByVortex = true;
+				isAlive = false;
 			}
 		}
 
@@ -142,6 +144,8 @@ var Ship = FlynnPolygon.extend({
 
 		// Update vortex shield angle to match ship
 		this.vortex.shieldAngleTarget = flynnUtilAngleBound2Pi(this.radialAngle);
+
+		return isAlive;
 	},
 
 	draw: function(ctx){

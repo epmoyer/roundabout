@@ -24,7 +24,7 @@ var ShipBounceMinVelocity = 1.5;
 var VortexShieldEndScore = 500;
 
 var ShipNumExplosionParticles = 50;
-var ShipRespawnDelayTicks = 60 * 3;
+var ShipRespawnDelayTicks = 30;
 var ShipRespawnDelayGameStartTicks = 60 * 1.25; // Respawn delay at inital start
 var ShipRespawnAnimationTicks = 60 * 1.8;
 var ShipRespawnScaleMax = 35;
@@ -190,12 +190,14 @@ var StateGame = FlynnState.extend({
 
 		// Sounds
 		this.engine_sound.stop();
-		this.player_die_sound.play();
 
 		// Explosion
-		this.particles.explosion(
-			this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles,
-			this.ship.color, ShipExplosionMaxVelocity);
+		if(!this.ship.deathByVortex){
+			this.player_die_sound.play();
+			this.particles.explosion(
+				this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles,
+				this.ship.color, ShipExplosionMaxVelocity);
+		}
 
 		// Timers
 		this.mcp.timers.set('shipRespawnDelay', ShipRespawnDelayTicks, null);
@@ -203,7 +205,7 @@ var StateGame = FlynnState.extend({
 		this.shipRespawnDelayExpired = false;
 		this.shipRespawnAnimationStarted = false;
 
-		// Vorted
+		// Vortex
 		this.vortexCollapse = true;
 		// Make all enemies death dive to clear the play field
 		for(i=0, len=this.drifters.length; i<len; i++){
@@ -318,10 +320,13 @@ var StateGame = FlynnState.extend({
 
 		if (this.ship.visible){
 			// Update ship
-			this.ship.update(
+			var isAlive = this.ship.update(
 				paceFactor,
 				this.vortex.radiusToAngularVelocity(this.ship.radius, true),
 				this.vortex.radius);
+			if(!isAlive){
+				this.doShipDie();
+			}
 		}
 		else{
 			// Ship not visible
@@ -351,6 +356,7 @@ var StateGame = FlynnState.extend({
 					this.ship.radialAngle = ShipStartAngle;
 					this.ship.ascentVelocity = 0;
 					this.ship.visible = true;
+					this.ship.deathByVortex = false;
 					this.ship.update(
 						paceFactor,
 						this.vortex.radiusToAngularVelocity(this.ship.radius, true),
