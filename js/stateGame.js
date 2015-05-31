@@ -78,32 +78,32 @@ var StateGame = FlynnState.extend({
 
 		this.generateLvl();
 
-		this.engine_sound = new Howl({
+		this.soundEngine = new Howl({
 			src: ['sounds/Engine.ogg','sounds/Engine.mp3'],
 			volume: 0.25,
 			loop: true,
 		});
-		this.player_die_sound = new Howl({
+		this.soundPlayerDie = new Howl({
 			src: ['sounds/Playerexplosion2.ogg','sounds/Playerexplosion2.mp3'],
 			volume: 0.25,
 		});
-		this.extra_life_sound = new Howl({
+		this.soundExtraLife = new Howl({
 			src: ['sounds/ExtraLife.ogg','sounds/ExtraLife.mp3'],
 			volume: 1.00,
 		});
-		this.shot_reflect_sound = new Howl({
+		this.soundShotReflect = new Howl({
 			src: ['sounds/Blocked.ogg','sounds/Blocked.mp3'],
 			volume: 0.25,
 		});
-		this.drifter_die_sound = new Howl({
+		this.soundDrifterDie = new Howl({
 			src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
 			volume: 0.25,
 		});
-		this.blocker_die_sound = new Howl({
+		this.soundBlockerDie = new Howl({
 			src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
 			volume: 0.25,
 		});
-		this.ship_respawn_sound = new Howl({
+		this.soundShipRespawn = new Howl({
 			src: ['sounds/ShipRespawn.ogg','sounds/ShipRespawn.mp3'],
 			volume: 0.25,
 		});
@@ -157,7 +157,7 @@ var StateGame = FlynnState.extend({
 			if(Math.floor(this.score / ExtraLifeScore) != Math.floor((this.score + points) / ExtraLifeScore)){
 				// Extra life
 				this.lives++;
-				this.extra_life_sound.play();
+				this.soundExtraLife.play();
 			}
 			this.score += points;
 		}
@@ -189,11 +189,11 @@ var StateGame = FlynnState.extend({
 		}
 
 		// Sounds
-		this.engine_sound.stop();
+		this.soundEngine.stop();
 
 		// Explosion
 		if(!this.ship.deathByVortex){
-			this.player_die_sound.play();
+			this.soundPlayerDie.play();
 			this.particles.explosion(
 				this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles,
 				this.ship.color, ShipExplosionMaxVelocity);
@@ -274,7 +274,7 @@ var StateGame = FlynnState.extend({
 			this.popUpThrustPending = false;
 			this.ship.addVel(paceFactor);
 			if(!this.engine_sound_playing){
-				this.engine_sound.play();
+				this.soundEngine.play();
 				this.engine_sound_playing = true;
 			}
 
@@ -284,7 +284,7 @@ var StateGame = FlynnState.extend({
 			}
 		} else {
 			if (this.engine_sound_playing){
-				this.engine_sound.stop();
+				this.soundEngine.stop();
 				this.engine_sound_playing = false;
 			}
 		}
@@ -342,7 +342,7 @@ var StateGame = FlynnState.extend({
 
 					this.mcp.timers.set('shipRespawnAnimation', ShipRespawnAnimationTicks);
 					this.shipRespawnAnimationStarted = true;
-					this.ship_respawn_sound.play();
+					this.soundShipRespawn.play();
 				}
 
 				if(this.mcp.timers.isRunning('shipRespawnAnimation')){
@@ -386,7 +386,7 @@ var StateGame = FlynnState.extend({
 					this.particles.explosion(drifter.radius, drifter.radialAngle, DrifterNumExplosionParticles, drifter.color);
 
 					// Remove dead drifter
-					this.drifter_die_sound.play();
+					this.soundDrifterDie.play();
 					this.drifters.splice(k, 1);
 					len3--;
 					k--;
@@ -405,7 +405,7 @@ var StateGame = FlynnState.extend({
 					b.world_position_v.x += b.velocity_v.x;
 					b.world_position_v.y += b.velocity_v.y;
 					b.lifetime = ReflectedProjectileLife;
-					this.shot_reflect_sound.play();
+					this.soundShotReflect.play();
 				}
 			}
 			if(bulletRemove){
@@ -593,7 +593,7 @@ var StateGame = FlynnState.extend({
 					if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < BlockerCollisionRadius*2){
 						if(this.ship.radius > d.radius){
 							// Ship destroys blocker
-							this.blocker_die_sound.play();
+							this.soundBlockerDie.play();
 							this.particles.explosion(d.radius, d.radialAngle, BlockerNumExplosionParticles, blocker.color);
 							this.particles.explosion(d.radius, d.radialAngle, BlockerCoreExplosionParticles, blocker.core.color);
 							

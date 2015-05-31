@@ -73,7 +73,7 @@ var Game = Class.extend({
 		this.mcp.resize();
 
 		// Audio
-		var song = new Howl({
+		var soundMusic = new Howl({
 			//src: ['sounds/song_roundabout.ogg', 'sounds/song_roundabout.mp3'],
 			src: ['sounds/ThemeIntroRDB.ogg', 'sounds/ThemeIntroRDB.mp3'],
 			loop: true,

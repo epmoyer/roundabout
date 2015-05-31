@@ -36,12 +36,12 @@ var Vortex = Class.extend({
 			this.stars.push(Math.random() * Math.PI * 2);
 		}
 
-		this.vortex_consume_sound = new Howl({
+		this.soundVortexConsume = new Howl({
 			src: ['sounds/VortexConsume.ogg','sounds/VortexConsume.mp3'],
 			volume: 1.0,
 		});
 
-		this.shield_erode_sound = new Howl({
+		this.soundShieldErode = new Howl({
 			src: ['sounds/ShieldBreak.ogg','sounds/ShieldBreak.mp3'],
 			volume: 1.0,
 		});
@@ -96,7 +96,7 @@ var Vortex = Class.extend({
 		if (this.target_radius >= VortexMaxRadius){
 			this.target_radius = VortexMaxRadius;
 		}
-		this.vortex_consume_sound.play();
+		this.soundVortexConsume.play();
 	},
 
 	caresianToAngle: function (x, y) {
@@ -181,7 +181,7 @@ var Vortex = Class.extend({
 							Math.atan2(y,x),
 							10,
 							FlynnColors.CYAN);
-						this.shield_erode_sound.play();
+						this.soundShieldErode.play();
 					}
 					this.shieldPolygon.pointsMaster.splice(len-2,2);
 					this.shieldPolygon.points.splice(len-2,2);

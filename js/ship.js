@@ -43,12 +43,12 @@ var Ship = FlynnPolygon.extend({
 			y: 0
 		};
 
-		this.shoot_sound = new Howl({
+		this.soundShoot = new Howl({
 			src: ['sounds/Laser_Shoot_sustained.ogg', 'sounds/Laser_Shoot_sustained.mp3'],
 			volume: 0.25,
 		});
 
-		this.vortex_consume_player_sound = new Howl({
+		this.soundVortexConsumePlayer = new Howl({
 			src: ['sounds/VortexConsume.ogg', 'sounds/VortexConsume.mp3'],
 			volume: 0.50,
 		});
@@ -82,7 +82,7 @@ var Ship = FlynnPolygon.extend({
 	},
 
 	shoot: function() {
-		this.shoot_sound.play();
+		this.soundShoot.play();
 
 		var projectile_info = {};
 		var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
@@ -128,7 +128,7 @@ var Ship = FlynnPolygon.extend({
 			if(this.visible){
 				this.ascentVelocity = 0;
 				this.radius = vortexRadius;
-				this.vortex_consume_player_sound.play();
+				this.soundVortexConsumePlayer.play();
 				this.deathByVortex = true;
 				isAlive = false;
 			}
