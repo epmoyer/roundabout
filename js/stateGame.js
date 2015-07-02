@@ -200,8 +200,8 @@ var StateGame = FlynnState.extend({
 		}
 
 		// Timers
-		this.mcp.timers.set('shipRespawnDelay', ShipRespawnDelayTicks, null);
-		this.mcp.timers.set('shipRespawnAnimation', 0, null); // Set to zero to deactivate it
+		this.mcp.timers.set('shipRespawnDelay', ShipRespawnDelayTicks);
+		this.mcp.timers.set('shipRespawnAnimation', 0); // Set to zero to deactivate it
 		this.shipRespawnDelayExpired = false;
 		this.shipRespawnAnimationStarted = false;
 
