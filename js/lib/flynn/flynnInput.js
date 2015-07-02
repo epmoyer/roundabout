@@ -99,7 +99,10 @@ var FlynnInputHandler = Class.extend({
 							//console.log("DEV: Touch in region:", name);
 							if(self.virtualButtons[name]){
 								self.virtualButtons[name].isDown = true;
-							} else {
+							} else if (self.uiButtons[name]){
+								self.uiButtons[name].isDown = true;
+							}
+							else {
 								console.log('Flynn: Warning: touch detected in touch region "' + name +
 									'" but no virtual button exists with that name.  The touch will go unreported.');
 							}
@@ -261,7 +264,7 @@ var FlynnInputHandler = Class.extend({
 		}
 		touchRegion = new FlynnTouchRegion(name, left, top, right, bottom);
 		this.touchRegions[name] = touchRegion;
-		if (!(name in this.virtualButtons)){
+		if (!(name in this.virtualButtons) && !(name in this.uiButtons)){
 			console.log('Flynn: Warning: touch region name "' + name +
 						'" does not match an existing virtual button name.  Touches to this region will be unreported' +
 						' unless (until) a virtual button with the same name is created.');

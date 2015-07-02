@@ -57,6 +57,10 @@ var FlynnProjectiles = Class.extend({
 		this.max_bounds_v = max_bounds_v;
 	},
 
+	reset: function(){
+		this.init(this.min_bounds_v, this.max_bounds_v);
+	},
+
 	add: function(world_position_v, velocity_v, lifetime, size, color) {
 		this.projectiles.push(new FlynnProjectile(
 			world_position_v, velocity_v, lifetime, size, color, this.min_bounds_v, this.max_bounds_v));
