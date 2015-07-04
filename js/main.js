@@ -43,6 +43,7 @@ var Game = Class.extend({
 		this.mcp.nextState = States.MENU;
 		this.mcp.custom.score = 0;
 		this.mcp.custom.leaderboard = new FlynnLeaderboard(
+			this.mcp,
 			['name', 'score'],  // attributeList
 			6,                  // maxItems
 			true                // sortDescending
@@ -81,6 +82,8 @@ var Game = Class.extend({
 		this.mcp.optionManager.addOption('musicEnabled', FlynnOptionType.BOOLEAN, true, true, 'MUSIC', null, null);
 		this.mcp.optionManager.addOption('resetScores', FlynnOptionType.COMMAND, true, true, 'RESET HIGH SCORES', null,
 			function(){self.resetScores();});
+		// Restore user option settings from cookies
+		this.mcp.optionManager.loadFromCookies();
 		
 		// Set resize handler and force a resize
 		this.mcp.setResizeFunc( function(width, height){
