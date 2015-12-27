@@ -71,6 +71,9 @@ var StateMenu = FlynnState.extend({
         if (input.virtualButtonIsPressed("UI_escape")) {
             this.mcp.nextState = States.CONFIG;
         }
+        if (input.virtualButtonIsPressed("UI_exit") && this.mcp.backEnabled){
+            window.history.back();
+        }
 	},
 
 	update: function(paceFactor) {
@@ -157,6 +160,11 @@ var StateMenu = FlynnState.extend({
 		ctx.vectorTextArc(
 			"BASED ON THE ASTEROIDS VECTOR FRAMEWORK DEVELOPED BY MAX WIHLBORG",
 			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2 , 220, FlynnColors.GREEN);
+        if(this.mcp.backEnabled){
+            ctx.vectorText('PRESS <TAB> TO EXIT GAME', 1.3, null, 750, null, FlynnColors.GRAY);
+        }
+
+        ctx.vectorText('FLYNN ' + this.mcp.version, 1.0, this.canvasWidth-3, this.canvasHeight-10, 0, FlynnColors.GRAY);
 
 		this.vortex.draw(ctx);
 	}

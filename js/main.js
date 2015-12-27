@@ -98,7 +98,8 @@ var Game = Class.extend({
 		// Audio
 		var soundMusic = new Howl({
 			//src: ['sounds/song_roundabout.ogg', 'sounds/song_roundabout.mp3'],
-			src: ['sounds/ThemeIntroRDB.ogg', 'sounds/ThemeIntroRDB.mp3'],
+			// src: ['sounds/ThemeIntroRDB.ogg', 'sounds/ThemeIntroRDB.mp3'],
+			src: ['sounds/SpaceThemev3.mp3'],
 			loop: true,
 			buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
 			volume: 0.5,
