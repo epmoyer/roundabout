@@ -1,0 +1,6 @@
+.DS_Store
+.dropbox
+.idea
+js/lib/flynn/old
+js/lib/flynn/*.sh
+scrapbook
