@@ -1,10 +1,14 @@
-var DefaultExplosionMaxVelocity = 0.5;
-var ParticleLife = 50;
-var ParticleLifeVariation = 20;
-var ParticleFriction = 0.99;
-var ParticleGravity = -0.01;
+if (typeof Game == "undefined") {
+   var Game = {};  // Create namespace
+}
 
-var Particle = Class.extend({
+Game.Particle = Class.extend({
+
+    PARTICLE_LIFE: 50,
+    PARTICLE_LIFE_VARIATION: 20,
+    PARTICLE_FRICTION: 0.99,
+    PARTICLE_GRAVITY: -0.01,
+
     init: function(particles, radius, angle, dx, dy, color, f_radiusToAngularVelocity){
         this.particles = particles;
         this.radius = radius;
@@ -16,7 +20,7 @@ var Particle = Class.extend({
         this.color = color;
         this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
 
-        this.life = ParticleLife + (Math.random()-0.5) * ParticleLifeVariation;
+        this.life = this.PARTICLE_LIFE + (Math.random()-0.5) * this.PARTICLE_LIFE_VARIATION;
         this.radiusDecayVelocity = 0;
     },
 
@@ -34,7 +38,7 @@ var Particle = Class.extend({
             // Apply angular velocity
             this.angle += angularVelocity * paceFactor;
             // Apply radius decay
-            this.radiusDecayVelocity += ParticleGravity;
+            this.radiusDecayVelocity += this.PARTICLE_GRAVITY;
             this.radius += this.radiusDecayVelocity;
             // Get cartesian position
             this.x = this.particles.center_x + Math.cos(this.angle) * this.radius;
@@ -43,8 +47,8 @@ var Particle = Class.extend({
             this.x += this.dx * paceFactor;
             this.y += this.dy * paceFactor;
             // Decay impulse
-            this.dx *= ParticleFriction;
-            this.dy *= ParticleFriction;
+            this.dx *= this.PARTICLE_FRICTION;
+            this.dy *= this.PARTICLE_FRICTION;
             // Convert back to polar coordinates
             this.angle = Math.atan2(this.y-this.particles.center_y, this.x-this.particles.center_x);
             this.radius = Math.sqrt(Math.pow(this.y-this.particles.center_y,2) + Math.pow(this.x-this.particles.center_x,2));
@@ -60,8 +64,10 @@ var Particle = Class.extend({
 
 });
 
-var Particles = Class.extend({
+Game.Particles = Class.extend({
 
+    DEFAULT_EXPLOSION_MAX_VELOCITY: 0.5,
+    
     init: function(center_x, center_y, f_radiusToAngularVelocity){
         this.center_x = center_x;
         this.center_y = center_y;
@@ -72,7 +78,7 @@ var Particles = Class.extend({
 
     explosion: function(radius, angle, quantity, color, maxVelocity) {
         if(typeof(maxVelocity)==='undefined'){
-            maxVelocity = DefaultExplosionMaxVelocity;
+            maxVelocity = this.DEFAULT_EXPLOSION_MAX_VELOCITY;
         }
         for(var i=0; i<quantity; i++){
             theta = Math.random() * Math.PI * 2;

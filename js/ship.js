@@ -1,160 +1,164 @@
-var ShipGravity = 0.08;
-var ShipThrust = 0.57; //0.4
-var ShipRecoil = 1.0;
-var ShipMaxRadius = 370;
-var ShipBulletVelocity = 5;
-var ShipBulletLife = 60 * 30; // 30 seconds
-var ShipExplosionMaxVelocity = 0.8;
+if (typeof Game == "undefined") {
+   var Game = {};  // Create namespace
+}
 
-var Ship = FlynnPolygon.extend({
+Game.Ship = Flynn.Polygon.extend({
 
-	maxX: null,
-	maxY: null,
+    GRAVITY: 0.08,
+    THRUST: 0.57, //0.4
+    RECOIL: 1.0,
+    MAX_RADIUS: 370,
+    BULLET_VELOCITY: 5,
+    BULLET_LIFE: 60 * 30, // 30 seconds
+    EXPLOSION_MAX_VELOCITY: 0.8,
 
-	init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity, vortex){
-		this._super(p, color);
+    maxX: null,
+    maxY: null,
 
-		this.flames = new FlynnPolygon(pf, FlynnColors.CYAN);
-		this.flames.setScale(s);
+    init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity, vortex){
+        this._super(p, color);
 
-		this.center_x = x;
-		this.center_y = y;
-		this.radius = radius;
-		this.radialAngle = radialAngle;
-		this.angle = 0;
-		this.scale = s;
-		this.ascentVelocity = 0;
-		this.angularVelocity = 0;
-		this.vortex = vortex;
+        this.flames = new Flynn.Polygon(pf, Flynn.Colors.CYAN);
+        this.flames.setScale(s);
 
-		this.x = null;
-		this.y = null;
+        this.center_x = x;
+        this.center_y = y;
+        this.radius = radius;
+        this.radialAngle = radialAngle;
+        this.angle = 0;
+        this.scale = s;
+        this.ascentVelocity = 0;
+        this.angularVelocity = 0;
+        this.vortex = vortex;
 
-		this.drawFlames = false;
-		this.visible = true;
-		this.deathByVortex = false;
+        this.x = null;
+        this.y = null;
 
-		this.setScale(s);
-		this.radial_to_cardinal();
-		this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
+        this.drawFlames = false;
+        this.visible = true;
+        this.deathByVortex = false;
 
-		this.vel = {
-			x: 0,
-			y: 0
-		};
+        this.setScale(s);
+        this.radial_to_cardinal();
+        this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
 
-		this.soundShoot = new Howl({
-			src: ['sounds/Laser_Shoot_sustained.ogg', 'sounds/Laser_Shoot_sustained.mp3'],
-			volume: 0.25,
-		});
+        this.vel = {
+            x: 0,
+            y: 0
+        };
 
-		this.soundVortexConsumePlayer = new Howl({
-			src: ['sounds/VortexConsume.ogg', 'sounds/VortexConsume.mp3'],
-			volume: 0.50,
-		});
-	},
+        this.soundShoot = new Howl({
+            src: ['sounds/Laser_Shoot_sustained.ogg', 'sounds/Laser_Shoot_sustained.mp3'],
+            volume: 0.25,
+        });
 
-	// Calculate caridnal position and angle from radial position and angle
-	radial_to_cardinal: function(){
-		this.setAngle(this.radialAngle);
-		this.flames.setAngle(this.radialAngle);
-		this.x = this.center_x + this.radius * Math.cos(this.radialAngle);
-		this.y = this.center_y + this.radius * Math.sin(this.radialAngle);
-	},
+        this.soundVortexConsumePlayer = new Howl({
+            src: ['sounds/VortexConsume.ogg', 'sounds/VortexConsume.mp3'],
+            volume: 0.50,
+        });
+    },
 
-	collide: function(polygon){
-		if (!this.visible){
-			return false;
-		}
-		for(i=0, len=this.points.length -2; i<len; i+=2){
-			var x = this.points[i] + this.x;
-			var y = this.points[i+1] + this.y;
+    // Calculate caridnal position and angle from radial position and angle
+    radial_to_cardinal: function(){
+        this.setAngle(this.radialAngle);
+        this.flames.setAngle(this.radialAngle);
+        this.x = this.center_x + this.radius * Math.cos(this.radialAngle);
+        this.y = this.center_y + this.radius * Math.sin(this.radialAngle);
+    },
 
-			if (polygon.hasPoint(x,y)){
-				return true;
-			}
-		}
-		return false;
-	},
+    collide: function(polygon){
+        if (!this.visible){
+            return false;
+        }
+        for(i=0, len=this.points.length -2; i<len; i+=2){
+            var x = this.points[i] + this.x;
+            var y = this.points[i+1] + this.y;
 
-	hasPoint: function(x, y) {
-		return this._super(this.x, this.y, x, y);
-	},
+            if (polygon.hasPoint(x,y)){
+                return true;
+            }
+        }
+        return false;
+    },
 
-	shoot: function() {
-		this.soundShoot.play();
+    hasPoint: function(x, y) {
+        return this._super(this.x, this.y, x, y);
+    },
 
-		var projectile_info = {};
-		var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
-		projectile_info.world_position_v = new Victor(
-			this.center_x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0],
-			this.center_y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1]);
-		projectile_info.velocity_v = new Victor(
-			Math.cos(this.radialAngle + b_advance_angle) * ShipBulletVelocity,
-			Math.sin(this.radialAngle + b_advance_angle) * ShipBulletVelocity);
-		projectile_info.lifetime = ShipBulletLife;
-		projectile_info.color = this.color;
-		projectile_info.maxX = this.maxX;
-		projectile_info.maxY = this.maxY;
+    shoot: function() {
+        this.soundShoot.play();
 
-		//Recoil
-		this.ascentVelocity -= ShipRecoil;
-		return projectile_info;
-	},
+        var projectile_info = {};
+        var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
+        projectile_info.world_position_v = new Victor(
+            this.center_x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0],
+            this.center_y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1]);
+        projectile_info.velocity_v = new Victor(
+            Math.cos(this.radialAngle + b_advance_angle) * this.BULLET_VELOCITY,
+            Math.sin(this.radialAngle + b_advance_angle) * this.BULLET_VELOCITY);
+        projectile_info.lifetime = this.BULLET_LIFE;
+        projectile_info.color = this.color;
+        projectile_info.maxX = this.maxX;
+        projectile_info.maxY = this.maxY;
 
-	addVel: function(paceFactor) {
-		this.ascentVelocity += ShipThrust * paceFactor;
-		this.drawFlames = true;
-	},
+        //Recoil
+        this.ascentVelocity -= this.RECOIL;
+        return projectile_info;
+    },
 
-	update: function(paceFactor, angularVelocity, vortexRadius) {
-		var isAlive = true;
+    addVel: function(paceFactor) {
+        this.ascentVelocity += this.THRUST * paceFactor;
+        this.drawFlames = true;
+    },
 
-		//console.log(paceFactor);
-		this.angularVelocity = angularVelocity;
-		this.ascentVelocity -= ShipGravity * paceFactor;
-		this.radius += this.ascentVelocity * paceFactor;
+    update: function(paceFactor, angularVelocity, vortexRadius) {
+        var isAlive = true;
 
-		// Do not descend below vortex shield (if active)
-		if (this.vortex.shieldActive){
-			if(this.radius < this.vortex.shieldRadius){
-				this.radius = this.vortex.shieldRadius;
-				this.ascentVelocity = 0;
-			}
-		}
+        //console.log(paceFactor);
+        this.angularVelocity = angularVelocity;
+        this.ascentVelocity -= this.GRAVITY * paceFactor;
+        this.radius += this.ascentVelocity * paceFactor;
 
-		// Die if fall into vortex
-		if (this.radius < vortexRadius){
-			if(this.visible){
-				this.ascentVelocity = 0;
-				this.radius = vortexRadius;
-				this.soundVortexConsumePlayer.play();
-				this.deathByVortex = true;
-				isAlive = false;
-			}
-		}
+        // Do not descend below vortex shield (if active)
+        if (this.vortex.shieldActive){
+            if(this.radius < this.vortex.shieldRadius){
+                this.radius = this.vortex.shieldRadius;
+                this.ascentVelocity = 0;
+            }
+        }
 
-		// Do not fly past max raius
-		if (this.radius > ShipMaxRadius){
-			this.ascentVelocity = 0;
-			this.radius = ShipMaxRadius;
-		}
-		this.radialAngle += angularVelocity * paceFactor;
-		this.radial_to_cardinal();
+        // Die if fall into vortex
+        if (this.radius < vortexRadius){
+            if(this.visible){
+                this.ascentVelocity = 0;
+                this.radius = vortexRadius;
+                this.soundVortexConsumePlayer.play();
+                this.deathByVortex = true;
+                isAlive = false;
+            }
+        }
 
-		// Update vortex shield angle to match ship
-		this.vortex.shieldAngleTarget = flynnUtilAngleBound2Pi(this.radialAngle);
+        // Do not fly past max raius
+        if (this.radius > this.MAX_RADIUS){
+            this.ascentVelocity = 0;
+            this.radius = this.MAX_RADIUS;
+        }
+        this.radialAngle += angularVelocity * paceFactor;
+        this.radial_to_cardinal();
 
-		return isAlive;
-	},
+        // Update vortex shield angle to match ship
+        this.vortex.shieldAngleTarget = Flynn.Util.angleBound2Pi(this.radialAngle);
 
-	draw: function(ctx){
-		if(this.visible){
-			ctx.drawPolygon(this, this.x, this.y);
-			if (this.drawFlames){
-				ctx.drawPolygon(this.flames, this.x, this.y);
-				this.drawFlames = false;
-			}
-		}
-	}
+        return isAlive;
+    },
+
+    draw: function(ctx){
+        if(this.visible){
+            ctx.drawPolygon(this, this.x, this.y);
+            if (this.drawFlames){
+                ctx.drawPolygon(this.flames, this.x, this.y);
+                this.drawFlames = false;
+            }
+        }
+    }
 });

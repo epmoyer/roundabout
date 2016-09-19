@@ -1,241 +1,242 @@
-var VortexLines = 15;
-var VortexThickness = 15;
-var VortexStartRadius = 20;
-var VortexMaxRadius = 350;
-var VortexRadialSpeed = -0.06;
-var VortexTwist = 0.20;
-var VortexGrowRadius = 10;
-var VortexGrowRate = 0.23;
-var VortexCollapseRate = 1.0;
-var VortexBoostRange = 70;
-var VortexBoostVelocity = 0.06;
+if (typeof Game == "undefined") {
+   var Game = {};  // Create namespace
+}
 
-var VortexShieldPoints = 18;
-var VortexShieldMargin = 15;
-var VortexShieldDrawMargin = 3;
-var VortexShieldErodeTime = 30;
-var VortexShieldAngularSpeed = Math.PI/40;
+Game.Vortex = Class.extend({
 
-var StarMaxRadius = 1024/2;
-var StarfallSpeed = 0.3;
-var StarSpawnRate = 0.07;
-var StarNumMax = 100;
+    VORTEX_LINES: 15,
+    VORTEX_THICKNESS: 15,
+    VORTEX_START_RADIUS: 20,
+    VORTEX_MAX_RADIUS: 350,
+    VORTEX_RADIAL_SPEED: -0.06,
+    VORTEX_TWIST: 0.20,
+    VORTEX_GROW_RADIUS: 10,
+    VORTEX_GROW_RATE: 0.23,
+    VORTEX_COLLAPSE_RATE: 1.0,
+    VORTEX_BOOST_RANGE: 70,
+    VORTEX_BOOST_VELOCITY: 0.06,
+    VORTEX_SHIELD_POINTS: 18,
+    VORTEX_SHIELD_MARGIN: 15,
+    VORTEX_SHIELD_DRAW_MARGIN: 3,
+    VORTEX_SHIELD_ERODE_TIME: 30,
+    VORTEX_SHIELD_ANGULAR_SPEED: Math.PI/40,
+    STAR_MAX_RADIUS: 1024/2,
+    STARFALL_SPEED: 0.3,
+    STAR_SPAWN_RATE: 0.07,
+    STAR_NUM_MAX: 100,
 
+    init: function(x, y){
+        this.target_radius = this.VORTEX_START_RADIUS;
+        this.angle = 0;
+        this.center_x = x;
+        this.center_y = y;
 
-var Vortex = Class.extend({
+        this.stars = [];
+        for (var i=0; i<this.STAR_NUM_MAX; i++){
+            this.stars.push(Math.random() * this.STAR_MAX_RADIUS);
+            this.stars.push(Math.random() * Math.PI * 2);
+        }
 
-	init: function(x, y){
-		this.target_radius = VortexStartRadius;
-		this.angle = 0;
-		this.center_x = x;
-		this.center_y = y;
+        this.soundVortexConsume = new Howl({
+            src: ['sounds/VortexConsume.ogg','sounds/VortexConsume.mp3'],
+            volume: 1.0,
+        });
 
-		this.stars = [];
-		for (var i=0; i<StarNumMax; i++){
-			this.stars.push(Math.random() * StarMaxRadius);
-			this.stars.push(Math.random() * Math.PI * 2);
-		}
+        this.soundShieldErode = new Howl({
+            src: ['sounds/ShieldBreak.ogg','sounds/ShieldBreak.mp3'],
+            volume: 1.0,
+        });
 
-		this.soundVortexConsume = new Howl({
-			src: ['sounds/VortexConsume.ogg','sounds/VortexConsume.mp3'],
-			volume: 1.0,
-		});
+        // Build shield 
+        var shieldPoints = [];
+        for (var theta=0; theta<Math.PI+0.01; theta+=Math.PI*2/this.VORTEX_SHIELD_POINTS){
+            shieldPoints.push(Math.cos(theta-Math.PI/2));
+            shieldPoints.push(Math.sin(theta-Math.PI/2));
+        }
+        this.shieldPolygon = new Flynn.Polygon(shieldPoints, Flynn.Colors.CYAN);
+        this.shieldAngleTarget = -Math.PI/2;
+        this.shieldAngle = -Math.PI/2;
+        this.shieldActive = true;
+        this.shieldPolygon.setAngle(this.shieldAngle);
+        this.shieldErodeTimer = this.VORTEX_SHIELD_ERODE_TIME;
+        this.shieldErode = false;
 
-		this.soundShieldErode = new Howl({
-			src: ['sounds/ShieldBreak.ogg','sounds/ShieldBreak.mp3'],
-			volume: 1.0,
-		});
+        this.setRadius(this.VORTEX_START_RADIUS);
+        this.particles = null;
+    },
 
-		// Build shield 
-		var shieldPoints = [];
-		for (var theta=0; theta<Math.PI+0.01; theta+=Math.PI*2/VortexShieldPoints){
-			shieldPoints.push(Math.cos(theta-Math.PI/2));
-			shieldPoints.push(Math.sin(theta-Math.PI/2));
-		}
-		this.shieldPolygon = new FlynnPolygon(shieldPoints, FlynnColors.CYAN);
-		this.shieldAngleTarget = -Math.PI/2;
-		this.shieldAngle = -Math.PI/2;
-		this.shieldActive = true;
-		this.shieldPolygon.setAngle(this.shieldAngle);
-		this.shieldErodeTimer = VortexShieldErodeTime;
-		this.shieldErode = false;
+    radiusToAngularVelocity: function(radius, boost) {
+        if(typeof(boost)==='undefined'){
+            boost = false;
+        }
+        var boostVelocity = 0;
+        var distance = radius - 20;
+        if (distance < 1){
+            distance = 1;
+        }
+        if (boost){
+            var distanceFromVortex = radius - this.radius;
+            if(distanceFromVortex < 0){
+                distanceFromVortex = 0;
+            }
+            if(distanceFromVortex<this.VORTEX_BOOST_RANGE){
+                boostVelocity = this.VORTEX_BOOST_VELOCITY * ((this.VORTEX_BOOST_RANGE - distanceFromVortex)/this.VORTEX_BOOST_RANGE);
+            }
+        }
+        return -((0.03 * ((this.STAR_MAX_RADIUS - distance)/this.STAR_MAX_RADIUS)) + boostVelocity);
+    },
 
-		this.setRadius(VortexStartRadius);
-		this.particles = null;
-	},
+    setRadius: function(radius){
+        this.radius = radius;
+        this.shieldRadius = radius + this.VORTEX_SHIELD_MARGIN;
+        this.shieldPolygon.setScale(this.shieldRadius - this.VORTEX_SHIELD_DRAW_MARGIN);
+    },
 
-	radiusToAngularVelocity: function(radius, boost) {
-		if(typeof(boost)==='undefined'){
-			boost = false;
-		}
-		var boostVelocity = 0;
-		var distance = radius - 20;
-		if (distance < 1){
-			distance = 1;
-		}
-		if (boost){
-			var distanceFromVortex = radius - this.radius;
-			if(distanceFromVortex < 0){
-				distanceFromVortex = 0;
-			}
-			if(distanceFromVortex<VortexBoostRange){
-				boostVelocity = VortexBoostVelocity * ((VortexBoostRange - distanceFromVortex)/VortexBoostRange);
-			}
-		}
-		return -((0.03 * ((StarMaxRadius - distance)/StarMaxRadius)) + boostVelocity);
-	},
+    grow: function(objectsConsumed) {
+        this.target_radius += this.VORTEX_GROW_RADIUS * objectsConsumed;
+        if (this.target_radius >= this.VORTEX_MAX_RADIUS){
+            this.target_radius = this.VORTEX_MAX_RADIUS;
+        }
+        this.soundVortexConsume.play();
+    },
 
-	setRadius: function(radius){
-		this.radius = radius;
-		this.shieldRadius = radius + VortexShieldMargin;
-		this.shieldPolygon.setScale(this.shieldRadius - VortexShieldDrawMargin);
-	},
+    caresianToAngle: function (x, y) {
+        return Math.atan2(y-this.center_y, x-this.center_x);
+    },
 
-	grow: function(objectsConsumed) {
-		this.target_radius += VortexGrowRadius * objectsConsumed;
-		if (this.target_radius >= VortexMaxRadius){
-			this.target_radius = VortexMaxRadius;
-		}
-		this.soundVortexConsume.play();
-	},
+    cartesianToRadius: function (x, y) {
+        return Math.sqrt(Math.pow(y-this.center_y,2) + Math.pow(x-this.center_x,2));
+    },
 
-	caresianToAngle: function (x, y) {
-		return Math.atan2(y-this.center_y, x-this.center_x);
-	},
+    update: function(paceFactor, doCollapse) {
+        isCollapsed = false;
 
-	cartesianToRadius: function (x, y) {
-		return Math.sqrt(Math.pow(y-this.center_y,2) + Math.pow(x-this.center_x,2));
-	},
+        this.angle += this.VORTEX_RADIAL_SPEED * paceFactor;
 
-	update: function(paceFactor, doCollapse) {
-		isCollapsed = false;
+        if(this.shieldAngle != this.shieldAngleTarget){
+            var angleStep = -this.VORTEX_SHIELD_ANGULAR_SPEED * paceFactor;
+            var separation = this.shieldAngleTarget - this.shieldAngle;
+            if((separation > 0) && (separation < Math.PI*5/6)){
+                angleStep = -angleStep;
+            }
+            this.shieldAngle = Flynn.Util.angleBound2Pi(this.shieldAngle + angleStep);
+            this.shieldPolygon.setAngle(this.shieldAngle);
+        }
 
-		this.angle += VortexRadialSpeed * paceFactor;
+        if (doCollapse){
+            this.target_radius = this.VORTEX_START_RADIUS;
+            this.setRadius(this.radius - this.VORTEX_COLLAPSE_RATE * paceFactor);
+            if (this.radius <= this.VORTEX_START_RADIUS){
+                this.setRadius(this.VORTEX_START_RADIUS);
+                isCollapsed = true;
+            }
+        }
+        else{
+            if(this.radius < this.target_radius){
+                this.setRadius(this.radius + this.VORTEX_GROW_RATE * paceFactor);
+            }
+        }
 
-		if(this.shieldAngle != this.shieldAngleTarget){
-			var angleStep = -VortexShieldAngularSpeed * paceFactor;
-			var separation = this.shieldAngleTarget - this.shieldAngle;
-			if((separation > 0) && (separation < Math.PI*5/6)){
-				angleStep = -angleStep;
-			}
-			this.shieldAngle = flynnUtilAngleBound2Pi(this.shieldAngle + angleStep);
-			this.shieldPolygon.setAngle(this.shieldAngle);
-		}
+        //-----------
+        // Stars
+        //-----------
+        // Add rotational angle to stars based on radius
+        for(var i=0, len=this.stars.length; i<len; i+=2){
+            this.stars[i+1] += this.radiusToAngularVelocity(this.stars[i], true) * paceFactor;
+            this.stars[i] -= this.STARFALL_SPEED * paceFactor;
+            if (this.stars[i] < (this.radius + this.VORTEX_THICKNESS/2)){
+                // Star fell into the vortex, so remove it
+                this.stars.splice(i,2);
+                i-=2;
+                len-=2;
+            }
+        }
+        // Spawn
+        if(this.stars.length < this.STAR_NUM_MAX*2){
+            if(Math.random() * paceFactor < this.STAR_SPAWN_RATE){
+                this.stars.push(Math.random() * this.STAR_MAX_RADIUS);
+                this.stars.push(Math.random() * Math.PI * 2);
+            }
+        }
 
-		if (doCollapse){
-			this.target_radius = VortexStartRadius;
-			this.setRadius(this.radius - VortexCollapseRate * paceFactor);
-			if (this.radius <= VortexStartRadius){
-				this.setRadius(VortexStartRadius);
-				isCollapsed = true;
-			}
-		}
-		else{
-			if(this.radius < this.target_radius){
-				this.setRadius(this.radius + VortexGrowRate * paceFactor);
-			}
-		}
+        // Update shield
+        if(this.shieldErode && this.shieldActive){
+            this.shieldErodeTimer -= paceFactor;
+            if(this.shieldErodeTimer <= 0){
+                len = this.shieldPolygon.pointsMaster.length;
+                if(len > 4){
+                    // Remove the end segments
+                    // console.log(this.shieldPolygon.pointsMaster);
+                    if(this.particles){
+                        x = this.shieldPolygon.points[2];
+                        y = this.shieldPolygon.points[3];
+                        this.particles.explosion(
+                            this.shieldRadius,
+                            Math.atan2(y,x),
+                            10,
+                            Flynn.Colors.CYAN);
+                        x = this.shieldPolygon.points[len-4];
+                        y = this.shieldPolygon.points[len-3];
+                        this.particles.explosion(
+                            this.shieldRadius,
+                            Math.atan2(y,x),
+                            10,
+                            Flynn.Colors.CYAN);
+                        this.soundShieldErode.play();
+                    }
+                    this.shieldPolygon.pointsMaster.splice(len-2,2);
+                    this.shieldPolygon.points.splice(len-2,2);
+                    this.shieldPolygon.pointsMaster.splice(0,2);
+                    this.shieldPolygon.points.splice(0,2);
+                    this.shieldErodeTimer = this.VORTEX_SHIELD_ERODE_TIME;
+                }else{
+                    // Shield eroded.
+                    this.shieldActive = false;
+                }
+            }
+        }
 
-		//-----------
-		// Stars
-		//-----------
-		// Add rotational angle to stars based on radius
-		for(var i=0, len=this.stars.length; i<len; i+=2){
-			this.stars[i+1] += this.radiusToAngularVelocity(this.stars[i], true) * paceFactor;
-			this.stars[i] -= StarfallSpeed * paceFactor;
-			if (this.stars[i] < (this.radius + VortexThickness/2)){
-				// Star fell into the vortex, so remove it
-				this.stars.splice(i,2);
-				i-=2;
-				len-=2;
-			}
-		}
-		// Spawn
-		if(this.stars.length < StarNumMax*2){
-			if(Math.random() * paceFactor < StarSpawnRate){
-				this.stars.push(Math.random() * StarMaxRadius);
-				this.stars.push(Math.random() * Math.PI * 2);
-			}
-		}
+        return isCollapsed;
+    },
 
-		// Update shield
-		if(this.shieldErode && this.shieldActive){
-			this.shieldErodeTimer -= paceFactor;
-			if(this.shieldErodeTimer <= 0){
-				len = this.shieldPolygon.pointsMaster.length;
-				if(len > 4){
-					// Remove the end segments
-					// console.log(this.shieldPolygon.pointsMaster);
-					if(this.particles){
-						x = this.shieldPolygon.points[2];
-						y = this.shieldPolygon.points[3];
-						this.particles.explosion(
-							this.shieldRadius,
-							Math.atan2(y,x),
-							10,
-							FlynnColors.CYAN);
-						x = this.shieldPolygon.points[len-4];
-						y = this.shieldPolygon.points[len-3];
-						this.particles.explosion(
-							this.shieldRadius,
-							Math.atan2(y,x),
-							10,
-							FlynnColors.CYAN);
-						this.soundShieldErode.play();
-					}
-					this.shieldPolygon.pointsMaster.splice(len-2,2);
-					this.shieldPolygon.points.splice(len-2,2);
-					this.shieldPolygon.pointsMaster.splice(0,2);
-					this.shieldPolygon.points.splice(0,2);
-					this.shieldErodeTimer = VortexShieldErodeTime;
-				}else{
-					// Shield eroded.
-					this.shieldActive = false;
-				}
-			}
-		}
+    draw: function(ctx, doCollapse) {
+        // Vortex
+        if (doCollapse){
+            // Collapsing
+            ctx.vectorStart(Flynn.Colors.CYAN);
+        }
+        else if(this.radius < this.target_radius){
+            // Growing
+            ctx.vectorStart(Flynn.Colors.MAGENTA);
+        }
+        else{
+            // Stable
+            ctx.vectorStart(Flynn.Colors.GREEN);
+        }
+        for(theta = 0, angle_delta = (Math.PI * 2)/this.VORTEX_LINES; theta < ((Math.PI * 2)-0.001); theta += angle_delta){
+            var sx = this.center_x + Math.cos(theta+this.angle - this.VORTEX_TWIST) * (this.radius - this.VORTEX_THICKNESS/2);
+            var sy = this.center_y + Math.sin(theta+this.angle - this.VORTEX_TWIST) * (this.radius - this.VORTEX_THICKNESS/2);
+            var ex = this.center_x + Math.cos(theta+this.angle + this.VORTEX_TWIST) * (this.radius + this.VORTEX_THICKNESS/2);
+            var ey = this.center_y + Math.sin(theta+this.angle + this.VORTEX_TWIST) * (this.radius + this.VORTEX_THICKNESS/2);
+            ctx.vectorMoveTo(sx,sy);
+            ctx.vectorLineTo(ex,ey);
+        }
+        ctx.vectorEnd();
 
-		return isCollapsed;
-	},
+        // Stars
+        ctx.fillStyle="#808080";
+        for(var i=0, len=this.stars.length; i<len; i+=2){
+            var radius = this.stars[i];
+            var angle = this.stars[i+1];
+            x = this.center_x + Math.cos(angle) * radius;
+            y = this.center_y + Math.sin(angle) * radius;
+            ctx.fillRect(x,y,2,2);
+        }
 
-	draw: function(ctx, doCollapse) {
-		// Vortex
-		if (doCollapse){
-			// Collapsing
-			ctx.vectorStart(FlynnColors.CYAN);
-		}
-		else if(this.radius < this.target_radius){
-			// Growing
-			ctx.vectorStart(FlynnColors.MAGENTA);
-		}
-		else{
-			// Stable
-			ctx.vectorStart(FlynnColors.GREEN);
-		}
-		for(theta = 0, angle_delta = (Math.PI * 2)/VortexLines; theta < ((Math.PI * 2)-0.001); theta += angle_delta){
-			var sx = this.center_x + Math.cos(theta+this.angle - VortexTwist) * (this.radius - VortexThickness/2);
-			var sy = this.center_y + Math.sin(theta+this.angle - VortexTwist) * (this.radius - VortexThickness/2);
-			var ex = this.center_x + Math.cos(theta+this.angle + VortexTwist) * (this.radius + VortexThickness/2);
-			var ey = this.center_y + Math.sin(theta+this.angle + VortexTwist) * (this.radius + VortexThickness/2);
-			ctx.vectorMoveTo(sx,sy);
-			ctx.vectorLineTo(ex,ey);
-		}
-		ctx.vectorEnd();
+        //Shield
+        if (this.shieldActive){
+            ctx.drawPolygon(this.shieldPolygon, this.center_x, this.center_y);
+        }
 
-		// Stars
-		ctx.fillStyle="#808080";
-		for(var i=0, len=this.stars.length; i<len; i+=2){
-			var radius = this.stars[i];
-			var angle = this.stars[i+1];
-			x = this.center_x + Math.cos(angle) * radius;
-			y = this.center_y + Math.sin(angle) * radius;
-			ctx.fillRect(x,y,2,2);
-		}
-
-		//Shield
-		if (this.shieldActive){
-			ctx.drawPolygon(this.shieldPolygon, this.center_x, this.center_y);
-		}
-
-	}
+    }
 });

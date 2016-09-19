@@ -1,43 +1,48 @@
-var TitleAngularVelocity = -0.01;
-var CreditsAngularVelocity = -0.013;
-var CreditsAngularVelocity2 = -0.014;
-var CreditsAngularVelocity2B = -0.015;
-var CreditsAngularVelocity3 = -0.020;
-var CreditsAngularVelocity4 = -0.027;
-var CreditsAngularVelocity5 = -0.031;
+if (typeof Game == "undefined") {
+   var Game = {};  // Create namespace
+}
 
-var StateMenu = FlynnState.extend({
+Game.StateMenu = Flynn.State.extend({
 
-	init: function(mcp){
-		this._super(mcp);
+    TITLE_ANGULAR_VELOCITY: -0.01,
+    CREDITS_ANGULAR_VELOCITY: -0.013,
+    CREDITS_ANGULAR_VELOCITY2: -0.014,
+    CREDITS_ANGULAR_VELOCITY2_B: -0.015,
+    CREDITS_ANGULAR_VELOCITY3: -0.020,
+    CREDITS_ANGULAR_VELOCITY4: -0.027,
+    CREDITS_ANGULAR_VELOCITY5: -0.031,
+    IS_CENTERED: true,
 
-		this.canvasWidth = mcp.canvas.ctx.width;
-		this.canvasHeight = mcp.canvas.ctx.height;
+    init: function(mcp){
+        this._super(mcp);
 
-		this.vortex = new Vortex(this.canvasWidth/2, this.canvasHeight/2);
-		this.vortex.shieldActive = false;
+        this.canvasWidth = mcp.canvas.ctx.width;
+        this.canvasHeight = mcp.canvas.ctx.height;
 
-		this.titleAngle = (Math.PI*2) * (210/360);
-		this.creditsAngle = 0;
-		this.creditsAngle2 = 2 * Math.PI/4;
-		this.creditsAngle2B = 3 * Math.PI/4;
-		this.creditsAngle3 = Math.PI/4;
-		this.creditsAngle4 = Math.PI/4;
+        this.vortex = new Game.Vortex(this.canvasWidth/2, this.canvasHeight/2);
+        this.vortex.shieldActive = false;
+
+        this.titleAngle = (Math.PI*2) * (210/360);
+        this.creditsAngle = 0;
+        this.creditsAngle2 = 2 * Math.PI/4;
+        this.creditsAngle2B = 3 * Math.PI/4;
+        this.creditsAngle3 = Math.PI/4;
+        this.creditsAngle4 = Math.PI/4;
         this.creditsAngle5 = Math.PI/4;
 
-		this.start_sound = new Howl({
-			src: ['sounds/Tripple_blip.ogg','sounds/Tripple_blip.mp3'],
-			volume: 0.5
-		});
+        this.start_sound = new Howl({
+            src: ['sounds/Tripple_blip.ogg','sounds/Tripple_blip.mp3'],
+            volume: 0.5
+        });
 
         this.insert_coin_sound = new Howl({
             src: ['sounds/InsertCoin.ogg','sounds/InsertCoin.mp3'],
             volume: 0.5
         });
-	},
+    },
 
-	handleInputs: function(input, paceFactor) {
-		// Metrics toggle
+    handleInputs: function(input, paceFactor) {
+        // Metrics toggle
         if(this.mcp.developerModeEnabled) {
             if (input.virtualButtonIsPressed("dev_metrics")) {
                 this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
@@ -67,31 +72,31 @@ var StateMenu = FlynnState.extend({
                  || input.virtualButtonIsPressed("UI_start2") )))
         {
             this.mcp.credits -= 1;
-			this.mcp.nextState = States.GAME;
-			this.start_sound.play();
-		}
+            this.mcp.nextState = Game.States.GAME;
+            this.start_sound.play();
+        }
 
         if (input.virtualButtonIsPressed("UI_escape")) {
-            this.mcp.nextState = States.CONFIG;
+            this.mcp.nextState = Game.States.CONFIG;
         }
         if (input.virtualButtonIsPressed("UI_exit") && this.mcp.backEnabled){
             window.history.back();
         }
-	},
+    },
 
-	update: function(paceFactor) {
-		// Update vortex
-		this.vortex.update(paceFactor);
-		this.titleAngle += TitleAngularVelocity * paceFactor;
-		this.creditsAngle += CreditsAngularVelocity * paceFactor;
-		this.creditsAngle2 += CreditsAngularVelocity2 * paceFactor;
-		this.creditsAngle2B += CreditsAngularVelocity2B * paceFactor;
-		this.creditsAngle3 += CreditsAngularVelocity3 * paceFactor;
-        this.creditsAngle4 += CreditsAngularVelocity4 * paceFactor;
-		this.creditsAngle5 += CreditsAngularVelocity5 * paceFactor;
-	},
+    update: function(paceFactor) {
+        // Update vortex
+        this.vortex.update(paceFactor);
+        this.titleAngle += this.TITLE_ANGULAR_VELOCITY * paceFactor;
+        this.creditsAngle += this.CREDITS_ANGULAR_VELOCITY * paceFactor;
+        this.creditsAngle2 += this.CREDITS_ANGULAR_VELOCITY2 * paceFactor;
+        this.creditsAngle2B += this.CREDITS_ANGULAR_VELOCITY2_B * paceFactor;
+        this.creditsAngle3 += this.CREDITS_ANGULAR_VELOCITY3 * paceFactor;
+        this.creditsAngle4 += this.CREDITS_ANGULAR_VELOCITY4 * paceFactor;
+        this.creditsAngle5 += this.CREDITS_ANGULAR_VELOCITY5 * paceFactor;
+    },
 
-	render: function(ctx) {
+    render: function(ctx) {
         ctx.clearAll();
         var title_x = 160;
         var title_y = 150;
@@ -99,18 +104,18 @@ var StateMenu = FlynnState.extend({
 
         // Font Test
         //ctx.vectorText("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
-        //	2.5, 30, 30, null, FlynnColors.MAGENTA);
+        //  2.5, 30, 30, null, Flynn.Colors.MAGENTA);
         //ctx.vectorText("Unimplemented:{|}~",
-        //	2.5, 30, 55, null, FlynnColors.MAGENTA);
+        //  2.5, 30, 55, null, Flynn.Colors.MAGENTA);
 
         for (var angle = 0; angle < Math.PI + 0.1; angle += Math.PI) {
-            ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, FlynnColors.MAGENTA);
-            ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle - 0.01 + angle, 297, FlynnColors.CYAN);
+            ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, Flynn.Colors.MAGENTA);
+            ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle - 0.01 + angle, 297, Flynn.Colors.CYAN);
         }
 
         ctx.vectorTextArc("VERSION 7.0",
             2, this.vortex.center_x, this.vortex.center_y,
-            this.creditsAngle3, 100, FlynnColors.GREEN, FlynnIsCentered);
+            this.creditsAngle3, 100, Flynn.Colors.GREEN, this.IS_CENTERED);
         var startText;
         var controlsText1, controlsText2;
         if (this.mcp.arcadeModeEnabled) {
@@ -120,7 +125,7 @@ var StateMenu = FlynnState.extend({
             controlsText2 = "RIGHT BUTTON SHOOT";
             this.mcp.custom.thrustPrompt = "PRESS LEFT BUTTON TO THRUST";
             this.mcp.custom.shootPrompt = "PRESS RIGHT BUTTON TO SHOOT";
-            ctx.vectorText(this.mcp.credits + " Credits", 2, 10, this.canvasHeight - 20, null, FlynnColors.YELLOW);
+            ctx.vectorText(this.mcp.credits + " Credits", 2, 10, this.canvasHeight - 20, null, Flynn.Colors.YELLOW);
         }
         else {
             if (!this.mcp.browserSupportsTouch) {
@@ -133,7 +138,7 @@ var StateMenu = FlynnState.extend({
                 this.mcp.custom.shootPrompt = "PRESS " + fireButtonName + " TO SHOOT";
                 ctx.vectorTextArc("PRESS ESCAPE TO CONFIGURE",
                     2, this.vortex.center_x, this.vortex.center_y,
-                    this.creditsAngle5, 60, FlynnColors.GREEN, FlynnIsCentered);
+                    this.creditsAngle5, 60, Flynn.Colors.GREEN, this.IS_CENTERED);
             } else {
                 startText = "TAP ANYWHERE TO START";
                 //              #########################################
@@ -147,29 +152,29 @@ var StateMenu = FlynnState.extend({
             if (Math.floor(this.mcp.clock / 40) % 2 == 1) {
                 ctx.vectorTextArc(startText,
                     2, this.vortex.center_x, this.vortex.center_y,
-                    this.creditsAngle3 + Math.PI, 100, FlynnColors.CYAN, FlynnIsCentered);
+                    this.creditsAngle3 + Math.PI, 100, Flynn.Colors.CYAN, this.IS_CENTERED);
             }
         }
-		ctx.vectorTextArc(controlsText1,
-			2, this.vortex.center_x, this.vortex.center_y,
-			this.creditsAngle4, 80, FlynnColors.YELLOW, FlynnIsCentered);
+        ctx.vectorTextArc(controlsText1,
+            2, this.vortex.center_x, this.vortex.center_y,
+            this.creditsAngle4, 80, Flynn.Colors.YELLOW, this.IS_CENTERED);
         ctx.vectorTextArc(controlsText2,
             2, this.vortex.center_x, this.vortex.center_y,
-            this.creditsAngle4 + Math.PI, 80, FlynnColors.YELLOW, FlynnIsCentered);
+            this.creditsAngle4 + Math.PI, 80, Flynn.Colors.YELLOW, this.IS_CENTERED);
 
-		ctx.vectorTextArc(
-			"WRITTEN BY TRAYTON MOYER (FLOATIN' HEAD) AND ERIC MOYER (FIENDFODDER) FOR LUDAM MINI DARE 56",
-			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle , 240, FlynnColors.GREEN);
-		ctx.vectorTextArc(
-			"BASED ON THE ASTEROIDS VECTOR FRAMEWORK DEVELOPED BY MAX WIHLBORG",
-			2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2 , 220, FlynnColors.GREEN);
+        ctx.vectorTextArc(
+            "WRITTEN BY TRAYTON MOYER (FLOATIN' HEAD) AND ERIC MOYER (FIENDFODDER) FOR LUDAM MINI DARE 56",
+            2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle , 240, Flynn.Colors.GREEN);
+        ctx.vectorTextArc(
+            "BASED ON THE ASTEROIDS VECTOR FRAMEWORK DEVELOPED BY MAX WIHLBORG",
+            2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2 , 220, Flynn.Colors.GREEN);
         if(this.mcp.backEnabled){
-            ctx.vectorText('PRESS <TAB> TO EXIT GAME', 1.3, null, 750, null, FlynnColors.GRAY);
+            ctx.vectorText('PRESS <TAB> TO EXIT GAME', 1.3, null, 750, null, Flynn.Colors.GRAY);
         }
 
-        ctx.vectorText('FLYNN ' + this.mcp.version, 1.0, this.canvasWidth-3, this.canvasHeight-10, 0, FlynnColors.GRAY);
+        ctx.vectorText('FLYNN ' + this.mcp.version, 1.0, this.canvasWidth-3, this.canvasHeight-10, 0, Flynn.Colors.GRAY);
 
-		this.vortex.draw(ctx);
-	}
+        this.vortex.draw(ctx);
+    }
 
 });

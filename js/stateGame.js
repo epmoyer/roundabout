@@ -1,760 +1,764 @@
-var ShipStartRadius = 250;
-var ShipStartAngle = -Math.PI / 2;
-	
-var DrifterMaxRadius = 1024/2+30;
-var DrifterSpawnRate = 0.005;
-var DrifterPoints = 100;
-var DrifterCollisionRadius = 13;
-var DrifterNumExplosionParticles = 20;
+if (typeof Game == "undefined") {
+   var Game = {};  // Create namespace
+}
 
-var BlockerAppearScore = 800;
-var BlockerSpawnRate = 0.001;
-var BlockerPoints = 250;
-var BlockerCollisionRadius = 13;
-var BlockerNumExplosionParticles = 30;
-var BlockerCoreExplosionParticles = 10;
+Game.StateGame = Flynn.State.extend({
 
-var SpawnOverlapRetries = 16;
-var OverlapAngleSpacing = Math.PI/16;
+    SHIP_START_RADIUS: 250,
+    SHIP_START_ANGLE: -Math.PI / 2,
 
-var ReflectedProjectileLife = 15;
+    DRIFTER_MAX_RADIUS: 1024/2+30,
+    DRIFTER_SPAWN_RATE: 0.005,
+    DRIFTER_POINTS: 100,
+    DRIFTER_COLLISION_RADIUS: 13,
+    DRIFTER_NUM_EXPLOSION_PARTICLES: 20,
 
-var ShipBounceMinVelocity = 1.5;
+    BLOCKER_APPEAR_SCORE: 800,
+    BLOCKER_SPAWN_RATE: 0.001,
+    BLOCKER_POINTS: 250,
+    BLOCKER_COLLISION_RADIUS: 13,
+    BLOCKER_NUM_EXPLOSION_PARTICLES: 30,
+    BLOCKER_CORE_EXPLOSION_PARTICLES: 10,
 
-var VortexShieldEndScore = 500;
+    SPAWN_OVERLAP_RETRIES: 16,
+    OVERLAP_ANGLE_SPACING: Math.PI/16,
 
-var ShipNumExplosionParticles = 50;
-var ShipRespawnDelayTicks = 30;
-var ShipRespawnDelayGameStartTicks = 60 * 1.25; // Respawn delay at inital start
-var ShipRespawnAnimationTicks = 60 * 1.8;
-var ShipRespawnScaleMax = 35;
-var ShipRespawnScaleMin = 0.1;
-var ShipRespawnAngleMax = Math.PI * 2 * 0.8;
+    REFLECTED_PROJECTILE_LIFE: 15,
 
-var PopUpTextLife = 3 * 60;
-var PopUpThrustPromptTime = 4 * 60; //2 * 60;
-var PopUpFirePromptTime = 7 * 60; //5 * 60;
-var PopUpCancelTime = 15; // Ticks to remove a pop-up when canceled
+    SHIP_BOUNCE_MIN_VELOCITY: 1.5,
 
-var ExtraLifeScore = 5000;
+    VORTEX_SHIELD_END_SCORE: 500,
 
-var ProjectilesMax = 4;
-var ProjectileSize = 3;
+    SHIP_NUM_EXPLOSION_PARTICLES: 50,
+    SHIP_RESPAWN_DELAY_TICKS: 30,
+    SHIP_RESPAWN_DELAY_GAME_START_TICKS: 60 * 1.25, // Respawn delay at inital start
+    SHIP_RESPAWN_ANIMATION_TICKS: 60 * 1.8,
+    SHIP_RESPAWN_SCALE_MAX: 35,
+    SHIP_RESPAWN_SCALE_MIN: 0.1,
+    SHIP_RESPAWN_ANGLE_MAX: Math.PI * 2 * 0.8,
 
-var StateGame = FlynnState.extend({
+    POP_UP_TEXT_LIFE: 3 * 60,
+    POP_UP_THRUST_PROMPT_TIME: 4 * 60, //2 * 60,
+    POP_UP_FIRE_PROMPT_TIME: 7 * 60, //5 * 60,
+    POP_UP_CANCEL_TIME: 15, // Ticks to remove a pop-up when canceled
 
-	init: function(mcp) {
-		this._super(mcp);
-		
-		this.canvasWidth = mcp.canvas.ctx.width;
-		this.canvasHeight = mcp.canvas.ctx.height;
-		this.center_x = this.canvasWidth/2;
-		this.center_y = this.canvasHeight/2;
-		this.viewport_v = new Victor(0,0);
+    EXTRA_LIFE_SCORE: 5000,
 
-		this.vortex = new Vortex(this.center_x, this.center_y);
+    PROJECTILES_MAX: 4,
+    PROJECTILE_SIZE: 3,
 
-		this.ship = new Ship(Points.WIDE_SHIP, Points.FLAMES, 1.5, this.center_x, this.center_y,
-			ShipStartRadius, ShipStartAngle, FlynnColors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
-		this.ship.maxX = this.canvasWidth;
-		this.ship.maxY = this.canvasHeight;
-		this.ship.visible = false; // Start invisible, to force respawn animation
+    init: function(mcp) {
+        this._super(mcp);
+        
+        this.canvasWidth = mcp.canvas.ctx.width;
+        this.canvasHeight = mcp.canvas.ctx.height;
+        this.center_x = this.canvasWidth/2;
+        this.center_y = this.canvasHeight/2;
+        this.viewport_v = new Victor(0,0);
 
-		this.respawnPolygon = new FlynnPolygon(Points.RESPAWN, FlynnColors.YELLOW);
-		this.respawnPolygon.setScale(1);
-		this.shipRespawnX = this.center_x + ShipStartRadius * Math.cos(ShipStartAngle);
-		this.shipRespawnY = this.center_y + ShipStartRadius * Math.sin(ShipStartAngle);
+        this.vortex = new Game.Vortex(this.center_x, this.center_y);
 
-		this.gameOver = false;
-		this.lives = 3;
-		this.lifepolygon = new FlynnPolygon(Points.WIDE_SHIP, FlynnColors.YELLOW);
-		this.lifepolygon.setScale(1.2);
+        this.ship = new Game.Ship(Game.Points.WIDE_SHIP, Game.Points.FLAMES, 1.5, this.center_x, this.center_y,
+            this.SHIP_START_RADIUS, this.SHIP_START_ANGLE, Flynn.Colors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
+        this.ship.maxX = this.canvasWidth;
+        this.ship.maxY = this.canvasHeight;
+        this.ship.visible = false; // Start invisible, to force respawn animation
+
+        this.respawnPolygon = new Flynn.Polygon(Game.Points.RESPAWN, Flynn.Colors.YELLOW);
+        this.respawnPolygon.setScale(1);
+        this.shipRespawnX = this.center_x + this.SHIP_START_RADIUS * Math.cos(this.SHIP_START_ANGLE);
+        this.shipRespawnY = this.center_y + this.SHIP_START_RADIUS * Math.sin(this.SHIP_START_ANGLE);
+
+        this.gameOver = false;
+        this.lives = 3;
+        this.lifepolygon = new Flynn.Polygon(Game.Points.WIDE_SHIP, Flynn.Colors.YELLOW);
+        this.lifepolygon.setScale(1.2);
         this.lifepolygon.setAngle(-Math.PI/2);
 
-		this.score = 0;
-		this.highscore = this.mcp.highscores[0][1];
-
-		this.lvl = 0;
-
-		this.generateLvl();
-
-		this.soundEngine = new Howl({
-			src: ['sounds/Engine.ogg','sounds/Engine.mp3'],
-			volume: 0.25,
-			loop: true,
-		});
-		this.soundPlayerDie = new Howl({
-			src: ['sounds/Playerexplosion2.ogg','sounds/Playerexplosion2.mp3'],
-			volume: 0.25,
-		});
-		this.soundExtraLife = new Howl({
-			src: ['sounds/ExtraLife.ogg','sounds/ExtraLife.mp3'],
-			volume: 1.00,
-		});
-		this.soundShotReflect = new Howl({
-			src: ['sounds/Blocked.ogg','sounds/Blocked.mp3'],
-			volume: 0.25,
-		});
-		this.soundDrifterDie = new Howl({
-			src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
-			volume: 0.25,
-		});
-		this.soundBlockerDie = new Howl({
-			src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
-			volume: 0.25,
-		});
-		this.soundShipRespawn = new Howl({
-			src: ['sounds/ShipRespawn.ogg','sounds/ShipRespawn.mp3'],
-			volume: 0.25,
-		});
-		this.engine_sound_playing = false;
-
-		this.vortexCollapse = false;
-
-		// Game Clock
-		this.gameClock = 0;
-
-		// Timers
-		this.mcp.timers.add('shipRespawnDelay', ShipRespawnDelayGameStartTicks, null);  // Start game with a delay (for start sound to finish)
-		this.mcp.timers.add('shipRespawnAnimation', 0, null);
-		this.shipRespawnDelayExpired = false;
-		this.shipRespawnAnimationStarted = false;
-
-		// Aliens
-		this.drifters = [];
-		this.blockers = [];
-
-		// Vortex
-		this.particles = new Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
-		this.vortex.particles = this.particles;
-
-		// Pop-up messages
-		this.popUpText = "";
-		this.popUpText2 = null;
-		this.popUpLife = 0;
-		this.popUpThrustPending = true;
-		this.popUpFirePending = true;
-		this.popUpThrustActive = false;
-		this.popUpFireActive = false;
-		this.thrustHasOccurred = false;
-		this.popupShieldErodePending = true;
-	},
-
-	generateLvl: function() {
-		var margin = 20;
-
-		this.ship.radius = ShipStartRadius;
-		this.ship.radialAngle = ShipStartAngle;
-
-		this.projectiles = new FlynnProjectiles( new Victor(0,0), new Victor(this.canvasWidth, this.canvasHeight));
-		this.drifters = [];
-		this.blockers = [];
-	},
-
-	addPoints: function(points){
-		// Points only count when not dead
-		if(this.ship.visible){
-			if(Math.floor(this.score / ExtraLifeScore) != Math.floor((this.score + points) / ExtraLifeScore)){
-				// Extra life
-				this.lives++;
-				this.soundExtraLife.play();
-			}
-			this.score += points;
-		}
-
-		// Update highscore if exceeded
-		if (this.score > this.highscore){
-			this.highscore = this.score;
-		}
-	},
-
-	showPopUp: function(popUpText, popUpText2){
-		if(typeof(popUpText2)==='undefined'){
-			popUpText2 = null;
-		}
-
-		this.popUpText = popUpText;
-		this.popUpText2 = popUpText2;
-		this.popUpLife = PopUpTextLife;
-	},
-
-	doShipDie: function(){
-		// Visibility
-		this.ship.visible = false;
-
-		// Lives
-		this.lives--;
-		if(this.lives <= 0){
-			this.gameOver = true;
-		}
-
-		// Sounds
-		this.soundEngine.stop();
-
-		// Explosion
-		if(!this.ship.deathByVortex){
-			this.soundPlayerDie.play();
-			this.particles.explosion(
-				this.ship.radius, this.ship.radialAngle, ShipNumExplosionParticles,
-				this.ship.color, ShipExplosionMaxVelocity);
-		}
-
-		// Timers
-		this.mcp.timers.set('shipRespawnDelay', ShipRespawnDelayTicks);
-		this.mcp.timers.set('shipRespawnAnimation', 0); // Set to zero to deactivate it
-		this.shipRespawnDelayExpired = false;
-		this.shipRespawnAnimationStarted = false;
-
-		// Vortex
-		this.vortexCollapse = true;
-		// Make all enemies death dive to clear the play field
-		for(i=0, len=this.drifters.length; i<len; i++){
-			this.drifters[i].deathDive = true;
-		}
-		for(i=0, len=this.blockers.length; i<len; i++){
-			this.blockers[i].deathDive = true;
-		}
-	},
-
-	handleInputs: function(input, paceFactor) {
-
-		if(this.mcp.developerModeEnabled){
-			// Metrics toggle
-			if (input.virtualButtonIsPressed("dev_metrics")){
-				this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
-			}
-
-			// Toggle DEV pacing mode slow mo
-			if (input.virtualButtonIsPressed("dev_slow_mo")){
-				this.mcp.toggleDevPacingSlowMo();
-			}
-
-			// Toggle DEV pacing mode fps 20
-			if (input.virtualButtonIsPressed("dev_fps_20")){
-				this.mcp.toggleDevPacingFps20();
-			}
-
-			// Points
-			if (input.virtualButtonIsPressed("dev_add_points")){
-				this.addPoints(100);
-			}
-
-			// Die
-			if (input.virtualButtonIsPressed("dev_die")){
-				this.doShipDie();
-			}
-
-			// Grow vortex
-			if (input.virtualButtonIsPressed("vortex_grow")){
-				this.vortex.grow(1);
-			}
-		}
-		
-		if(!this.ship.visible){
-			if (input.virtualButtonIsPressed("UI_enter")){
-				if (this.gameOver){
-					if(this.mcp.browserSupportsTouch){
-						// On touch devices just update high score and go back to menu
-						this.mcp.updateHighScores("NONAME", this.score);
-
-						this.mcp.nextState = States.MENU;
-					} else {
-						this.mcp.nextState = States.END;
-					}
-					this.mcp.custom.score = this.score;
-					return;
-				}
-			}
-			return;
-		}
-
-
-		if (input.virtualButtonIsDown("thrust")){
-			this.thrustHasOccurred = true;
-			this.popUpThrustPending = false;
-			this.ship.addVel(paceFactor);
-			if(!this.engine_sound_playing){
-				this.soundEngine.play();
-				this.engine_sound_playing = true;
-			}
-
-			// Cancel PopUp
-			if(this.popUpThrustActive){
-				this.popUpLife = Math.min(PopUpCancelTime, this.popUpLife);
-			}
-		} else {
-			if (this.engine_sound_playing){
-				this.soundEngine.stop();
-				this.engine_sound_playing = false;
-			}
-		}
-
-		if (input.virtualButtonIsPressed("fire")){
-			this.popUpFirePending = false;
-
-			// Limit max shots on screen 
-			if(this.projectiles.projectiles.length < ProjectilesMax){
-				var projectile = this.ship.shoot();
-				this.projectiles.add(
-					projectile.world_position_v,
-					projectile.velocity_v,
-					projectile.lifetime,
-					ProjectileSize,
-					projectile.color
-					);
-				this.projectiles.advanceFrame(); // Move the projectile one frame to get it away from the ship
-			}
-
-			// Cancel PopUp
-			if(this.popUpFireActive){
-				this.popUpLife = Math.min(PopUpCancelTime, this.popUpLife);
-			}
-		}
-
-	},
-
-	update: function(paceFactor) {
-		var i, len, b, numOusideEnemies, outsideEnemyAngles;
-
-		this.gameClock += paceFactor;
-
-		if (this.ship.visible){
-			// Update ship
-			var isAlive = this.ship.update(
-				paceFactor,
-				this.vortex.radiusToAngularVelocity(this.ship.radius, true),
-				this.vortex.radius);
-			if(!isAlive){
-				this.doShipDie();
-			}
-		}
-		else{
-			// Ship not visible
-			if(!this.gameOver){
-				if(this.mcp.timers.hasExpired('shipRespawnDelay')){
-					this.shipRespawnDelayExpired = true;
-				}
-
-				if(	(this.drifters.length === 0) &&
-					(this.blockers.length === 0) &&
-					this.shipRespawnDelayExpired &&
-					!this.shipRespawnAnimationStarted){
-
-					this.mcp.timers.set('shipRespawnAnimation', ShipRespawnAnimationTicks);
-					this.shipRespawnAnimationStarted = true;
-					this.soundShipRespawn.play();
-				}
-
-				if(this.mcp.timers.isRunning('shipRespawnAnimation')){
-					this.vortex.shieldAngleTarget = flynnUtilAngleBound2Pi(ShipStartAngle);
-				}
-
-				// If respawn animation has finished...
-				if(this.mcp.timers.hasExpired('shipRespawnAnimation')){
-					// Respawn the ship
-					this.ship.radius = ShipStartRadius;
-					this.ship.radialAngle = ShipStartAngle;
-					this.ship.ascentVelocity = 0;
-					this.ship.visible = true;
-					this.ship.deathByVortex = false;
-					this.ship.update(
-						paceFactor,
-						this.vortex.radiusToAngularVelocity(this.ship.radius, true),
-						this.vortex.radius);
-				}
-			}
-		}
-
-		// Check projectile collisions
-		for(var j=0, len2 = this.projectiles.projectiles.length; j<len2; j++){
-			b = this.projectiles.projectiles[j];
-			var bulletRemove = false;
-
-			// Remove shots that reflect back into vortex
-			if (Math.sqrt(Math.pow(b.world_position_v.x - this.center_x, 2) + Math.pow(b.world_position_v.y - this.center_y,2)) <= this.vortex.radius){
-				bulletRemove = true;
-			}
-
-			// Shoot drifters
-			for(var k=0, len3 =this.drifters.length; k<len3; k++){
-				drifter = this.drifters[k];
-				if (Math.sqrt(Math.pow(drifter.x - b.world_position_v.x, 2) + Math.pow(drifter.y - b.world_position_v.y,2)) < DrifterCollisionRadius){
-
-					this.addPoints(DrifterPoints);
-
-					// Explode
-					this.particles.explosion(drifter.radius, drifter.radialAngle, DrifterNumExplosionParticles, drifter.color);
-
-					// Remove dead drifter
-					this.soundDrifterDie.play();
-					this.drifters.splice(k, 1);
-					len3--;
-					k--;
-
-					bulletRemove = true;
-				}
-			}
-			// Shoot blockers
-			for(k=0, len3 =this.blockers.length; k<len3; k++){
-				blocker = this.blockers[k];
-				if (Math.sqrt(Math.pow(blocker.x - b.world_position_v.x, 2) + Math.pow(blocker.y - b.world_position_v.y,2)) < BlockerCollisionRadius){
-					// Reverse bullet direction
-					b.velocity_v.x =- b.velocity_v.x;
-					b.velocity_v.y =- b.velocity_v.y;
-					// Move the bullet after reflect, so that it cannot bounce around inside the blocker
-					b.world_position_v.x += b.velocity_v.x;
-					b.world_position_v.y += b.velocity_v.y;
-					b.lifetime = ReflectedProjectileLife;
-					this.soundShotReflect.play();
-				}
-			}
-			if(bulletRemove){
-				this.projectiles.projectiles.splice(j, 1);
-				len2--;
-				j--;
-			}
-		}
-
-
-		// Update projectiles
-		this.projectiles.update(paceFactor);
-
-		// Update vortex
-		var isCollapsed = this.vortex.update(paceFactor, this.vortexCollapse);
-		if (isCollapsed){
-			this.vortexCollapse = false;
-		}
-
-		//----------------
-		// Drifers
-		//----------------
-
-		//Spawn
-		if(!this.vortexCollapse && this.ship.visible){
-			if((Math.random() < DrifterSpawnRate) || (this.drifters.length === 0)){
-				var drifterRadius;
-				var drifterAngle;
-				if(this.drifters.length === 0){
-					// Start first drifter at one of the midscreen edges, so that it is immediately visisble
-					if (Math.random() > 0.5){
-						// Left/right
-						drifterRadius = this.center_x;
-						if (Math.random() > 0.5){
-							drifterAngle = 0;
-						}
-						else{
-							drifterAngle = Math.PI;
-						}
-					} else {
-						// Top/bottom
-						drifterRadius = this.center_y;
-						if (Math.random() > 0.5){
-							drifterAngle = Math.PI/2;
-						}
-						else{
-							drifterAngle = Math.PI*3/2;
-						}
-					}
-				}
-				else {
-					drifterRadius = DrifterMaxRadius;
-					drifterAngle =  Math.random() * Math.PI * 2;
-
-					// Make sure new drifter is not on top of an existing enemy
-					numOusideEnemies = 0;
-					outsideEnemyAngles = [];
-					for(i=0, len=this.drifters.length; i<len; i++){
-						if(this.drifters[i].radius > drifterRadius - (DrifterCollisionRadius * 2)){
-							outsideEnemyAngles.push(flynnUtilAngleBound2Pi(this.drifters[i].radialAngle));
-							++numOusideEnemies;
-						}
-					}
-					for(i=0, len=this.blockers.length; i<len; i++){
-						if(this.blockers[i].radius > drifterRadius - (BlockerCollisionRadius + DrifterCollisionRadius)){
-							outsideEnemyAngles.push(flynnUtilAngleBound2Pi(this.blockers[i].radialAngle));
-							++numOusideEnemies;
-						}
-					}
-					if(numOusideEnemies > 0){
-						// Try SpawnOverlapRetries times, then give up
-						for (i = 0; i<SpawnOverlapRetries; i++){
-							overlapping = false;
-							for(j=0; j<numOusideEnemies; j++){
-								if(Math.abs(drifterAngle-outsideEnemyAngles[j]) < OverlapAngleSpacing){
-									overlapping = true;
-								}
-							}
-							if(!overlapping){
-								break;
-							}
-							else {
-								drifterAngle = flynnUtilAngleBound2Pi(drifterAngle + OverlapAngleSpacing);
-								//console.log("DEV: Advancing drifter spawn.");
-							}
-						}
-					}
-				}
-
-				// Create drifter
-				drifter = new Drifter(Points.POINTY_SHIP, 2, this.center_x, this.center_y,
-					drifterRadius, drifterAngle, FlynnColors.RED,
-					this.vortex.radiusToAngularVelocity);
-				this.drifters.push(drifter);
-			}
-		}
-
-		// Update & check player collisions
-		var numObjectsConsumed = 0;
-		for(i=0, len=this.drifters.length; i<len; i++){
-			numObjectsConsumed += this.drifters[i].update(paceFactor, this.vortex.radius);
-			if(this.drifters[i].alive === false){
-				// Remove dead drifter
-				this.drifters.splice(i, 1);
-				len--;
-				i--;
-			} else{
-				if(this.ship.visible){
-					d = this.drifters[i];
-					if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < DrifterCollisionRadius*2){
-						this.doShipDie();
-						this.particles.explosion(d.radius, d.radialAngle, DrifterNumExplosionParticles, drifter.color);
-						
-						// Remove dead drifter
-						this.drifters.splice(i, 1);
-						len--;
-						i--;
-					}
-				}
-			}
-		}
-
-		//----------------
-		// Blockers
-		//----------------
-
-		//Spawn
-		if(!this.vortexCollapse && this.ship.visible && this.score >= BlockerAppearScore){
-			if((Math.random() < BlockerSpawnRate) || (this.blockers.length === 0)){
-
-				var blockerRadius = DrifterMaxRadius;
-				var blockerAngle = Math.random() * Math.PI * 2;
-
-				// Make sure new blocker is not on top of an existing enemy
-				numOusideEnemies = 0;
-				outsideEnemyAngles = [];
-				for(i=0, len=this.drifters.length; i<len; i++){
-					if(this.drifters[i].radius > blockerRadius - (DrifterCollisionRadius + BlockerCollisionRadius)){
-						outsideEnemyAngles.push(flynnUtilAngleBound2Pi(this.drifters[i].radialAngle));
-						++numOusideEnemies;
-					}
-				}
-				for(i=0, len=this.blockers.length; i<len; i++){
-					if(this.blockers[i].radius > blockerRadius - (BlockerCollisionRadius*2)){
-						outsideEnemyAngles.push(flynnUtilAngleBound2Pi(this.blockers[i].radialAngle));
-						++numOusideEnemies;
-					}
-				}
-				if(numOusideEnemies > 0){
-					// Try SpawnOverlapRetries times, then give up
-					for (i = 0; i<SpawnOverlapRetries; i++){
-						overlapping = false;
-						for(j=0; j<numOusideEnemies; j++){
-							if(Math.abs(blockerAngle-outsideEnemyAngles[j]) < OverlapAngleSpacing){
-								overlapping = true;
-							}
-						}
-						if(!overlapping){
-							break;
-						}
-						else {
-							blockerAngle = flynnUtilAngleBound2Pi(blockerAngle + OverlapAngleSpacing);
-						}
-					}
-				}
-
-				blocker = new Blocker(Points.SHIELD_TYPE_SHORT, Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
-					blockerRadius, blockerAngle, FlynnColors.RED,
-					this.vortex.radiusToAngularVelocity);
-				this.blockers.push(blocker);
-			}
-		}
-
-		// Update & check player collisions
-		for(i=0, len=this.blockers.length; i<len; i++){
-			numObjectsConsumed += this.blockers[i].update(paceFactor, this.vortex.radius);
-			if(this.blockers[i].alive === false){
-				// Remove dead blocker
-				this.blockers.splice(i, 1);
-				len--;
-				i--;
-			} else{
-				if(this.ship.visible){
-					d = this.blockers[i];
-					if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < BlockerCollisionRadius*2){
-						if(this.ship.radius > d.radius){
-							// Ship destroys blocker
-							this.soundBlockerDie.play();
-							this.particles.explosion(d.radius, d.radialAngle, BlockerNumExplosionParticles, blocker.color);
-							this.particles.explosion(d.radius, d.radialAngle, BlockerCoreExplosionParticles, blocker.core.color);
-							
-							// Remove dead blocker
-							this.blockers.splice(i, 1);
-							len--;
-							i--;
-
-                            this.addPoints(BlockerPoints);
-
-							// Bounce the ship
-							this.ship.ascentVelocity = ShipBounceMinVelocity;
-						}
-						else {
-							// Blocker destroys ship
-							this.doShipDie();
-						}
-					}
-				}
-			}
-		}
-
-		//-------------------
-		// PopUps
-		//-------------------
-		// Life
-		var oldPopUpLife = this.popUpLife;
-		this.popUpLife -= paceFactor;
-
-		// Expiration
-		if ((this.popUpLife <= 0) && (oldPopUpLife > 0)){
-			// PopUp Expired
-			this.popUpThrustActive = false;
-			this.popUpFireActive = false;
-		}
-
-		// Generation
-		if(this.popUpThrustPending){
-			if (this.gameClock >= PopUpThrustPromptTime)
-			{
-				this.popUpThrustPending = false;
-				this.popUpThrustActive = true;
-				this.showPopUp(this.mcp.custom.thrustPrompt);
-				this.popUpLife = PopUpTextLife;
-			}
-		}
-		if (this.popUpFirePending && this.thrustHasOccurred){
-			if (this.gameClock >= PopUpFirePromptTime)
-			{
-				this.popUpFirePending = false;
-				this.popUpFireActive = true;
-				this.showPopUp(this.mcp.custom.shootPrompt);
-				this.popUpLife = PopUpTextLife;
-			}
-		}
-		if (this.vortex.shieldErode && this.popupShieldErodePending){
-			this.popupShieldErodePending = false;
-			this.showPopUp("SHIELD COLLAPSE", "AVOID VORTEX");
-			this.popUpLife = PopUpTextLife;
-		}
-
-		// Vortex grow
-		if(numObjectsConsumed>0){
-			if(!this.vortexCollapse && this.ship.visible){
-				this.vortex.grow(numObjectsConsumed);
-			}
-		}
-
-		// Vortex shield
-		if(this.score >= VortexShieldEndScore){
-			this.vortex.shieldErode = true;
-		}
-
-		// Particles
-		this.particles.update(paceFactor);
-	},
-
-	render: function(ctx){
-		ctx.clearAll();
-
-		// DEBUG: Show number of stars
-		//ctx.vectorText(this.vortex.stars.length, 3,300,15,null, FlynnColors.GREEN);
-
-		// Scores
-		ctx.vectorText(this.score, 3, 15, 15, null, FlynnColors.YELLOW);
-		ctx.vectorText(this.highscore, 3, this.canvasWidth - 6	, 15, 0 , FlynnColors.YELLOW);
-
-		// Extra Lives
-		for(var i=0; i<this.lives; i++){
-			ctx.drawPolygon(this.lifepolygon, 25+25*i, 50);
-		}
-
-		// PopUp Text
-		if(this.popUpLife > 0){
-			ctx.vectorTextArc(this.popUpText,
-				3, this.vortex.center_x, this.vortex.center_y,
-				Math.PI*3/2, 150, FlynnColors.YELLOW, true, false);
-			if(this.popUpText2){
-				ctx.vectorTextArc(this.popUpText2,
-					3, this.vortex.center_x, this.vortex.center_y,
-					Math.PI/2, 150, FlynnColors.YELLOW, true, true);
-			}
-		}
-
-		// projectiles
-		this.projectiles.draw(ctx, this.viewport_v);
-
-		// Drifters
-		for(i=0, len=this.drifters.length; i<len; i++){
-			this.drifters[i].draw(ctx);
-		}
-
-		// Blockers
-		for(i=0, len=this.blockers.length; i<len; i++){
-			this.blockers[i].draw(ctx);
-		}
-
-		// Player
-		this.ship.draw(ctx);
-
-		// Vortex
-		var showCollapse = (this.vortexCollapse || (this.ship.visible === false && this.drifters.length > 0));
-		this.vortex.draw(ctx, showCollapse);
-
-		// Particles
-		this.particles.draw(ctx);
-
-		// Ship respawn animation
-		if(this.mcp.timers.isRunning('shipRespawnAnimation')){
-			var animationPercentage = this.mcp.timers.get('shipRespawnAnimation') / ShipRespawnAnimationTicks;
-			var sizePercentageStep = 0.005;
-			var rotationPercentageStep = 0.1;
-			// for(i=0; i<9; i++){
-			// 	var sizePercentage = animationPercentage + i*sizePercentageStep;
-			// 	var rotationPercentage = animationPercentage + i*rotationPercentageStep;
-			// 	//if (percentage < 0){
-			// 	//	percentage = 0.1;
-			// 	//}
-			// 	this.respawnPolygon.setScale((ShipRespawnScaleMin + (ShipRespawnScaleMax - ShipRespawnScaleMin)*sizePercentage));
-			// 	this.respawnPolygon.setAngle(ShipRespawnAngleMax * rotationPercentage);
-			// 	ctx.drawPolygon(this.respawnPolygon, this.shipRespawnX, this.shipRespawnY);
-			// }
-			var startRadius = 200 * animationPercentage;
-			var numParticles = 100 * (1-animationPercentage);
-			var startAngle = Math.PI * 1 * animationPercentage;
-			var angleStep = Math.PI * 8 / 100;
-			var radiusStep = 2 * animationPercentage;
-			ctx.fillStyle=FlynnColors.YELLOW;
-			for(i=0; i<numParticles; i++){
-				var angle = startAngle + i * angleStep;
-				var radius = startRadius + radiusStep * i;
-				var x = this.shipRespawnX + Math.cos(angle) * radius;
-				var y = this.shipRespawnY + Math.sin(angle) * radius;
-				ctx.fillRect(x,y,2,2);
-			}
-		}
-
-		// Game OVer
-		if(this.gameOver){
-			ctx.vectorText("GAME OVER", 6, null, 200, null, FlynnColors.GREEN);
-			ctx.vectorText("PRESS <ENTER>", 2, null, 250, null, FlynnColors.GREEN);
-		}
-	}
+        this.score = 0;
+        this.highscore = this.mcp.highscores[0][1];
+
+        this.lvl = 0;
+
+        this.generateLvl();
+
+        this.soundEngine = new Howl({
+            src: ['sounds/Engine.ogg','sounds/Engine.mp3'],
+            volume: 0.25,
+            loop: true,
+        });
+        this.soundPlayerDie = new Howl({
+            src: ['sounds/Playerexplosion2.ogg','sounds/Playerexplosion2.mp3'],
+            volume: 0.25,
+        });
+        this.soundExtraLife = new Howl({
+            src: ['sounds/ExtraLife.ogg','sounds/ExtraLife.mp3'],
+            volume: 1.00,
+        });
+        this.soundShotReflect = new Howl({
+            src: ['sounds/Blocked.ogg','sounds/Blocked.mp3'],
+            volume: 0.25,
+        });
+        this.soundDrifterDie = new Howl({
+            src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
+            volume: 0.25,
+        });
+        this.soundBlockerDie = new Howl({
+            src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
+            volume: 0.25,
+        });
+        this.soundShipRespawn = new Howl({
+            src: ['sounds/ShipRespawn.ogg','sounds/ShipRespawn.mp3'],
+            volume: 0.25,
+        });
+        this.engine_sound_playing = false;
+
+        this.vortexCollapse = false;
+
+        // Game Clock
+        this.gameClock = 0;
+
+        // Timers
+        this.mcp.timers.add('shipRespawnDelay', this.SHIP_RESPAWN_DELAY_GAME_START_TICKS, null);  // Start game with a delay (for start sound to finish)
+        this.mcp.timers.add('shipRespawnAnimation', 0, null);
+        this.shipRespawnDelayExpired = false;
+        this.shipRespawnAnimationStarted = false;
+
+        // Aliens
+        this.drifters = [];
+        this.blockers = [];
+
+        // Vortex
+        this.particles = new Game.Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
+        this.vortex.particles = this.particles;
+
+        // Pop-up messages
+        this.popUpText = "";
+        this.popUpText2 = null;
+        this.popUpLife = 0;
+        this.popUpThrustPending = true;
+        this.popUpFirePending = true;
+        this.popUpThrustActive = false;
+        this.popUpFireActive = false;
+        this.thrustHasOccurred = false;
+        this.popupShieldErodePending = true;
+    },
+
+    generateLvl: function() {
+        var margin = 20;
+
+        this.ship.radius = this.SHIP_START_RADIUS;
+        this.ship.radialAngle = this.SHIP_START_ANGLE;
+
+        this.projectiles = new Flynn.Projectiles( new Victor(0,0), new Victor(this.canvasWidth, this.canvasHeight));
+        this.drifters = [];
+        this.blockers = [];
+    },
+
+    addPoints: function(points){
+        // Points only count when not dead
+        if(this.ship.visible){
+            if(Math.floor(this.score / this.EXTRA_LIFE_SCORE) != Math.floor((this.score + points) / this.EXTRA_LIFE_SCORE)){
+                // Extra life
+                this.lives++;
+                this.soundExtraLife.play();
+            }
+            this.score += points;
+        }
+
+        // Update highscore if exceeded
+        if (this.score > this.highscore){
+            this.highscore = this.score;
+        }
+    },
+
+    showPopUp: function(popUpText, popUpText2){
+        if(typeof(popUpText2)==='undefined'){
+            popUpText2 = null;
+        }
+
+        this.popUpText = popUpText;
+        this.popUpText2 = popUpText2;
+        this.popUpLife = this.POP_UP_TEXT_LIFE;
+    },
+
+    doShipDie: function(){
+        // Visibility
+        this.ship.visible = false;
+
+        // Lives
+        this.lives--;
+        if(this.lives <= 0){
+            this.gameOver = true;
+        }
+
+        // Sounds
+        this.soundEngine.stop();
+
+        // Explosion
+        if(!this.ship.deathByVortex){
+            this.soundPlayerDie.play();
+            this.particles.explosion(
+                this.ship.radius, this.ship.radialAngle, this.SHIP_NUM_EXPLOSION_PARTICLES,
+                this.ship.color, this.ship.EXPLOSION_MAX_VELOCITY);
+        }
+
+        // Timers
+        this.mcp.timers.set('shipRespawnDelay', this.SHIP_RESPAWN_DELAY_TICKS);
+        this.mcp.timers.set('shipRespawnAnimation', 0); // Set to zero to deactivate it
+        this.shipRespawnDelayExpired = false;
+        this.shipRespawnAnimationStarted = false;
+
+        // Vortex
+        this.vortexCollapse = true;
+        // Make all enemies death dive to clear the play field
+        for(i=0, len=this.drifters.length; i<len; i++){
+            this.drifters[i].deathDive = true;
+        }
+        for(i=0, len=this.blockers.length; i<len; i++){
+            this.blockers[i].deathDive = true;
+        }
+    },
+
+    handleInputs: function(input, paceFactor) {
+
+        if(this.mcp.developerModeEnabled){
+            // Metrics toggle
+            if (input.virtualButtonIsPressed("dev_metrics")){
+                this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
+            }
+
+            // Toggle DEV pacing mode slow mo
+            if (input.virtualButtonIsPressed("dev_slow_mo")){
+                this.mcp.toggleDevPacingSlowMo();
+            }
+
+            // Toggle DEV pacing mode fps 20
+            if (input.virtualButtonIsPressed("dev_fps_20")){
+                this.mcp.toggleDevPacingFps20();
+            }
+
+            // Points
+            if (input.virtualButtonIsPressed("dev_add_points")){
+                this.addPoints(100);
+            }
+
+            // Die
+            if (input.virtualButtonIsPressed("dev_die")){
+                this.doShipDie();
+            }
+
+            // Grow vortex
+            if (input.virtualButtonIsPressed("vortex_grow")){
+                this.vortex.grow(1);
+            }
+        }
+        
+        if(!this.ship.visible){
+            if (input.virtualButtonIsPressed("UI_enter")){
+                if (this.gameOver){
+                    if(this.mcp.browserSupportsTouch){
+                        // On touch devices just update high score and go back to menu
+                        this.mcp.updateHighScores("NONAME", this.score);
+
+                        this.mcp.nextState = States.MENU;
+                    } else {
+                        this.mcp.nextState = States.END;
+                    }
+                    this.mcp.custom.score = this.score;
+                    return;
+                }
+            }
+            return;
+        }
+
+
+        if (input.virtualButtonIsDown("thrust")){
+            this.thrustHasOccurred = true;
+            this.popUpThrustPending = false;
+            this.ship.addVel(paceFactor);
+            if(!this.engine_sound_playing){
+                this.soundEngine.play();
+                this.engine_sound_playing = true;
+            }
+
+            // Cancel PopUp
+            if(this.popUpThrustActive){
+                this.popUpLife = Math.min(this.POP_UP_CANCEL_TIME, this.popUpLife);
+            }
+        } else {
+            if (this.engine_sound_playing){
+                this.soundEngine.stop();
+                this.engine_sound_playing = false;
+            }
+        }
+
+        if (input.virtualButtonIsPressed("fire")){
+            this.popUpFirePending = false;
+
+            // Limit max shots on screen 
+            if(this.projectiles.projectiles.length < this.PROJECTILES_MAX){
+                var projectile = this.ship.shoot();
+                this.projectiles.add(
+                    projectile.world_position_v,
+                    projectile.velocity_v,
+                    projectile.lifetime,
+                    this.PROJECTILE_SIZE,
+                    projectile.color
+                    );
+                this.projectiles.advanceFrame(); // Move the projectile one frame to get it away from the ship
+            }
+
+            // Cancel PopUp
+            if(this.popUpFireActive){
+                this.popUpLife = Math.min(this.POP_UP_CANCEL_TIME, this.popUpLife);
+            }
+        }
+
+    },
+
+    update: function(paceFactor) {
+        var i, len, b, numOusideEnemies, outsideEnemyAngles;
+
+        this.gameClock += paceFactor;
+
+        if (this.ship.visible){
+            // Update ship
+            var isAlive = this.ship.update(
+                paceFactor,
+                this.vortex.radiusToAngularVelocity(this.ship.radius, true),
+                this.vortex.radius);
+            if(!isAlive){
+                this.doShipDie();
+            }
+        }
+        else{
+            // Ship not visible
+            if(!this.gameOver){
+                if(this.mcp.timers.hasExpired('shipRespawnDelay')){
+                    this.shipRespawnDelayExpired = true;
+                }
+
+                if( (this.drifters.length === 0) &&
+                    (this.blockers.length === 0) &&
+                    this.shipRespawnDelayExpired &&
+                    !this.shipRespawnAnimationStarted){
+
+                    this.mcp.timers.set('shipRespawnAnimation', this.SHIP_RESPAWN_ANIMATION_TICKS);
+                    this.shipRespawnAnimationStarted = true;
+                    this.soundShipRespawn.play();
+                }
+
+                if(this.mcp.timers.isRunning('shipRespawnAnimation')){
+                    this.vortex.shieldAngleTarget = Flynn.Util.angleBound2Pi(this.SHIP_START_ANGLE);
+                }
+
+                // If respawn animation has finished...
+                if(this.mcp.timers.hasExpired('shipRespawnAnimation')){
+                    // Respawn the ship
+                    this.ship.radius = this.SHIP_START_RADIUS;
+                    this.ship.radialAngle = this.SHIP_START_ANGLE;
+                    this.ship.ascentVelocity = 0;
+                    this.ship.visible = true;
+                    this.ship.deathByVortex = false;
+                    this.ship.update(
+                        paceFactor,
+                        this.vortex.radiusToAngularVelocity(this.ship.radius, true),
+                        this.vortex.radius);
+                }
+            }
+        }
+
+        // Check projectile collisions
+        for(var j=0, len2 = this.projectiles.projectiles.length; j<len2; j++){
+            b = this.projectiles.projectiles[j];
+            var bulletRemove = false;
+
+            // Remove shots that reflect back into vortex
+            if (Math.sqrt(Math.pow(b.world_position_v.x - this.center_x, 2) + Math.pow(b.world_position_v.y - this.center_y,2)) <= this.vortex.radius){
+                bulletRemove = true;
+            }
+
+            // Shoot drifters
+            for(var k=0, len3 =this.drifters.length; k<len3; k++){
+                drifter = this.drifters[k];
+                if (Math.sqrt(Math.pow(drifter.x - b.world_position_v.x, 2) + Math.pow(drifter.y - b.world_position_v.y,2)) < this.DRIFTER_COLLISION_RADIUS){
+
+                    this.addPoints(this.DRIFTER_POINTS);
+
+                    // Explode
+                    this.particles.explosion(drifter.radius, drifter.radialAngle, this.DRIFTER_NUM_EXPLOSION_PARTICLES, drifter.color);
+
+                    // Remove dead drifter
+                    this.soundDrifterDie.play();
+                    this.drifters.splice(k, 1);
+                    len3--;
+                    k--;
+
+                    bulletRemove = true;
+                }
+            }
+            // Shoot blockers
+            for(k=0, len3 =this.blockers.length; k<len3; k++){
+                blocker = this.blockers[k];
+                if (Math.sqrt(Math.pow(blocker.x - b.world_position_v.x, 2) + Math.pow(blocker.y - b.world_position_v.y,2)) < this.BLOCKER_COLLISION_RADIUS){
+                    // Reverse bullet direction
+                    b.velocity_v.x =- b.velocity_v.x;
+                    b.velocity_v.y =- b.velocity_v.y;
+                    // Move the bullet after reflect, so that it cannot bounce around inside the blocker
+                    b.world_position_v.x += b.velocity_v.x;
+                    b.world_position_v.y += b.velocity_v.y;
+                    b.lifetime = this.REFLECTED_PROJECTILE_LIFE;
+                    this.soundShotReflect.play();
+                }
+            }
+            if(bulletRemove){
+                this.projectiles.projectiles.splice(j, 1);
+                len2--;
+                j--;
+            }
+        }
+
+
+        // Update projectiles
+        this.projectiles.update(paceFactor);
+
+        // Update vortex
+        var isCollapsed = this.vortex.update(paceFactor, this.vortexCollapse);
+        if (isCollapsed){
+            this.vortexCollapse = false;
+        }
+
+        //----------------
+        // Drifers
+        //----------------
+
+        //Spawn
+        if(!this.vortexCollapse && this.ship.visible){
+            if((Math.random() < this.DRIFTER_SPAWN_RATE) || (this.drifters.length === 0)){
+                var drifterRadius;
+                var drifterAngle;
+                if(this.drifters.length === 0){
+                    // Start first drifter at one of the midscreen edges, so that it is immediately visisble
+                    if (Math.random() > 0.5){
+                        // Left/right
+                        drifterRadius = this.center_x;
+                        if (Math.random() > 0.5){
+                            drifterAngle = 0;
+                        }
+                        else{
+                            drifterAngle = Math.PI;
+                        }
+                    } else {
+                        // Top/bottom
+                        drifterRadius = this.center_y;
+                        if (Math.random() > 0.5){
+                            drifterAngle = Math.PI/2;
+                        }
+                        else{
+                            drifterAngle = Math.PI*3/2;
+                        }
+                    }
+                }
+                else {
+                    drifterRadius = this.DRIFTER_MAX_RADIUS;
+                    drifterAngle =  Math.random() * Math.PI * 2;
+
+                    // Make sure new drifter is not on top of an existing enemy
+                    numOusideEnemies = 0;
+                    outsideEnemyAngles = [];
+                    for(i=0, len=this.drifters.length; i<len; i++){
+                        if(this.drifters[i].radius > drifterRadius - (this.DRIFTER_COLLISION_RADIUS * 2)){
+                            outsideEnemyAngles.push(Flynn.Util.angleBound2Pi(this.drifters[i].radialAngle));
+                            ++numOusideEnemies;
+                        }
+                    }
+                    for(i=0, len=this.blockers.length; i<len; i++){
+                        if(this.blockers[i].radius > drifterRadius - (this.BLOCKER_COLLISION_RADIUS + this.DRIFTER_COLLISION_RADIUS)){
+                            outsideEnemyAngles.push(Flynn.Util.angleBound2Pi(this.blockers[i].radialAngle));
+                            ++numOusideEnemies;
+                        }
+                    }
+                    if(numOusideEnemies > 0){
+                        // Try this.SPAWN_OVERLAP_RETRIES times, then give up
+                        for (i = 0; i<this.SPAWN_OVERLAP_RETRIES; i++){
+                            overlapping = false;
+                            for(j=0; j<numOusideEnemies; j++){
+                                if(Math.abs(drifterAngle-outsideEnemyAngles[j]) < this.OVERLAP_ANGLE_SPACING){
+                                    overlapping = true;
+                                }
+                            }
+                            if(!overlapping){
+                                break;
+                            }
+                            else {
+                                drifterAngle = Flynn.Util.angleBound2Pi(drifterAngle + this.OVERLAP_ANGLE_SPACING);
+                                //console.log("DEV: Advancing drifter spawn.");
+                            }
+                        }
+                    }
+                }
+
+                // Create drifter
+                drifter = new Game.Drifter(Game.Points.POINTY_SHIP, 2, this.center_x, this.center_y,
+                    drifterRadius, drifterAngle, Flynn.Colors.RED,
+                    this.vortex.radiusToAngularVelocity);
+                this.drifters.push(drifter);
+            }
+        }
+
+        // Update & check player collisions
+        var numObjectsConsumed = 0;
+        for(i=0, len=this.drifters.length; i<len; i++){
+            numObjectsConsumed += this.drifters[i].update(paceFactor, this.vortex.radius);
+            if(this.drifters[i].alive === false){
+                // Remove dead drifter
+                this.drifters.splice(i, 1);
+                len--;
+                i--;
+            } else{
+                if(this.ship.visible){
+                    d = this.drifters[i];
+                    if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < this.DRIFTER_COLLISION_RADIUS*2){
+                        this.doShipDie();
+                        this.particles.explosion(d.radius, d.radialAngle, this.DRIFTER_NUM_EXPLOSION_PARTICLES, drifter.color);
+                        
+                        // Remove dead drifter
+                        this.drifters.splice(i, 1);
+                        len--;
+                        i--;
+                    }
+                }
+            }
+        }
+
+        //----------------
+        // Blockers
+        //----------------
+
+        //Spawn
+        if(!this.vortexCollapse && this.ship.visible && this.score >= this.BLOCKER_APPEAR_SCORE){
+            if((Math.random() < this.BLOCKER_SPAWN_RATE) || (this.blockers.length === 0)){
+
+                var blockerRadius = this.DRIFTER_MAX_RADIUS;
+                var blockerAngle = Math.random() * Math.PI * 2;
+
+                // Make sure new blocker is not on top of an existing enemy
+                numOusideEnemies = 0;
+                outsideEnemyAngles = [];
+                for(i=0, len=this.drifters.length; i<len; i++){
+                    if(this.drifters[i].radius > blockerRadius - (this.DRIFTER_COLLISION_RADIUS + this.BLOCKER_COLLISION_RADIUS)){
+                        outsideEnemyAngles.push(Flynn.Util.angleBound2Pi(this.drifters[i].radialAngle));
+                        ++numOusideEnemies;
+                    }
+                }
+                for(i=0, len=this.blockers.length; i<len; i++){
+                    if(this.blockers[i].radius > blockerRadius - (this.BLOCKER_COLLISION_RADIUS*2)){
+                        outsideEnemyAngles.push(Flynn.Util.angleBound2Pi(this.blockers[i].radialAngle));
+                        ++numOusideEnemies;
+                    }
+                }
+                if(numOusideEnemies > 0){
+                    // Try this.SPAWN_OVERLAP_RETRIES times, then give up
+                    for (i = 0; i<this.SPAWN_OVERLAP_RETRIES; i++){
+                        overlapping = false;
+                        for(j=0; j<numOusideEnemies; j++){
+                            if(Math.abs(blockerAngle-outsideEnemyAngles[j]) < this.OVERLAP_ANGLE_SPACING){
+                                overlapping = true;
+                            }
+                        }
+                        if(!overlapping){
+                            break;
+                        }
+                        else {
+                            blockerAngle = Flynn.Util.angleBound2Pi(blockerAngle + this.OVERLAP_ANGLE_SPACING);
+                        }
+                    }
+                }
+
+                blocker = new Game.Blocker(Game.Points.SHIELD_TYPE_SHORT, Game.Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
+                    blockerRadius, blockerAngle, Flynn.Colors.RED,
+                    this.vortex.radiusToAngularVelocity);
+                this.blockers.push(blocker);
+            }
+        }
+
+        // Update & check player collisions
+        for(i=0, len=this.blockers.length; i<len; i++){
+            numObjectsConsumed += this.blockers[i].update(paceFactor, this.vortex.radius);
+            if(this.blockers[i].alive === false){
+                // Remove dead blocker
+                this.blockers.splice(i, 1);
+                len--;
+                i--;
+            } else{
+                if(this.ship.visible){
+                    d = this.blockers[i];
+                    if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < this.BLOCKER_COLLISION_RADIUS*2){
+                        if(this.ship.radius > d.radius){
+                            // Ship destroys blocker
+                            this.soundBlockerDie.play();
+                            this.particles.explosion(d.radius, d.radialAngle, this.BLOCKER_NUM_EXPLOSION_PARTICLES, blocker.color);
+                            this.particles.explosion(d.radius, d.radialAngle, this.BLOCKER_CORE_EXPLOSION_PARTICLES, blocker.core.color);
+                            
+                            // Remove dead blocker
+                            this.blockers.splice(i, 1);
+                            len--;
+                            i--;
+
+                            this.addPoints(this.BLOCKER_POINTS);
+
+                            // Bounce the ship
+                            this.ship.ascentVelocity = this.SHIP_BOUNCE_MIN_VELOCITY;
+                        }
+                        else {
+                            // Blocker destroys ship
+                            this.doShipDie();
+                        }
+                    }
+                }
+            }
+        }
+
+        //-------------------
+        // PopUps
+        //-------------------
+        // Life
+        var oldPopUpLife = this.popUpLife;
+        this.popUpLife -= paceFactor;
+
+        // Expiration
+        if ((this.popUpLife <= 0) && (oldPopUpLife > 0)){
+            // PopUp Expired
+            this.popUpThrustActive = false;
+            this.popUpFireActive = false;
+        }
+
+        // Generation
+        if(this.popUpThrustPending){
+            if (this.gameClock >= this.POP_UP_THRUST_PROMPT_TIME)
+            {
+                this.popUpThrustPending = false;
+                this.popUpThrustActive = true;
+                this.showPopUp(this.mcp.custom.thrustPrompt);
+                this.popUpLife = this.POP_UP_TEXT_LIFE;
+            }
+        }
+        if (this.popUpFirePending && this.thrustHasOccurred){
+            if (this.gameClock >= this.POP_UP_FIRE_PROMPT_TIME)
+            {
+                this.popUpFirePending = false;
+                this.popUpFireActive = true;
+                this.showPopUp(this.mcp.custom.shootPrompt);
+                this.popUpLife = this.POP_UP_TEXT_LIFE;
+            }
+        }
+        if (this.vortex.shieldErode && this.popupShieldErodePending){
+            this.popupShieldErodePending = false;
+            this.showPopUp("SHIELD COLLAPSE", "AVOID VORTEX");
+            this.popUpLife = this.POP_UP_TEXT_LIFE;
+        }
+
+        // Vortex grow
+        if(numObjectsConsumed>0){
+            if(!this.vortexCollapse && this.ship.visible){
+                this.vortex.grow(numObjectsConsumed);
+            }
+        }
+
+        // Vortex shield
+        if(this.score >= this.VORTEX_SHIELD_END_SCORE){
+            this.vortex.shieldErode = true;
+        }
+
+        // Particles
+        this.particles.update(paceFactor);
+    },
+
+    render: function(ctx){
+        ctx.clearAll();
+
+        // DEBUG: Show number of stars
+        //ctx.vectorText(this.vortex.stars.length, 3,300,15,null, Flynn.Colors.GREEN);
+
+        // Scores
+        ctx.vectorText(this.score, 3, 15, 15, null, Flynn.Colors.YELLOW);
+        ctx.vectorText(this.highscore, 3, this.canvasWidth - 6  , 15, 0 , Flynn.Colors.YELLOW);
+
+        // Extra Lives
+        for(var i=0; i<this.lives; i++){
+            ctx.drawPolygon(this.lifepolygon, 25+25*i, 50);
+        }
+
+        // PopUp Text
+        if(this.popUpLife > 0){
+            ctx.vectorTextArc(this.popUpText,
+                3, this.vortex.center_x, this.vortex.center_y,
+                Math.PI*3/2, 150, Flynn.Colors.YELLOW, true, false);
+            if(this.popUpText2){
+                ctx.vectorTextArc(this.popUpText2,
+                    3, this.vortex.center_x, this.vortex.center_y,
+                    Math.PI/2, 150, Flynn.Colors.YELLOW, true, true);
+            }
+        }
+
+        // projectiles
+        this.projectiles.draw(ctx, this.viewport_v);
+
+        // Drifters
+        for(i=0, len=this.drifters.length; i<len; i++){
+            this.drifters[i].draw(ctx);
+        }
+
+        // Blockers
+        for(i=0, len=this.blockers.length; i<len; i++){
+            this.blockers[i].draw(ctx);
+        }
+
+        // Player
+        this.ship.draw(ctx);
+
+        // Vortex
+        var showCollapse = (this.vortexCollapse || (this.ship.visible === false && this.drifters.length > 0));
+        this.vortex.draw(ctx, showCollapse);
+
+        // Particles
+        this.particles.draw(ctx);
+
+        // Ship respawn animation
+        if(this.mcp.timers.isRunning('shipRespawnAnimation')){
+            var animationPercentage = this.mcp.timers.get('shipRespawnAnimation') / this.SHIP_RESPAWN_ANIMATION_TICKS;
+            var sizePercentageStep = 0.005;
+            var rotationPercentageStep = 0.1;
+            // for(i=0; i<9; i++){
+            //  var sizePercentage = animationPercentage + i*sizePercentageStep;
+            //  var rotationPercentage = animationPercentage + i*rotationPercentageStep;
+            //  //if (percentage < 0){
+            //  //  percentage = 0.1;
+            //  //}
+            //  this.respawnPolygon.setScale((this.SHIP_RESPAWN_SCALE_MIN + (this.SHIP_RESPAWN_SCALE_MAX - this.SHIP_RESPAWN_SCALE_MIN)*sizePercentage));
+            //  this.respawnPolygon.setAngle(this.SHIP_RESPAWN_ANGLE_MAX * rotationPercentage);
+            //  ctx.drawPolygon(this.respawnPolygon, this.shipRespawnX, this.shipRespawnY);
+            // }
+            var startRadius = 200 * animationPercentage;
+            var numParticles = 100 * (1-animationPercentage);
+            var startAngle = Math.PI * 1 * animationPercentage;
+            var angleStep = Math.PI * 8 / 100;
+            var radiusStep = 2 * animationPercentage;
+            ctx.fillStyle=Flynn.Colors.YELLOW;
+            for(i=0; i<numParticles; i++){
+                var angle = startAngle + i * angleStep;
+                var radius = startRadius + radiusStep * i;
+                var x = this.shipRespawnX + Math.cos(angle) * radius;
+                var y = this.shipRespawnY + Math.sin(angle) * radius;
+                ctx.fillRect(x,y,2,2);
+            }
+        }
+
+        // Game OVer
+        if(this.gameOver){
+            ctx.vectorText("GAME OVER", 6, null, 200, null, Flynn.Colors.GREEN);
+            ctx.vectorText("PRESS <ENTER>", 2, null, 250, null, Flynn.Colors.GREEN);
+        }
+    }
 });
