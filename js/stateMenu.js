@@ -6,8 +6,6 @@ Game.StateMenu = Flynn.State.extend({
 
     TITLE_ANGULAR_VELOCITY: -0.01,
     CREDITS_ANGULAR_VELOCITY: -0.013,
-    CREDITS_ANGULAR_VELOCITY2: -0.014,
-    CREDITS_ANGULAR_VELOCITY2_B: -0.015,
     CREDITS_ANGULAR_VELOCITY3: -0.020,
     CREDITS_ANGULAR_VELOCITY4: -0.027,
     CREDITS_ANGULAR_VELOCITY5: -0.031,
@@ -89,8 +87,6 @@ Game.StateMenu = Flynn.State.extend({
         this.vortex.update(paceFactor);
         this.titleAngle += this.TITLE_ANGULAR_VELOCITY * paceFactor;
         this.creditsAngle += this.CREDITS_ANGULAR_VELOCITY * paceFactor;
-        this.creditsAngle2 += this.CREDITS_ANGULAR_VELOCITY2 * paceFactor;
-        this.creditsAngle2B += this.CREDITS_ANGULAR_VELOCITY2_B * paceFactor;
         this.creditsAngle3 += this.CREDITS_ANGULAR_VELOCITY3 * paceFactor;
         this.creditsAngle4 += this.CREDITS_ANGULAR_VELOCITY4 * paceFactor;
         this.creditsAngle5 += this.CREDITS_ANGULAR_VELOCITY5 * paceFactor;
@@ -165,9 +161,6 @@ Game.StateMenu = Flynn.State.extend({
         ctx.vectorTextArc(
             "WRITTEN BY TRAYTON MOYER (FLOATIN' HEAD) AND ERIC MOYER (FIENDFODDER) FOR LUDAM MINI DARE 56",
             2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle , 240, Flynn.Colors.GREEN);
-        ctx.vectorTextArc(
-            "BASED ON THE ASTEROIDS VECTOR FRAMEWORK DEVELOPED BY MAX WIHLBORG",
-            2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle2 , 220, Flynn.Colors.GREEN);
         if(this.mcp.backEnabled){
             ctx.vectorText('PRESS <TAB> TO EXIT GAME', 1.3, null, 750, null, Flynn.Colors.GRAY);
         }

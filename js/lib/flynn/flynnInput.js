@@ -269,7 +269,7 @@ Flynn.InputHandler = Class.extend({
     },
 
     getConfigurableVirtualButtonNames: function(){
-        names = [];
+        var names = [];
         for (var name in this.virtualButtons){
             if(this.virtualButtons[name].isConfigurable){
                 names.push(name);

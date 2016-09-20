@@ -38,7 +38,9 @@ Game.Main = Class.extend({
                             self.mcp.custom.leaderboard,
                             Flynn.Colors.GREEN,
                             'HIGH SCORES',
-                            'YOU MADE IT TO THE HIGH SCORE LIST!');
+                            'YOU MADE IT TO THE HIGH SCORE LIST!',
+                            Game.States.MENU     // Parent state
+                            );
                     case Game.States.CONFIG:
                         return new Flynn.StateConfig(
                             self.mcp,

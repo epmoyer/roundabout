@@ -6,7 +6,7 @@ Game.Drifter = Flynn.Polygon.extend({
 
     FALL_SPEED: 0.6,
 
-    init: function(p, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity){
+    init: function(p, s, x, y, radius, radialAngle, color, vortex){
         this._super(p, color);
 
         this.center_x = x;
@@ -23,7 +23,7 @@ Game.Drifter = Flynn.Polygon.extend({
         this.radial_to_cardinal();
         this.alive = true;
         this.deathDive = false;
-        this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
+        this.vortex = vortex;
     },
 
     // Calculate caridnal position and angle from radial position and angle
@@ -55,7 +55,7 @@ Game.Drifter = Flynn.Polygon.extend({
     update: function(paceFactor, vortexRadius) {
         var numVortexed = 0;
         // Add rotational angle to stars based on radius
-        this.radialAngle += this.f_radiusToAngularVelocity(this.radius) * paceFactor;
+        this.radialAngle += this.vortex.radiusToAngularVelocity(this.radius) * paceFactor;
         if(this.deathDive){
             this.radius -= 12 * this.FALL_SPEED * paceFactor;
         }

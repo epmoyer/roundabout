@@ -129,7 +129,7 @@ Game.StateGame = Flynn.State.extend({
         this.blockers = [];
 
         // Vortex
-        this.particles = new Game.Particles(this.center_x, this.center_y, this.vortex.radiusToAngularVelocity);
+        this.particles = new Game.Particles(this.center_x, this.center_y, this.vortex);
         this.vortex.particles = this.particles;
 
         // Pop-up messages
@@ -183,6 +183,8 @@ Game.StateGame = Flynn.State.extend({
     },
 
     doShipDie: function(){
+        var i, len; 
+        
         // Visibility
         this.ship.visible = false;
 
@@ -261,9 +263,9 @@ Game.StateGame = Flynn.State.extend({
                         // On touch devices just update high score and go back to menu
                         this.mcp.updateHighScores("NONAME", this.score);
 
-                        this.mcp.nextState = States.MENU;
+                        this.mcp.nextState = Game.States.MENU;
                     } else {
-                        this.mcp.nextState = States.END;
+                        this.mcp.nextState = Game.States.END;
                     }
                     this.mcp.custom.score = this.score;
                     return;
@@ -381,7 +383,7 @@ Game.StateGame = Flynn.State.extend({
 
             // Shoot drifters
             for(var k=0, len3 =this.drifters.length; k<len3; k++){
-                drifter = this.drifters[k];
+                var drifter = this.drifters[k];
                 if (Math.sqrt(Math.pow(drifter.x - b.world_position_v.x, 2) + Math.pow(drifter.y - b.world_position_v.y,2)) < this.DRIFTER_COLLISION_RADIUS){
 
                     this.addPoints(this.DRIFTER_POINTS);
@@ -400,7 +402,7 @@ Game.StateGame = Flynn.State.extend({
             }
             // Shoot blockers
             for(k=0, len3 =this.blockers.length; k<len3; k++){
-                blocker = this.blockers[k];
+                var blocker = this.blockers[k];
                 if (Math.sqrt(Math.pow(blocker.x - b.world_position_v.x, 2) + Math.pow(blocker.y - b.world_position_v.y,2)) < this.BLOCKER_COLLISION_RADIUS){
                     // Reverse bullet direction
                     b.velocity_v.x =- b.velocity_v.x;
@@ -502,7 +504,7 @@ Game.StateGame = Flynn.State.extend({
                 // Create drifter
                 drifter = new Game.Drifter(Game.Points.POINTY_SHIP, 2, this.center_x, this.center_y,
                     drifterRadius, drifterAngle, Flynn.Colors.RED,
-                    this.vortex.radiusToAngularVelocity);
+                    this.vortex);
                 this.drifters.push(drifter);
             }
         }
@@ -521,7 +523,7 @@ Game.StateGame = Flynn.State.extend({
                     d = this.drifters[i];
                     if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < this.DRIFTER_COLLISION_RADIUS*2){
                         this.doShipDie();
-                        this.particles.explosion(d.radius, d.radialAngle, this.DRIFTER_NUM_EXPLOSION_PARTICLES, drifter.color);
+                        this.particles.explosion(d.radius, d.radialAngle, this.DRIFTER_NUM_EXPLOSION_PARTICLES, d.color);
                         
                         // Remove dead drifter
                         this.drifters.splice(i, 1);
@@ -561,7 +563,7 @@ Game.StateGame = Flynn.State.extend({
                 if(numOusideEnemies > 0){
                     // Try this.SPAWN_OVERLAP_RETRIES times, then give up
                     for (i = 0; i<this.SPAWN_OVERLAP_RETRIES; i++){
-                        overlapping = false;
+                        var overlapping = false;
                         for(j=0; j<numOusideEnemies; j++){
                             if(Math.abs(blockerAngle-outsideEnemyAngles[j]) < this.OVERLAP_ANGLE_SPACING){
                                 overlapping = true;
@@ -578,7 +580,7 @@ Game.StateGame = Flynn.State.extend({
 
                 blocker = new Game.Blocker(Game.Points.SHIELD_TYPE_SHORT, Game.Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
                     blockerRadius, blockerAngle, Flynn.Colors.RED,
-                    this.vortex.radiusToAngularVelocity);
+                    this.vortex);
                 this.blockers.push(blocker);
             }
         }
@@ -676,6 +678,7 @@ Game.StateGame = Flynn.State.extend({
     },
 
     render: function(ctx){
+        var i, len;
         ctx.clearAll();
 
         // DEBUG: Show number of stars
@@ -686,7 +689,7 @@ Game.StateGame = Flynn.State.extend({
         ctx.vectorText(this.highscore, 3, this.canvasWidth - 6  , 15, 0 , Flynn.Colors.YELLOW);
 
         // Extra Lives
-        for(var i=0; i<this.lives; i++){
+        for(i=0; i<this.lives; i++){
             ctx.drawPolygon(this.lifepolygon, 25+25*i, 50);
         }
 

@@ -302,7 +302,7 @@ Flynn.Canvas = Class.extend({
 
             ctx.vectorTextArc = function(text, scale, center_x, center_y, angle, radius, color, isCentered, isReversed){
                 text = String(text);
-                
+
                 if(typeof(color)==='undefined'){
                     color = Flynn.Colors.GREEN;
                 }

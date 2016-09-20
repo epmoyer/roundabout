@@ -109,7 +109,8 @@ Game.Vortex = Class.extend({
     },
 
     update: function(paceFactor, doCollapse) {
-        isCollapsed = false;
+        var isCollapsed = false;
+        var x, y;
 
         this.angle += this.VORTEX_RADIAL_SPEED * paceFactor;
 
@@ -213,7 +214,7 @@ Game.Vortex = Class.extend({
             // Stable
             ctx.vectorStart(Flynn.Colors.GREEN);
         }
-        for(theta = 0, angle_delta = (Math.PI * 2)/this.VORTEX_LINES; theta < ((Math.PI * 2)-0.001); theta += angle_delta){
+        for(var theta = 0, angle_delta = (Math.PI * 2)/this.VORTEX_LINES; theta < ((Math.PI * 2)-0.001); theta += angle_delta){
             var sx = this.center_x + Math.cos(theta+this.angle - this.VORTEX_TWIST) * (this.radius - this.VORTEX_THICKNESS/2);
             var sy = this.center_y + Math.sin(theta+this.angle - this.VORTEX_TWIST) * (this.radius - this.VORTEX_THICKNESS/2);
             var ex = this.center_x + Math.cos(theta+this.angle + this.VORTEX_TWIST) * (this.radius + this.VORTEX_THICKNESS/2);
@@ -228,8 +229,8 @@ Game.Vortex = Class.extend({
         for(var i=0, len=this.stars.length; i<len; i+=2){
             var radius = this.stars[i];
             var angle = this.stars[i+1];
-            x = this.center_x + Math.cos(angle) * radius;
-            y = this.center_y + Math.sin(angle) * radius;
+            var x = this.center_x + Math.cos(angle) * radius;
+            var y = this.center_y + Math.sin(angle) * radius;
             ctx.fillRect(x,y,2,2);
         }
 

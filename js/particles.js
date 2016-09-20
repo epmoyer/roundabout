@@ -9,7 +9,7 @@ Game.Particle = Class.extend({
     PARTICLE_FRICTION: 0.99,
     PARTICLE_GRAVITY: -0.01,
 
-    init: function(particles, radius, angle, dx, dy, color, f_radiusToAngularVelocity){
+    init: function(particles, radius, angle, dx, dy, color, vortex){
         this.particles = particles;
         this.radius = radius;
         this.angle = angle;
@@ -18,7 +18,7 @@ Game.Particle = Class.extend({
         this.x = 0;
         this.y = 0;
         this.color = color;
-        this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
+        this.vortex = vortex;
 
         this.life = this.PARTICLE_LIFE + (Math.random()-0.5) * this.PARTICLE_LIFE_VARIATION;
         this.radiusDecayVelocity = 0;
@@ -34,12 +34,12 @@ Game.Particle = Class.extend({
         }
         else{
             // Get angular velocity
-            var angularVelocity = this.f_radiusToAngularVelocity(this.radius, false); // BUG: Boost doesn't work here. Calling without
+            var angularVelocity = this.vortex.radiusToAngularVelocity(this.radius, false); // BUG: Boost doesn't work here. Calling without
             // Apply angular velocity
             this.angle += angularVelocity * paceFactor;
             // Apply radius decay
-            this.radiusDecayVelocity += this.PARTICLE_GRAVITY;
-            this.radius += this.radiusDecayVelocity;
+            this.radiusDecayVelocity += this.PARTICLE_GRAVITY * paceFactor;
+            this.radius += this.radiusDecayVelocity * paceFactor;
             // Get cartesian position
             this.x = this.particles.center_x + Math.cos(this.angle) * this.radius;
             this.y = this.particles.center_y + Math.sin(this.angle) * this.radius;
@@ -47,8 +47,9 @@ Game.Particle = Class.extend({
             this.x += this.dx * paceFactor;
             this.y += this.dy * paceFactor;
             // Decay impulse
-            this.dx *= this.PARTICLE_FRICTION;
-            this.dy *= this.PARTICLE_FRICTION;
+            var pacedFriction = Math.pow(this.PARTICLE_FRICTION, paceFactor);
+            this.dx *= pacedFriction;
+            this.dy *= pacedFriction;
             // Convert back to polar coordinates
             this.angle = Math.atan2(this.y-this.particles.center_y, this.x-this.particles.center_x);
             this.radius = Math.sqrt(Math.pow(this.y-this.particles.center_y,2) + Math.pow(this.x-this.particles.center_x,2));
@@ -68,10 +69,10 @@ Game.Particles = Class.extend({
 
     DEFAULT_EXPLOSION_MAX_VELOCITY: 0.5,
     
-    init: function(center_x, center_y, f_radiusToAngularVelocity){
+    init: function(center_x, center_y, vortex){
         this.center_x = center_x;
         this.center_y = center_y;
-        this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
+        this.vortex = vortex;
 
         this.particles=[];
     },
@@ -81,16 +82,16 @@ Game.Particles = Class.extend({
             maxVelocity = this.DEFAULT_EXPLOSION_MAX_VELOCITY;
         }
         for(var i=0; i<quantity; i++){
-            theta = Math.random() * Math.PI * 2;
-            velocity = Math.random() * maxVelocity;
-            this.particles.push(new Particle(
+            var theta = Math.random() * Math.PI * 2;
+            var velocity = Math.random() * maxVelocity;
+            this.particles.push(new Game.Particle(
                 this,
                 radius,
                 angle,
                 Math.cos(theta) * velocity,
                 Math.sin(theta) * velocity,
                 color,
-                this.f_radiusToAngularVelocity
+                this.vortex
             ));
         }
     },
