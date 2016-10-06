@@ -67,6 +67,8 @@ Game.Ship = Flynn.Polygon.extend({
     },
 
     collide: function(polygon){
+        var i, len;
+        
         if (!this.visible){
             return false;
         }

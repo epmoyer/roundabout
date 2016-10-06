@@ -3,8 +3,8 @@ if (typeof Game == "undefined") {
 }
 
 Game.CANVAS_HEIGHT = 768;
-Game.CANVASWIDTH = 1024;
-Game.SPEEDFACTOR = 0.7;
+Game.CANVAS_WIDTH = 1024;
+Game.SPEED_FACTOR = 0.7;
 
 Game.States = {
     NO_CHANGE: 0,
@@ -23,7 +23,7 @@ Game.Main = Class.extend({
 
         this.input = new Flynn.InputHandler();
 
-        this.mcp = new Flynn.Mcp(Game.CANVASWIDTH, Game.CANVAS_HEIGHT, this.input, Game.States.NO_CHANGE, Game.SPEEDFACTOR);
+        this.mcp = new Flynn.Mcp(Game.CANVAS_WIDTH, Game.CANVAS_HEIGHT, this.input, Game.States.NO_CHANGE, Game.SPEED_FACTOR);
         this.mcp.setStateBuilderFunc(
             function(state){
                 switch(state){
