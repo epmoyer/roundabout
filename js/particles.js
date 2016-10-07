@@ -58,7 +58,7 @@ Game.Particle = Class.extend({
         return isAlive;
     },
 
-    draw: function(ctx) {
+    render: function(ctx) {
         ctx.fillStyle=this.color;
         ctx.fillRect(this.x,this.y,2,2);
     }
@@ -107,9 +107,9 @@ Game.Particles = Class.extend({
         }
     },
 
-    draw: function(ctx) {
+    render: function(ctx) {
         for(var i=0, len=this.particles.length; i<len; i+=1){
-            this.particles[i].draw(ctx);
+            this.particles[i].render(ctx);
         }
     }
 });

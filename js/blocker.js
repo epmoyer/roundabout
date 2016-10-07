@@ -7,10 +7,20 @@ Game.Blocker = Flynn.Polygon.extend({
     FALL_SPEED: 0.6,
     
     init: function(p, p2, s, x, y, radius, radialAngle, color, vortex){
-        this._super(p, color);
+        this._super(
+            p,
+            color,
+            s, // scale
+            {x:x, y:y, is_world:false}
+            );
 
-        this.core = new Flynn.Polygon(p2, Flynn.Colors.CYAN);
-        this.core.setScale(s);
+
+        this.core = new Flynn.Polygon(
+            p2,
+            Flynn.Colors.CYAN,
+            s, // scale
+            {x:x, y:y, is_world:false}
+            );
 
         this.center_x = x;
         this.center_y = y;
@@ -19,8 +29,8 @@ Game.Blocker = Flynn.Polygon.extend({
         this.angle = 0;
         this.scale = s;
 
-        this.x = null;
-        this.y = null;
+        this.position.x = null;
+        this.position.y = null;
 
         this.setScale(s);
         this.radial_to_cardinal();
@@ -33,8 +43,8 @@ Game.Blocker = Flynn.Polygon.extend({
     radial_to_cardinal: function(){
         this.setAngle(this.radialAngle + Math.PI);
         this.core.setAngle(this.radialAngle + Math.PI);
-        this.x = this.center_x + this.radius * Math.cos(this.radialAngle);
-        this.y = this.center_y + this.radius * Math.sin(this.radialAngle);
+        this.position.x = this.center_x + this.radius * Math.cos(this.radialAngle);
+        this.position.y = this.center_y + this.radius * Math.sin(this.radialAngle);
     },
 
     collide: function(polygon){
@@ -42,8 +52,8 @@ Game.Blocker = Flynn.Polygon.extend({
             return false;
         }
         for(i=0, len=this.points.length -2; i<len; i+=2){
-            var x = this.points[i] + this.x;
-            var y = this.points[i+1] + this.y;
+            var x = this.points[i] + this.position.x;
+            var y = this.points[i+1] + this.position.y;
 
             if (polygon.hasPoint(x,y)){
                 return true;
@@ -53,7 +63,7 @@ Game.Blocker = Flynn.Polygon.extend({
     },
 
     hasPoint: function(x, y) {
-        return this._super(this.x, this.y, x, y);
+        return this._super(this.position.x, this.position.y, x, y);
     },
 
     update: function(paceFactor, vortexRadius) {
@@ -75,12 +85,19 @@ Game.Blocker = Flynn.Polygon.extend({
         return numVortexed;
     },
 
-    draw: function(ctx){
-        ctx.drawPolygon(this, this.x, this.y);
-        ctx.drawPolygon(this.core, this.x, this.y);
+    render: function(ctx){
+        this._super(ctx);
+        
+        this.core.position.x = this.position.x;
+        this.core.position.y = this.position.y;
+        this.core.render(ctx);
+        
+        // ctx.drawPolygon(this, this.position.x, this.position.y);
+        // ctx.drawPolygon(this.core, this.position.x, this.position.y);
+        
         //Colision radius visualization
         //ctx.beginPath();
-        //ctx.arc(this.x,this.y,13,0,2*Math.PI);
+        //ctx.arc(this.position.x,this.position.y,13,0,2*Math.PI);
         //ctx.stroke();
     }
 });

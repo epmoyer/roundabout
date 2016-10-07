@@ -53,7 +53,14 @@ Game.Vortex = Class.extend({
             shieldPoints.push(Math.cos(theta-Math.PI/2));
             shieldPoints.push(Math.sin(theta-Math.PI/2));
         }
-        this.shieldPolygon = new Flynn.Polygon(shieldPoints, Flynn.Colors.CYAN);
+        this.shieldPolygon = new Flynn.Polygon(
+            shieldPoints,
+            Flynn.Colors.CYAN,
+            1, // scale (Temporary; Will be overwritten)
+            {   x:this.center_x, // Will be set when rendering instances
+                y:this.center_y, 
+                is_world:false}
+            );
         this.shieldAngleTarget = -Math.PI/2;
         this.shieldAngle = -Math.PI/2;
         this.shieldActive = true;
@@ -200,7 +207,7 @@ Game.Vortex = Class.extend({
         return isCollapsed;
     },
 
-    draw: function(ctx, doCollapse) {
+    render: function(ctx, doCollapse) {
         // Vortex
         if (doCollapse){
             // Collapsing
@@ -236,7 +243,7 @@ Game.Vortex = Class.extend({
 
         //Shield
         if (this.shieldActive){
-            ctx.drawPolygon(this.shieldPolygon, this.center_x, this.center_y);
+            this.shieldPolygon.render(ctx);
         }
 
     }

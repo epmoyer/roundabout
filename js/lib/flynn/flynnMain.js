@@ -6,6 +6,22 @@ if (typeof Flynn == "undefined") {
   var Flynn = {};  // Create namespace
 }
 
+Flynn.init = function(
+    canvasWidth,
+    canvasHeight,
+    noChangeState,
+    gameSpeedFactor, 
+    stateBuilderFunc){
+    
+    // The mcp will regester itself as Flynn.mcp when created
+    new Flynn.Mcp(
+        canvasWidth,
+        canvasHeight,
+        noChangeState,
+        gameSpeedFactor,
+        stateBuilderFunc);
+};
+
 Flynn.TICKS_PER_SECOND = 60;
 
 Flynn.DevPacingMode = {
@@ -108,7 +124,7 @@ Flynn.KeyboardMap = {
     'equals':        187, // =
     'left_bracket':  219, // [
     'backslash':     220, // \
-    'right_bracket': 221, // /
+    'right_bracket': 221, // ]
     'grave_accent':  192, // `
 
     'tab':      9,
@@ -149,6 +165,14 @@ Flynn.KeyboardMap = {
     'icade_b2':    -10,
     'icade_b3':    -11,
     'icade_b4':    -12,
+};
+
+
+//------------
+// Points
+//------------
+Flynn.Points = {
+    FLYNN_LOGO: [9000,8014,-21,-9,-21,5,-19,5,-19,-1,-15,-1,-15,-3,-19,-3,-19,-7,17,-7,17,-9,-21,-9,9000,7000,-13,5,-13,-5,-11,-5,-11,3,-7,3,-7,5,-13,5,9000,7000,-9,-5,9000,8005,-4,0,-4,5,-2,5,-2,0,3,-5,0,-5,-3,-2,-6,-5,-9,-5,9000,7000,1,5,9000,8014,1,-1,9000,8001,4,-4,9000,8014,6,0,6,-5,8,-5,8,5,6,5,3,-1,3,5,1,5,9000,7000,10,-5,10,5,12,5,12,-1,15,5,17,5,17,-5,15,-5,15,0,13,-5,10,-5,9000,7000,19,-9,19,7,-21,7,-21,9,21,9,21,-9,19,-9],
 };
 
 //------------
@@ -235,3 +259,27 @@ Flynn.Font.Points = {
         [1.5,0,2.5,1],                                                       // `
     ],
 };
+
+Flynn.Rect= Class.extend({
+    init: function(left, top, width, height){
+        this.object_id = 'Flynn.Rect';
+
+        this.left = left;
+        this.top = top;
+        this.width = width;
+        this.height = height;
+        this.center_x = this.left + this.width/2;
+        this.center_y = this.top + this.height/2;
+        this.right = this.left + this.width;
+        this.bottom = this.top + this.height;
+    },
+
+    clone: function(){
+        return new Flynn.Rect(
+            this.left,
+            this.top,
+            this.width,
+            this.height
+            );
+    }
+});

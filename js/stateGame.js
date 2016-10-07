@@ -47,21 +47,18 @@ Game.StateGame = Flynn.State.extend({
     PROJECTILES_MAX: 4,
     PROJECTILE_SIZE: 3,
 
-    init: function(mcp) {
-        this._super(mcp);
+    init: function() {
+        this._super();
         
-        this.canvasWidth = mcp.canvas.ctx.width;
-        this.canvasHeight = mcp.canvas.ctx.height;
-        this.center_x = this.canvasWidth/2;
-        this.center_y = this.canvasHeight/2;
-        this.viewport_v = new Victor(0,0);
+        this.center_x = Game.CANVAS_WIDTH/2;
+        this.center_y = Game.CANVAS_HEIGHT/2;
 
         this.vortex = new Game.Vortex(this.center_x, this.center_y);
 
         this.ship = new Game.Ship(Game.Points.WIDE_SHIP, Game.Points.FLAMES, 1.5, this.center_x, this.center_y,
             this.SHIP_START_RADIUS, this.SHIP_START_ANGLE, Flynn.Colors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
-        this.ship.maxX = this.canvasWidth;
-        this.ship.maxY = this.canvasHeight;
+        this.ship.maxX = Game.CANVAS_WIDTH;
+        this.ship.maxY = Game.CANVAS_HEIGHT;
         this.ship.visible = false; // Start invisible, to force respawn animation
 
         this.respawnPolygon = new Flynn.Polygon(Game.Points.RESPAWN, Flynn.Colors.YELLOW);
@@ -71,12 +68,18 @@ Game.StateGame = Flynn.State.extend({
 
         this.gameOver = false;
         this.lives = 3;
-        this.lifepolygon = new Flynn.Polygon(Game.Points.WIDE_SHIP, Flynn.Colors.YELLOW);
-        this.lifepolygon.setScale(1.2);
+        this.lifepolygon = new Flynn.Polygon(
+            Game.Points.WIDE_SHIP, 
+            Flynn.Colors.YELLOW,
+            1.2, // scale
+            {   x:0, // Will be set when rendering instances
+                y:50, 
+                is_world:false}
+            );
         this.lifepolygon.setAngle(-Math.PI/2);
 
         this.score = 0;
-        this.highscore = this.mcp.highscores[0][1];
+        this.highscore = Flynn.mcp.highscores[0][1];
 
         this.lvl = 0;
 
@@ -119,8 +122,8 @@ Game.StateGame = Flynn.State.extend({
         this.gameClock = 0;
 
         // Timers
-        this.mcp.timers.add('shipRespawnDelay', this.SHIP_RESPAWN_DELAY_GAME_START_TICKS, null);  // Start game with a delay (for start sound to finish)
-        this.mcp.timers.add('shipRespawnAnimation', 0, null);
+        Flynn.mcp.timers.add('shipRespawnDelay', this.SHIP_RESPAWN_DELAY_GAME_START_TICKS, null);  // Start game with a delay (for start sound to finish)
+        Flynn.mcp.timers.add('shipRespawnAnimation', 0, null);
         this.shipRespawnDelayExpired = false;
         this.shipRespawnAnimationStarted = false;
 
@@ -150,7 +153,9 @@ Game.StateGame = Flynn.State.extend({
         this.ship.radius = this.SHIP_START_RADIUS;
         this.ship.radialAngle = this.SHIP_START_ANGLE;
 
-        this.projectiles = new Flynn.Projectiles( new Victor(0,0), new Victor(this.canvasWidth, this.canvasHeight));
+        this.projectiles = new Flynn.Projectiles(
+            new Flynn.Rect(0, 0, Game.CANVAS_WIDTH, Game.CANVAS_HEIGHT), 
+            false);
         this.drifters = [];
         this.blockers = [];
     },
@@ -206,8 +211,8 @@ Game.StateGame = Flynn.State.extend({
         }
 
         // Timers
-        this.mcp.timers.set('shipRespawnDelay', this.SHIP_RESPAWN_DELAY_TICKS);
-        this.mcp.timers.set('shipRespawnAnimation', 0); // Set to zero to deactivate it
+        Flynn.mcp.timers.set('shipRespawnDelay', this.SHIP_RESPAWN_DELAY_TICKS);
+        Flynn.mcp.timers.set('shipRespawnAnimation', 0); // Set to zero to deactivate it
         this.shipRespawnDelayExpired = false;
         this.shipRespawnAnimationStarted = false;
 
@@ -224,50 +229,50 @@ Game.StateGame = Flynn.State.extend({
 
     handleInputs: function(input, paceFactor) {
 
-        if(this.mcp.developerModeEnabled){
+        if(Flynn.mcp.developerModeEnabled){
             // Metrics toggle
-            if (input.virtualButtonIsPressed("dev_metrics")){
-                this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
+            if (input.virtualButtonWasPressed("dev_metrics")){
+                Flynn.mcp.canvas.showMetrics = !Flynn.mcp.canvas.showMetrics;
             }
 
             // Toggle DEV pacing mode slow mo
-            if (input.virtualButtonIsPressed("dev_slow_mo")){
-                this.mcp.toggleDevPacingSlowMo();
+            if (input.virtualButtonWasPressed("dev_slow_mo")){
+                Flynn.mcp.toggleDevPacingSlowMo();
             }
 
             // Toggle DEV pacing mode fps 20
-            if (input.virtualButtonIsPressed("dev_fps_20")){
-                this.mcp.toggleDevPacingFps20();
+            if (input.virtualButtonWasPressed("dev_fps_20")){
+                Flynn.mcp.toggleDevPacingFps20();
             }
 
             // Points
-            if (input.virtualButtonIsPressed("dev_add_points")){
+            if (input.virtualButtonWasPressed("dev_add_points")){
                 this.addPoints(100);
             }
 
             // Die
-            if (input.virtualButtonIsPressed("dev_die")){
+            if (input.virtualButtonWasPressed("dev_die")){
                 this.doShipDie();
             }
 
             // Grow vortex
-            if (input.virtualButtonIsPressed("vortex_grow")){
+            if (input.virtualButtonWasPressed("vortex_grow")){
                 this.vortex.grow(1);
             }
         }
         
         if(!this.ship.visible){
-            if (input.virtualButtonIsPressed("UI_enter")){
+            if (input.virtualButtonWasPressed("UI_enter")){
                 if (this.gameOver){
-                    if(this.mcp.browserSupportsTouch){
+                    if(Flynn.mcp.browserSupportsTouch){
                         // On touch devices just update high score and go back to menu
-                        this.mcp.updateHighScores("NONAME", this.score);
+                        Flynn.mcp.updateHighScores("NONAME", this.score);
 
-                        this.mcp.nextState = Game.States.MENU;
+                        Flynn.mcp.nextState = Game.States.MENU;
                     } else {
-                        this.mcp.nextState = Game.States.END;
+                        Flynn.mcp.nextState = Game.States.END;
                     }
-                    this.mcp.custom.score = this.score;
+                    Flynn.mcp.custom.score = this.score;
                     return;
                 }
             }
@@ -295,7 +300,7 @@ Game.StateGame = Flynn.State.extend({
             }
         }
 
-        if (input.virtualButtonIsPressed("fire")){
+        if (input.virtualButtonWasPressed("fire")){
             this.popUpFirePending = false;
 
             // Limit max shots on screen 
@@ -337,7 +342,7 @@ Game.StateGame = Flynn.State.extend({
         else{
             // Ship not visible
             if(!this.gameOver){
-                if(this.mcp.timers.hasExpired('shipRespawnDelay')){
+                if(Flynn.mcp.timers.hasExpired('shipRespawnDelay')){
                     this.shipRespawnDelayExpired = true;
                 }
 
@@ -346,17 +351,17 @@ Game.StateGame = Flynn.State.extend({
                     this.shipRespawnDelayExpired &&
                     !this.shipRespawnAnimationStarted){
 
-                    this.mcp.timers.set('shipRespawnAnimation', this.SHIP_RESPAWN_ANIMATION_TICKS);
+                    Flynn.mcp.timers.set('shipRespawnAnimation', this.SHIP_RESPAWN_ANIMATION_TICKS);
                     this.shipRespawnAnimationStarted = true;
                     this.soundShipRespawn.play();
                 }
 
-                if(this.mcp.timers.isRunning('shipRespawnAnimation')){
+                if(Flynn.mcp.timers.isRunning('shipRespawnAnimation')){
                     this.vortex.shieldAngleTarget = Flynn.Util.angleBound2Pi(this.SHIP_START_ANGLE);
                 }
 
                 // If respawn animation has finished...
-                if(this.mcp.timers.hasExpired('shipRespawnAnimation')){
+                if(Flynn.mcp.timers.hasExpired('shipRespawnAnimation')){
                     // Respawn the ship
                     this.ship.radius = this.SHIP_START_RADIUS;
                     this.ship.radialAngle = this.SHIP_START_ANGLE;
@@ -377,14 +382,14 @@ Game.StateGame = Flynn.State.extend({
             var bulletRemove = false;
 
             // Remove shots that reflect back into vortex
-            if (Math.sqrt(Math.pow(b.world_position_v.x - this.center_x, 2) + Math.pow(b.world_position_v.y - this.center_y,2)) <= this.vortex.radius){
+            if (Math.sqrt(Math.pow(b.position.x - this.center_x, 2) + Math.pow(b.position.y - this.center_y,2)) <= this.vortex.radius){
                 bulletRemove = true;
             }
 
             // Shoot drifters
             for(var k=0, len3 =this.drifters.length; k<len3; k++){
                 var drifter = this.drifters[k];
-                if (Math.sqrt(Math.pow(drifter.x - b.world_position_v.x, 2) + Math.pow(drifter.y - b.world_position_v.y,2)) < this.DRIFTER_COLLISION_RADIUS){
+                if (Math.sqrt(Math.pow(drifter.position.x - b.position.x, 2) + Math.pow(drifter.position.y - b.position.y,2)) < this.DRIFTER_COLLISION_RADIUS){
 
                     this.addPoints(this.DRIFTER_POINTS);
 
@@ -403,13 +408,13 @@ Game.StateGame = Flynn.State.extend({
             // Shoot blockers
             for(k=0, len3 =this.blockers.length; k<len3; k++){
                 var blocker = this.blockers[k];
-                if (Math.sqrt(Math.pow(blocker.x - b.world_position_v.x, 2) + Math.pow(blocker.y - b.world_position_v.y,2)) < this.BLOCKER_COLLISION_RADIUS){
+                if (Math.sqrt(Math.pow(blocker.position.x - b.position.x, 2) + Math.pow(blocker.position.y - b.position.y,2)) < this.BLOCKER_COLLISION_RADIUS){
                     // Reverse bullet direction
-                    b.velocity_v.x =- b.velocity_v.x;
-                    b.velocity_v.y =- b.velocity_v.y;
+                    b.velocity.x =- b.velocity.x;
+                    b.velocity.y =- b.velocity.y;
                     // Move the bullet after reflect, so that it cannot bounce around inside the blocker
-                    b.world_position_v.x += b.velocity_v.x;
-                    b.world_position_v.y += b.velocity_v.y;
+                    b.position.x += b.velocity.x;
+                    b.position.y += b.velocity.y;
                     b.lifetime = this.REFLECTED_PROJECTILE_LIFE;
                     this.soundShotReflect.play();
                 }
@@ -521,7 +526,7 @@ Game.StateGame = Flynn.State.extend({
             } else{
                 if(this.ship.visible){
                     d = this.drifters[i];
-                    if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < this.DRIFTER_COLLISION_RADIUS*2){
+                    if (Math.sqrt(Math.pow(d.position.x - this.ship.position.x, 2) + Math.pow(d.position.y - this.ship.position.y,2)) < this.DRIFTER_COLLISION_RADIUS*2){
                         this.doShipDie();
                         this.particles.explosion(d.radius, d.radialAngle, this.DRIFTER_NUM_EXPLOSION_PARTICLES, d.color);
                         
@@ -596,18 +601,10 @@ Game.StateGame = Flynn.State.extend({
             } else{
                 if(this.ship.visible){
                     d = this.blockers[i];
-                    if (Math.sqrt(Math.pow(d.x - this.ship.x, 2) + Math.pow(d.y - this.ship.y,2)) < this.BLOCKER_COLLISION_RADIUS*2){
+                    if (Math.sqrt(Math.pow(d.position.x - this.ship.position.x, 2) + Math.pow(d.position.y - this.ship.position.y,2)) < this.BLOCKER_COLLISION_RADIUS*2){
                         if(this.ship.radius > d.radius){
                             // Ship destroys blocker
                             this.soundBlockerDie.play();
-                            this.particles.explosion(d.radius, d.radialAngle, this.BLOCKER_NUM_EXPLOSION_PARTICLES, blocker.color);
-                            this.particles.explosion(d.radius, d.radialAngle, this.BLOCKER_CORE_EXPLOSION_PARTICLES, blocker.core.color);
-                            
-                            // Remove dead blocker
-                            this.blockers.splice(i, 1);
-                            len--;
-                            i--;
-
                             this.addPoints(this.BLOCKER_POINTS);
 
                             // Bounce the ship
@@ -617,6 +614,15 @@ Game.StateGame = Flynn.State.extend({
                             // Blocker destroys ship
                             this.doShipDie();
                         }
+
+                        // Explosion
+                        this.particles.explosion(d.radius, d.radialAngle, this.BLOCKER_NUM_EXPLOSION_PARTICLES, d.color);
+                        this.particles.explosion(d.radius, d.radialAngle, this.BLOCKER_CORE_EXPLOSION_PARTICLES, d.core.color);
+                        
+                        // Remove dead blocker
+                        this.blockers.splice(i, 1);
+                        len--;
+                        i--;
                     }
                 }
             }
@@ -642,7 +648,7 @@ Game.StateGame = Flynn.State.extend({
             {
                 this.popUpThrustPending = false;
                 this.popUpThrustActive = true;
-                this.showPopUp(this.mcp.custom.thrustPrompt);
+                this.showPopUp(Flynn.mcp.custom.thrustPrompt);
                 this.popUpLife = this.POP_UP_TEXT_LIFE;
             }
         }
@@ -651,7 +657,7 @@ Game.StateGame = Flynn.State.extend({
             {
                 this.popUpFirePending = false;
                 this.popUpFireActive = true;
-                this.showPopUp(this.mcp.custom.shootPrompt);
+                this.showPopUp(Flynn.mcp.custom.shootPrompt);
                 this.popUpLife = this.POP_UP_TEXT_LIFE;
             }
         }
@@ -685,12 +691,13 @@ Game.StateGame = Flynn.State.extend({
         //ctx.vectorText(this.vortex.stars.length, 3,300,15,null, Flynn.Colors.GREEN);
 
         // Scores
-        ctx.vectorText(this.score, 3, 15, 15, null, Flynn.Colors.YELLOW);
-        ctx.vectorText(this.highscore, 3, this.canvasWidth - 6  , 15, 0 , Flynn.Colors.YELLOW);
+        ctx.vectorText(this.score, 3, 15, 15, 'left', Flynn.Colors.YELLOW);
+        ctx.vectorText(this.highscore, 3, Game.CANVAS_WIDTH - 6  , 15, 'right' , Flynn.Colors.YELLOW);
 
         // Extra Lives
         for(i=0; i<this.lives; i++){
-            ctx.drawPolygon(this.lifepolygon, 25+25*i, 50);
+            this.lifepolygon.position.x = 25+25*i;
+            this.lifepolygon.render(ctx);
         }
 
         // PopUp Text
@@ -706,31 +713,31 @@ Game.StateGame = Flynn.State.extend({
         }
 
         // projectiles
-        this.projectiles.draw(ctx, this.viewport_v);
+        this.projectiles.render(ctx);
 
         // Drifters
         for(i=0, len=this.drifters.length; i<len; i++){
-            this.drifters[i].draw(ctx);
+            this.drifters[i].render(ctx);
         }
 
         // Blockers
         for(i=0, len=this.blockers.length; i<len; i++){
-            this.blockers[i].draw(ctx);
+            this.blockers[i].render(ctx);
         }
 
         // Player
-        this.ship.draw(ctx);
+        this.ship.render(ctx);
 
         // Vortex
         var showCollapse = (this.vortexCollapse || (this.ship.visible === false && this.drifters.length > 0));
-        this.vortex.draw(ctx, showCollapse);
+        this.vortex.render(ctx, showCollapse);
 
         // Particles
-        this.particles.draw(ctx);
+        this.particles.render(ctx);
 
         // Ship respawn animation
-        if(this.mcp.timers.isRunning('shipRespawnAnimation')){
-            var animationPercentage = this.mcp.timers.get('shipRespawnAnimation') / this.SHIP_RESPAWN_ANIMATION_TICKS;
+        if(Flynn.mcp.timers.isRunning('shipRespawnAnimation')){
+            var animationPercentage = Flynn.mcp.timers.get('shipRespawnAnimation') / this.SHIP_RESPAWN_ANIMATION_TICKS;
             var sizePercentageStep = 0.005;
             var rotationPercentageStep = 0.1;
             // for(i=0; i<9; i++){

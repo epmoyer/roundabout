@@ -11,11 +11,10 @@ Game.StateMenu = Flynn.State.extend({
     CREDITS_ANGULAR_VELOCITY5: -0.031,
     IS_CENTERED: true,
 
-    init: function(mcp){
-        this._super(mcp);
+    init: function(){
 
-        this.canvasWidth = mcp.canvas.ctx.width;
-        this.canvasHeight = mcp.canvas.ctx.height;
+        this.canvasWidth = Flynn.mcp.canvas.ctx.width;
+        this.canvasHeight = Flynn.mcp.canvas.ctx.height;
 
         this.vortex = new Game.Vortex(this.canvasWidth/2, this.canvasHeight/2);
         this.vortex.shieldActive = false;
@@ -41,43 +40,43 @@ Game.StateMenu = Flynn.State.extend({
 
     handleInputs: function(input, paceFactor) {
         // Metrics toggle
-        if(this.mcp.developerModeEnabled) {
-            if (input.virtualButtonIsPressed("dev_metrics")) {
-                this.mcp.canvas.showMetrics = !this.mcp.canvas.showMetrics;
+        if(Flynn.mcp.developerModeEnabled) {
+            if (input.virtualButtonWasPressed("dev_metrics")) {
+                Flynn.mcp.canvas.showMetrics = !Flynn.mcp.canvas.showMetrics;
             }
             
             // Toggle DEV pacing mode slow mo
-            if (input.virtualButtonIsPressed("dev_slow_mo")){
-                this.mcp.toggleDevPacingSlowMo();
+            if (input.virtualButtonWasPressed("dev_slow_mo")){
+                Flynn.mcp.toggleDevPacingSlowMo();
             }
 
             // Toggle DEV pacing mode fps 20
-            if (input.virtualButtonIsPressed("dev_fps_20")){
-                this.mcp.toggleDevPacingFps20();
+            if (input.virtualButtonWasPressed("dev_fps_20")){
+                Flynn.mcp.toggleDevPacingFps20();
             }
         }
-        if(this.mcp.arcadeModeEnabled) {
-            if (input.virtualButtonIsPressed("UI_quarter")) {
-                this.mcp.credits += 1;
+        if(Flynn.mcp.arcadeModeEnabled) {
+            if (input.virtualButtonWasPressed("UI_quarter")) {
+                Flynn.mcp.credits += 1;
                 this.insert_coin_sound.play();
             }
         }
 
 
-        if (  ( !this.mcp.arcadeModeEnabled && input.virtualButtonIsPressed("UI_enter"))
-           || (  this.mcp.arcadeModeEnabled && (this.mcp.credits > 0)
-              && (  input.virtualButtonIsPressed("UI_start1") 
-                 || input.virtualButtonIsPressed("UI_start2") )))
+        if (  ( !Flynn.mcp.arcadeModeEnabled && input.virtualButtonWasPressed("UI_enter"))
+           || (  Flynn.mcp.arcadeModeEnabled && (Flynn.mcp.credits > 0)
+              && (  input.virtualButtonWasPressed("UI_start1") 
+                 || input.virtualButtonWasPressed("UI_start2") )))
         {
-            this.mcp.credits -= 1;
-            this.mcp.nextState = Game.States.GAME;
+            Flynn.mcp.credits -= 1;
+            Flynn.mcp.changeState(Game.States.GAME);
             this.start_sound.play();
         }
 
-        if (input.virtualButtonIsPressed("UI_escape")) {
-            this.mcp.nextState = Game.States.CONFIG;
+        if (input.virtualButtonWasPressed("UI_escape")) {
+            Flynn.mcp.changeState(Game.States.CONFIG);
         }
-        if (input.virtualButtonIsPressed("UI_exit") && this.mcp.backEnabled){
+        if (input.virtualButtonWasPressed("UI_exit") && Flynn.mcp.backEnabled){
             window.history.back();
         }
     },
@@ -114,24 +113,24 @@ Game.StateMenu = Flynn.State.extend({
             this.creditsAngle3, 100, Flynn.Colors.GREEN, this.IS_CENTERED);
         var startText;
         var controlsText1, controlsText2;
-        if (this.mcp.arcadeModeEnabled) {
+        if (Flynn.mcp.arcadeModeEnabled) {
             startText =     "        PRESS START";
             //              #########################################
             controlsText1 = "LEFT BUTTON THRUST";
             controlsText2 = "RIGHT BUTTON SHOOT";
-            this.mcp.custom.thrustPrompt = "PRESS LEFT BUTTON TO THRUST";
-            this.mcp.custom.shootPrompt = "PRESS RIGHT BUTTON TO SHOOT";
-            ctx.vectorText(this.mcp.credits + " Credits", 2, 10, this.canvasHeight - 20, null, Flynn.Colors.YELLOW);
+            Flynn.mcp.custom.thrustPrompt = "PRESS LEFT BUTTON TO THRUST";
+            Flynn.mcp.custom.shootPrompt = "PRESS RIGHT BUTTON TO SHOOT";
+            ctx.vectorText(Flynn.mcp.credits + " Credits", 2, 10, this.canvasHeight - 20, null, Flynn.Colors.YELLOW);
         }
         else {
-            if (!this.mcp.browserSupportsTouch) {
+            if (!Flynn.mcp.browserSupportsTouch) {
                 startText = "PRESS ENTER TO START";
-                var thrustButtonName = this.mcp.input.getVirtualButtonBoundKeyName("thrust");
-                var fireButtonName = this.mcp.input.getVirtualButtonBoundKeyName("fire");
+                var thrustButtonName = Flynn.mcp.input.getVirtualButtonBoundKeyName("thrust");
+                var fireButtonName = Flynn.mcp.input.getVirtualButtonBoundKeyName("fire");
                 controlsText1 = thrustButtonName + " TO THRUST";
                 controlsText2 = fireButtonName + " TO SHOOT";
-                this.mcp.custom.thrustPrompt = "PRESS " + thrustButtonName + " TO THRUST";
-                this.mcp.custom.shootPrompt = "PRESS " + fireButtonName + " TO SHOOT";
+                Flynn.mcp.custom.thrustPrompt = "PRESS " + thrustButtonName + " TO THRUST";
+                Flynn.mcp.custom.shootPrompt = "PRESS " + fireButtonName + " TO SHOOT";
                 ctx.vectorTextArc("PRESS ESCAPE TO CONFIGURE",
                     2, this.vortex.center_x, this.vortex.center_y,
                     this.creditsAngle5, 60, Flynn.Colors.GREEN, this.IS_CENTERED);
@@ -140,12 +139,12 @@ Game.StateMenu = Flynn.State.extend({
                 //              #########################################
                 controlsText1 = "TAP LEFT TO THRUST";
                 controlsText2 = "TAP RIGHT TO SHOOT";
-                this.mcp.custom.thrustPrompt = "TAP LEFT TO THRUST";
-                this.mcp.custom.shootPrompt = "TAP RIGHT TO SHOOT";
+                Flynn.mcp.custom.thrustPrompt = "TAP LEFT TO THRUST";
+                Flynn.mcp.custom.shootPrompt = "TAP RIGHT TO SHOOT";
             }
         }
-        if(!this.mcp.arcadeModeEnabled || (this.mcp.arcadeModeEnabled && (this.mcp.credits > 0))) {
-            if (Math.floor(this.mcp.clock / 40) % 2 == 1) {
+        if(!Flynn.mcp.arcadeModeEnabled || (Flynn.mcp.arcadeModeEnabled && (Flynn.mcp.credits > 0))) {
+            if (Math.floor(Flynn.mcp.clock / 40) % 2 == 1) {
                 ctx.vectorTextArc(startText,
                     2, this.vortex.center_x, this.vortex.center_y,
                     this.creditsAngle3 + Math.PI, 100, Flynn.Colors.CYAN, this.IS_CENTERED);
@@ -161,13 +160,14 @@ Game.StateMenu = Flynn.State.extend({
         ctx.vectorTextArc(
             "WRITTEN BY TRAYTON MOYER (FLOATIN' HEAD) AND ERIC MOYER (FIENDFODDER) FOR LUDAM MINI DARE 56",
             2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle , 240, Flynn.Colors.GREEN);
-        if(this.mcp.backEnabled){
+        if(Flynn.mcp.backEnabled){
             ctx.vectorText('PRESS <TAB> TO EXIT GAME', 1.3, null, 750, null, Flynn.Colors.GRAY);
         }
 
-        ctx.vectorText('FLYNN ' + this.mcp.version, 1.0, this.canvasWidth-3, this.canvasHeight-10, 0, Flynn.Colors.GRAY);
+        //ctx.vectorText('FLYNN ' + Flynn.mcp.version, 1.0, this.canvasWidth-3, this.canvasHeight-10, 0, Flynn.Colors.GRAY);
+        Flynn.mcp.renderLogo(ctx);
 
-        this.vortex.draw(ctx);
+        this.vortex.render(ctx);
     }
 
 });

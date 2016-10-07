@@ -16,10 +16,19 @@ Game.Ship = Flynn.Polygon.extend({
     maxY: null,
 
     init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity, vortex){
-        this._super(p, color);
+        this._super(
+            p,
+            color,
+            s, // scale
+            {x:x, y:y, is_world:false}
+            );
 
-        this.flames = new Flynn.Polygon(pf, Flynn.Colors.CYAN);
-        this.flames.setScale(s);
+        this.flames = new Flynn.Polygon(
+            pf,
+            Flynn.Colors.CYAN,
+            s, // scale
+            {x:x, y:y, is_world:false}
+            );
 
         this.center_x = x;
         this.center_y = y;
@@ -31,14 +40,13 @@ Game.Ship = Flynn.Polygon.extend({
         this.angularVelocity = 0;
         this.vortex = vortex;
 
-        this.x = null;
-        this.y = null;
+        this.position.x = null;
+        this.position.y = null;
 
         this.drawFlames = false;
         this.visible = true;
         this.deathByVortex = false;
 
-        this.setScale(s);
         this.radial_to_cardinal();
         this.f_radiusToAngularVelocity = f_radiusToAngularVelocity;
 
@@ -62,8 +70,8 @@ Game.Ship = Flynn.Polygon.extend({
     radial_to_cardinal: function(){
         this.setAngle(this.radialAngle);
         this.flames.setAngle(this.radialAngle);
-        this.x = this.center_x + this.radius * Math.cos(this.radialAngle);
-        this.y = this.center_y + this.radius * Math.sin(this.radialAngle);
+        this.position.x = this.center_x + this.radius * Math.cos(this.radialAngle);
+        this.position.y = this.center_y + this.radius * Math.sin(this.radialAngle);
     },
 
     collide: function(polygon){
@@ -73,8 +81,8 @@ Game.Ship = Flynn.Polygon.extend({
             return false;
         }
         for(i=0, len=this.points.length -2; i<len; i+=2){
-            var x = this.points[i] + this.x;
-            var y = this.points[i+1] + this.y;
+            var x = this.points[i] + this.position.x;
+            var y = this.points[i+1] + this.position.y;
 
             if (polygon.hasPoint(x,y)){
                 return true;
@@ -84,7 +92,7 @@ Game.Ship = Flynn.Polygon.extend({
     },
 
     hasPoint: function(x, y) {
-        return this._super(this.x, this.y, x, y);
+        return this._super(this.position.x, this.position.y, x, y);
     },
 
     shoot: function() {
@@ -154,11 +162,17 @@ Game.Ship = Flynn.Polygon.extend({
         return isAlive;
     },
 
-    draw: function(ctx){
+    render: function(ctx){
         if(this.visible){
-            ctx.drawPolygon(this, this.x, this.y);
+            this._super(ctx);
+        
+
+            //ctx.drawPolygon(this, this.position.x, this.position.y);
             if (this.drawFlames){
-                ctx.drawPolygon(this.flames, this.x, this.y);
+                this.flames.position.x = this.position.x;
+                this.flames.position.y = this.position.y;
+                this.flames.render(ctx);
+                //ctx.drawPolygon(this.flames, this.position.x, this.position.y);
                 this.drawFlames = false;
             }
         }
