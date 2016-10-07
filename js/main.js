@@ -107,15 +107,15 @@ Game.Main = Class.extend({
         var button_size = 80;
         var x, y;
         if(Flynn.mcp.browserSupportsTouch){
-            x = 1.4*button_size;
-            y = Game.CANVAS_HEIGHT - 1.4*button_size;
+            x = 0.1*button_size;
+            y = Game.CANVAS_HEIGHT - 1.1*button_size;
             Flynn.mcp.input.addTouchRegion("thrust",
                 x, y, x+button_size, y+button_size,
                 'round',
                 [Game.States.GAME]  // visible_states
                 );
 
-            x = Game.CANVAS_WIDTH - 1.4*button_size;
+            x = Game.CANVAS_WIDTH - 1.1*button_size;
             Flynn.mcp.input.addTouchRegion("fire",
                 x, y, x+button_size, y+button_size,
                 'round',
