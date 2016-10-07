@@ -47,25 +47,6 @@ Game.Blocker = Flynn.Polygon.extend({
         this.position.y = this.center_y + this.radius * Math.sin(this.radialAngle);
     },
 
-    collide: function(polygon){
-        if (!this.visible){
-            return false;
-        }
-        for(i=0, len=this.points.length -2; i<len; i+=2){
-            var x = this.points[i] + this.position.x;
-            var y = this.points[i+1] + this.position.y;
-
-            if (polygon.hasPoint(x,y)){
-                return true;
-            }
-        }
-        return false;
-    },
-
-    hasPoint: function(x, y) {
-        return this._super(this.position.x, this.position.y, x, y);
-    },
-
     update: function(paceFactor, vortexRadius) {
         var numVortexed = 0;
         // Add rotational angle based on radius
