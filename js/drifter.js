@@ -21,10 +21,6 @@ Game.Drifter = Flynn.Polygon.extend({
         this.angle = 0;
         this.scale = s;
 
-        // this.position.x = null;
-        // this.position.y = null;
-
-        //this.setScale(s);
         this.radial_to_cardinal();
         this.alive = true;
         this.deathDive = false;
@@ -78,10 +74,5 @@ Game.Drifter = Flynn.Polygon.extend({
 
     render: function(ctx){
         this._super(ctx);
-        //ctx.drawPolygon(this, this.position.x, this.position.y);
-        //Colision radius visualization
-        //ctx.beginPath();
-        //ctx.arc(this.position.x,this.position.y,13,0,2*Math.PI);
-        //ctx.stroke();
     }
 });

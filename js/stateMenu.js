@@ -118,8 +118,8 @@ Game.StateMenu = Flynn.State.extend({
             //              #########################################
             controlsText1 = "LEFT BUTTON THRUST";
             controlsText2 = "RIGHT BUTTON SHOOT";
-            Flynn.mcp.custom.thrustPrompt = "PRESS LEFT BUTTON TO THRUST";
-            Flynn.mcp.custom.shootPrompt = "PRESS RIGHT BUTTON TO SHOOT";
+            Game.config.thrustPrompt = "PRESS LEFT BUTTON TO THRUST";
+            Game.config.shootPrompt = "PRESS RIGHT BUTTON TO SHOOT";
             ctx.vectorText(Flynn.mcp.credits + " Credits", 2, 10, this.canvasHeight - 20, null, Flynn.Colors.YELLOW);
         }
         else {
@@ -129,8 +129,8 @@ Game.StateMenu = Flynn.State.extend({
                 var fireButtonName = Flynn.mcp.input.getVirtualButtonBoundKeyName("fire");
                 controlsText1 = thrustButtonName + " TO THRUST";
                 controlsText2 = fireButtonName + " TO SHOOT";
-                Flynn.mcp.custom.thrustPrompt = "PRESS " + thrustButtonName + " TO THRUST";
-                Flynn.mcp.custom.shootPrompt = "PRESS " + fireButtonName + " TO SHOOT";
+                Game.config.thrustPrompt = "PRESS " + thrustButtonName + " TO THRUST";
+                Game.config.shootPrompt = "PRESS " + fireButtonName + " TO SHOOT";
                 ctx.vectorTextArc("PRESS ESCAPE TO CONFIGURE",
                     2, this.vortex.center_x, this.vortex.center_y,
                     this.creditsAngle5, 60, Flynn.Colors.GREEN, this.IS_CENTERED);
@@ -139,8 +139,8 @@ Game.StateMenu = Flynn.State.extend({
                 //              #########################################
                 controlsText1 = "TAP LEFT TO THRUST";
                 controlsText2 = "TAP RIGHT TO SHOOT";
-                Flynn.mcp.custom.thrustPrompt = "TAP LEFT TO THRUST";
-                Flynn.mcp.custom.shootPrompt = "TAP RIGHT TO SHOOT";
+                Game.config.thrustPrompt = "TAP LEFT TO THRUST";
+                Game.config.shootPrompt = "TAP RIGHT TO SHOOT";
             }
         }
         if(!Flynn.mcp.arcadeModeEnabled || (Flynn.mcp.arcadeModeEnabled && (Flynn.mcp.credits > 0))) {

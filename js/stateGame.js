@@ -268,11 +268,11 @@ Game.StateGame = Flynn.State.extend({
                         // On touch devices just update high score and go back to menu
                         Flynn.mcp.updateHighScores("NONAME", this.score);
 
-                        Flynn.mcp.nextState = Game.States.MENU;
+                        Flynn.mcp.changeState(Game.States.MENU);
                     } else {
-                        Flynn.mcp.nextState = Game.States.END;
+                        Flynn.mcp.changeState(Game.States.END);
                     }
-                    Flynn.mcp.custom.score = this.score;
+                    Game.config.score = this.score;
                     return;
                 }
             }
@@ -648,7 +648,7 @@ Game.StateGame = Flynn.State.extend({
             {
                 this.popUpThrustPending = false;
                 this.popUpThrustActive = true;
-                this.showPopUp(Flynn.mcp.custom.thrustPrompt);
+                this.showPopUp(Game.config.thrustPrompt);
                 this.popUpLife = this.POP_UP_TEXT_LIFE;
             }
         }
@@ -657,7 +657,7 @@ Game.StateGame = Flynn.State.extend({
             {
                 this.popUpFirePending = false;
                 this.popUpFireActive = true;
-                this.showPopUp(Flynn.mcp.custom.shootPrompt);
+                this.showPopUp(Game.config.shootPrompt);
                 this.popUpLife = this.POP_UP_TEXT_LIFE;
             }
         }

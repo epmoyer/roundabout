@@ -87,13 +87,10 @@ Game.Blocker = Flynn.Polygon.extend({
 
     render: function(ctx){
         this._super(ctx);
-        
+
         this.core.position.x = this.position.x;
         this.core.position.y = this.position.y;
         this.core.render(ctx);
-        
-        // ctx.drawPolygon(this, this.position.x, this.position.y);
-        // ctx.drawPolygon(this.core, this.position.x, this.position.y);
         
         //Colision radius visualization
         //ctx.beginPath();
