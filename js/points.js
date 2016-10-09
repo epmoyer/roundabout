@@ -1,6 +1,6 @@
-if (typeof Game == "undefined") {
-   var Game = {};  // Create namespace
-}
+var Game = Game || {}; // Create namespace
+
+(function () { "use strict";
 
 Game.Points = {
 
@@ -22,3 +22,5 @@ Game.Points = {
     ABSTRACT: [5,-1,5,1,2,2,2,-2,-2,2,-2,-2,-5,-1,-5,1,-2,2,2,2,-2,-2,-1,-5,1,-5,2,-2,-2,-2,-2,2,-1,5,1,5,2,2,2,-2,5,-1],
     RESPAWN: [1,-2,0,-6,-1,-2,-3,-3,-2,-1,-6,0,-2,1,-3,3,-1,2,0,6,1,2,3,3,2,1,6,0,2,-1,3,-3,1,-2],
 };
+
+}()); // "use strict" wrapper

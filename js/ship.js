@@ -1,6 +1,6 @@
-if (typeof Game == "undefined") {
-   var Game = {};  // Create namespace
-}
+var Game = Game || {}; // Create namespace
+
+(function () { "use strict";
 
 Game.Ship = Flynn.Polygon.extend({
 
@@ -157,3 +157,5 @@ Game.Ship = Flynn.Polygon.extend({
         }
     }
 });
+
+}()); // "use strict" wrapper

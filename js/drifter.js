@@ -1,6 +1,6 @@
-if (typeof Game == "undefined") {
-   var Game = {};  // Create namespace
-}
+var Game = Game || {}; // Create namespace
+
+(function () { "use strict";
 
 Game.Drifter = Flynn.Polygon.extend({
 
@@ -57,3 +57,5 @@ Game.Drifter = Flynn.Polygon.extend({
         this._super(ctx);
     }
 });
+
+}()); // "use strict" wrapper

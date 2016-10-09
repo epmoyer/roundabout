@@ -1,6 +1,6 @@
-if (typeof Game == "undefined") {
-   var Game = {};  // Create namespace
-}
+var Game = Game || {}; // Create namespace
+
+(function () { "use strict";
 
 Game.StateGame = Flynn.State.extend({
 
@@ -79,8 +79,8 @@ Game.StateGame = Flynn.State.extend({
         );
         this.lifepolygon.setAngle(-Math.PI/2);
 
-        this.score = 0;
-        this.highscore = Flynn.mcp.highscores[0][1];
+        Game.config.score = 0;
+        Game.config.high_score = Game.config.leaderboard.getBestEntry().score;
 
         this.lvl = 0;
 
@@ -165,17 +165,17 @@ Game.StateGame = Flynn.State.extend({
     addPoints: function(points){
         // Points only count when not dead
         if(this.ship.visible){
-            if(Math.floor(this.score / this.EXTRA_LIFE_SCORE) != Math.floor((this.score + points) / this.EXTRA_LIFE_SCORE)){
+            if(Math.floor(Game.config.score / this.EXTRA_LIFE_SCORE) != Math.floor((Game.config.score + points) / this.EXTRA_LIFE_SCORE)){
                 // Extra life
                 this.lives++;
                 this.soundExtraLife.play();
             }
-            this.score += points;
+            Game.config.score += points;
         }
 
         // Update highscore if exceeded
-        if (this.score > this.highscore){
-            this.highscore = this.score;
+        if (Game.config.score > Game.config.high_score){
+            Game.config.high_score = Game.config.score;
         }
     },
 
@@ -268,13 +268,16 @@ Game.StateGame = Flynn.State.extend({
                 if (this.gameOver){
                     if(Flynn.mcp.browserSupportsTouch){
                         // On touch devices just update high score and go back to menu
-                        Flynn.mcp.updateHighScores("NONAME", this.score);
+                        Game.config.leaderboard.add(
+                                {  score: Game.config.score,
+                                   name: "NONAME"
+                                }
+                            );
 
                         Flynn.mcp.changeState(Game.States.MENU);
                     } else {
                         Flynn.mcp.changeState(Game.States.END);
                     }
-                    Game.config.score = this.score;
                     return;
                 }
             }
@@ -527,7 +530,7 @@ Game.StateGame = Flynn.State.extend({
                 i--;
             } else{
                 if(this.ship.visible){
-                    d = this.drifters[i];
+                    var d = this.drifters[i];
                     if (Math.sqrt(Math.pow(d.position.x - this.ship.position.x, 2) + Math.pow(d.position.y - this.ship.position.y,2)) < this.DRIFTER_COLLISION_RADIUS*2){
                         this.doShipDie();
                         this.particles.explosion(d.radius, d.radialAngle, this.DRIFTER_NUM_EXPLOSION_PARTICLES, d.color);
@@ -546,7 +549,7 @@ Game.StateGame = Flynn.State.extend({
         //----------------
 
         //Spawn
-        if(!this.vortexCollapse && this.ship.visible && this.score >= this.BLOCKER_APPEAR_SCORE){
+        if(!this.vortexCollapse && this.ship.visible && Game.config.score >= this.BLOCKER_APPEAR_SCORE){
             if((Math.random() < this.BLOCKER_SPAWN_RATE) || (this.blockers.length === 0)){
 
                 var blockerRadius = this.DRIFTER_MAX_RADIUS;
@@ -677,7 +680,7 @@ Game.StateGame = Flynn.State.extend({
         }
 
         // Vortex shield
-        if(this.score >= this.VORTEX_SHIELD_END_SCORE){
+        if(Game.config.score >= this.VORTEX_SHIELD_END_SCORE){
             this.vortex.shieldErode = true;
         }
 
@@ -693,8 +696,8 @@ Game.StateGame = Flynn.State.extend({
         //ctx.vectorText(this.vortex.stars.length, 3,300,15,null, Flynn.Colors.GREEN);
 
         // Scores
-        ctx.vectorText(this.score, 3, 15, 15, 'left', Flynn.Colors.YELLOW);
-        ctx.vectorText(this.highscore, 3, Game.CANVAS_WIDTH - 6  , 15, 'right' , Flynn.Colors.YELLOW);
+        ctx.vectorText(Game.config.score, 3, 15, 15, 'left', Flynn.Colors.YELLOW);
+        ctx.vectorText(Game.config.high_score, 3, Game.CANVAS_WIDTH - 6  , 15, 'right' , Flynn.Colors.YELLOW);
 
         // Extra Lives
         for(i=0; i<this.lives; i++){
@@ -774,3 +777,5 @@ Game.StateGame = Flynn.State.extend({
         }
     }
 });
+
+}()); // "use strict" wrapper

@@ -1,6 +1,6 @@
-if (typeof Game == "undefined") {
-   var Game = {};  // Create namespace
-}
+var Game = Game || {}; // Create namespace
+
+(function () { "use strict";
 
 Game.Particle = Class.extend({
 
@@ -113,3 +113,5 @@ Game.Particles = Class.extend({
         }
     }
 });
+
+}()); // "use strict" wrapper
