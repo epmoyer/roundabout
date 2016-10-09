@@ -74,8 +74,9 @@ Game.StateGame = Flynn.State.extend({
             1.2, // scale
             {   x:0, // Will be set when rendering instances
                 y:50, 
-                is_world:false}
-            );
+                is_world:false
+            }
+        );
         this.lifepolygon.setAngle(-Math.PI/2);
 
         this.score = 0;
@@ -155,7 +156,8 @@ Game.StateGame = Flynn.State.extend({
 
         this.projectiles = new Flynn.Projectiles(
             new Flynn.Rect(0, 0, Game.CANVAS_WIDTH, Game.CANVAS_HEIGHT), 
-            false);
+            false // is_world
+            );
         this.drifters = [];
         this.blockers = [];
     },

@@ -96,6 +96,8 @@ Game.StateMenu = Flynn.State.extend({
         var title_x = 160;
         var title_y = 150;
         var title_step = 5;
+        var is_world = false; // Use screen coordinates
+        var scale = 8;
 
         // Font Test
         //ctx.vectorText("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
@@ -104,11 +106,21 @@ Game.StateMenu = Flynn.State.extend({
         //  2.5, 30, 55, null, Flynn.Colors.MAGENTA);
 
         for (var angle = 0; angle < Math.PI + 0.1; angle += Math.PI) {
-            ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, Flynn.Colors.MAGENTA);
-            ctx.vectorTextArc("ROUNDABOUT", 12, this.vortex.center_x, this.vortex.center_y, this.titleAngle - 0.01 + angle, 297, Flynn.Colors.CYAN);
+            ctx.vectorTextArc("ROUNDABOUT", scale, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, 
+                Flynn.Colors.MAGENTA,
+                is_world,
+                false, // is_centered
+                false, // is_reversed
+                Flynn.Font.Block);
+            ctx.vectorTextArc("ROUNDABOUT", scale, this.vortex.center_x, this.vortex.center_y, this.titleAngle - 0.01 + angle, 297,
+                Flynn.Colors.CYAN,
+                is_world,
+                false, // is_centered
+                false, // is_reversed
+                Flynn.Font.Block);
         }
 
-        ctx.vectorTextArc("VERSION 7.0",
+        ctx.vectorTextArc("VERSION " + Game.VERSION,
             2, this.vortex.center_x, this.vortex.center_y,
             this.creditsAngle3, 100, Flynn.Colors.GREEN, this.IS_CENTERED);
         var startText;
@@ -164,7 +176,6 @@ Game.StateMenu = Flynn.State.extend({
             ctx.vectorText('PRESS <TAB> TO EXIT GAME', 1.3, null, 750, null, Flynn.Colors.GRAY);
         }
 
-        //ctx.vectorText('FLYNN ' + Flynn.mcp.version, 1.0, this.canvasWidth-3, this.canvasHeight-10, 0, Flynn.Colors.GRAY);
         Flynn.mcp.renderLogo(ctx);
 
         this.vortex.render(ctx);

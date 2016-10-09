@@ -2,6 +2,7 @@ if (typeof Game == "undefined") {
    var Game = {};  // Create namespace
 }
 
+Game.VERSION = '7.1';
 Game.CANVAS_HEIGHT = 768;
 Game.CANVAS_WIDTH = 1024;
 Game.SPEED_FACTOR = 0.7;
