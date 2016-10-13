@@ -54,16 +54,6 @@ Game.Ship = Flynn.Polygon.extend({
             x: 0,
             y: 0
         };
-
-        this.soundShoot = new Howl({
-            src: ['sounds/Laser_Shoot_sustained.ogg', 'sounds/Laser_Shoot_sustained.mp3'],
-            volume: 0.25,
-        });
-
-        this.soundVortexConsumePlayer = new Howl({
-            src: ['sounds/VortexConsume.ogg', 'sounds/VortexConsume.mp3'],
-            volume: 0.50,
-        });
     },
 
     // Calculate caridnal position and angle from radial position and angle
@@ -75,7 +65,7 @@ Game.Ship = Flynn.Polygon.extend({
     },
 
     shoot: function() {
-        this.soundShoot.play();
+        Game.sounds.shoot.play();
 
         var projectile_info = {};
         var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
@@ -121,7 +111,7 @@ Game.Ship = Flynn.Polygon.extend({
             if(this.visible){
                 this.ascentVelocity = 0;
                 this.radius = vortexRadius;
-                this.soundVortexConsumePlayer.play();
+                Game.sounds.vortex_consume_player.play();
                 this.deathByVortex = true;
                 isAlive = false;
             }

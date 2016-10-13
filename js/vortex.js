@@ -37,16 +37,6 @@ Game.Vortex = Class.extend({
             this.stars.push(Math.random() * Math.PI * 2);
         }
 
-        this.soundVortexConsume = new Howl({
-            src: ['sounds/VortexConsume.ogg','sounds/VortexConsume.mp3'],
-            volume: 1.0,
-        });
-
-        this.soundShieldErode = new Howl({
-            src: ['sounds/ShieldBreak.ogg','sounds/ShieldBreak.mp3'],
-            volume: 1.0,
-        });
-
         // Build shield 
         var shieldPoints = [];
         for (var theta=0; theta<Math.PI+0.01; theta+=Math.PI*2/this.VORTEX_SHIELD_POINTS){
@@ -104,7 +94,7 @@ Game.Vortex = Class.extend({
         if (this.target_radius >= this.VORTEX_MAX_RADIUS){
             this.target_radius = this.VORTEX_MAX_RADIUS;
         }
-        this.soundVortexConsume.play();
+        Game.sounds.vortex_consume.play();
     },
 
     caresianToAngle: function (x, y) {
@@ -190,7 +180,7 @@ Game.Vortex = Class.extend({
                             Math.atan2(y,x),
                             10,
                             Flynn.Colors.CYAN);
-                        this.soundShieldErode.play();
+                        Game.sounds.shield_erode.play();
                     }
                     this.shieldPolygon.pointsMaster.splice(len-2,2);
                     this.shieldPolygon.points.splice(len-2,2);

@@ -86,37 +86,7 @@ Game.StateGame = Flynn.State.extend({
 
         this.generateLvl();
 
-        this.soundEngine = new Howl({
-            src: ['sounds/Engine.ogg','sounds/Engine.mp3'],
-            volume: 0.25,
-            loop: true,
-        });
-        this.soundPlayerDie = new Howl({
-            src: ['sounds/Playerexplosion2.ogg','sounds/Playerexplosion2.mp3'],
-            volume: 0.25,
-        });
-        this.soundExtraLife = new Howl({
-            src: ['sounds/ExtraLife.ogg','sounds/ExtraLife.mp3'],
-            volume: 1.00,
-        });
-        this.soundShotReflect = new Howl({
-            src: ['sounds/Blocked.ogg','sounds/Blocked.mp3'],
-            volume: 0.25,
-        });
-        this.soundDrifterDie = new Howl({
-            src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
-            volume: 0.25,
-        });
-        this.soundBlockerDie = new Howl({
-            src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
-            volume: 0.25,
-        });
-        this.soundShipRespawn = new Howl({
-            src: ['sounds/ShipRespawn.ogg','sounds/ShipRespawn.mp3'],
-            volume: 0.25,
-        });
         this.engine_sound_playing = false;
-
         this.vortexCollapse = false;
 
         // Game Clock
@@ -168,7 +138,7 @@ Game.StateGame = Flynn.State.extend({
             if(Math.floor(Game.config.score / this.EXTRA_LIFE_SCORE) != Math.floor((Game.config.score + points) / this.EXTRA_LIFE_SCORE)){
                 // Extra life
                 this.lives++;
-                this.soundExtraLife.play();
+                Game.sounds.extra_life.play();
             }
             Game.config.score += points;
         }
@@ -202,11 +172,11 @@ Game.StateGame = Flynn.State.extend({
         }
 
         // Sounds
-        this.soundEngine.stop();
+        Game.sounds.engine.stop();
 
         // Explosion
         if(!this.ship.deathByVortex){
-            this.soundPlayerDie.play();
+            Game.sounds.player_die.play();
             this.particles.explosion(
                 this.ship.radius, this.ship.radialAngle, this.SHIP_NUM_EXPLOSION_PARTICLES,
                 this.ship.color, this.ship.EXPLOSION_MAX_VELOCITY);
@@ -290,7 +260,7 @@ Game.StateGame = Flynn.State.extend({
             this.popUpThrustPending = false;
             this.ship.addVel(paceFactor);
             if(!this.engine_sound_playing){
-                this.soundEngine.play();
+                Game.sounds.engine.play();
                 this.engine_sound_playing = true;
             }
 
@@ -300,7 +270,7 @@ Game.StateGame = Flynn.State.extend({
             }
         } else {
             if (this.engine_sound_playing){
-                this.soundEngine.stop();
+                Game.sounds.engine.stop();
                 this.engine_sound_playing = false;
             }
         }
@@ -358,7 +328,7 @@ Game.StateGame = Flynn.State.extend({
 
                     Flynn.mcp.timers.set('shipRespawnAnimation', this.SHIP_RESPAWN_ANIMATION_TICKS);
                     this.shipRespawnAnimationStarted = true;
-                    this.soundShipRespawn.play();
+                    Game.sounds.ship_respawn.play();
                 }
 
                 if(Flynn.mcp.timers.isRunning('shipRespawnAnimation')){
@@ -402,7 +372,7 @@ Game.StateGame = Flynn.State.extend({
                     this.particles.explosion(drifter.radius, drifter.radialAngle, this.DRIFTER_NUM_EXPLOSION_PARTICLES, drifter.color);
 
                     // Remove dead drifter
-                    this.soundDrifterDie.play();
+                    Game.sounds.drifter_die.play();
                     this.drifters.splice(k, 1);
                     len3--;
                     k--;
@@ -421,7 +391,7 @@ Game.StateGame = Flynn.State.extend({
                     b.position.x += b.velocity.x;
                     b.position.y += b.velocity.y;
                     b.lifetime = this.REFLECTED_PROJECTILE_LIFE;
-                    this.soundShotReflect.play();
+                    Game.sounds.shot_reflect.play();
                 }
             }
             if(bulletRemove){
@@ -609,7 +579,7 @@ Game.StateGame = Flynn.State.extend({
                     if (Math.sqrt(Math.pow(d.position.x - this.ship.position.x, 2) + Math.pow(d.position.y - this.ship.position.y,2)) < this.BLOCKER_COLLISION_RADIUS*2){
                         if(this.ship.radius > d.radius){
                             // Ship destroys blocker
-                            this.soundBlockerDie.play();
+                            Game.sounds.blocker_die.play();
                             this.addPoints(this.BLOCKER_POINTS);
 
                             // Bounce the ship

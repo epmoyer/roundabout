@@ -96,27 +96,80 @@ Game.Main = Class.extend({
         }
 
 
-        // Audio
-        Game.config.soundMusic = new Howl({
-            //src: ['sounds/song_roundabout.ogg', 'sounds/song_roundabout.mp3'],
-            // src: ['sounds/ThemeIntroRDB.ogg', 'sounds/ThemeIntroRDB.mp3'],
-            src: ['sounds/SpaceThemev3.mp3'],
-            loop: true,
-            buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
-            volume: 0.5,
-        });
+        //----------------------
+        // Sounds
+        //----------------------
+        Game.sounds = {
+            music:{ 
+                intro: new Howl({
+                    //src: ['sounds/song_roundabout.ogg', 'sounds/song_roundabout.mp3'],
+                    // src: ['sounds/ThemeIntroRDB.ogg', 'sounds/ThemeIntroRDB.mp3'],
+                    src: ['sounds/SpaceThemev3.mp3'],
+                    loop: true,
+                    buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
+                    volume: 0.5 }),
+            },
+
+            // Interface
+            insert_coin: new Howl({
+                src: ['sounds/InsertCoin.ogg','sounds/InsertCoin.mp3'],
+                volume: 0.5 }),
+
+            start_game: new Howl({
+                src: ['sounds/Tripple_blip.ogg','sounds/Tripple_blip.mp3'],
+                volume: 0.5 }),
+
+            // Vortex
+            vortex_consume_player: new Howl({
+                src: ['sounds/VortexConsume.ogg', 'sounds/VortexConsume.mp3'],
+                volume: 0.5 }),
+            vortex_consume: new Howl({
+                src: ['sounds/VortexConsume.ogg','sounds/VortexConsume.mp3'],
+                volume: 1.0 }),
+
+            // Primary
+            shoot: new Howl({
+                src: ['sounds/Laser_Shoot_sustained.ogg', 'sounds/Laser_Shoot_sustained.mp3'],
+                volume: 0.25 }),
+            shield_erode: new Howl({
+                src: ['sounds/ShieldBreak.ogg','sounds/ShieldBreak.mp3'],
+                volume: 1.0 }),
+            engine: new Howl({
+                src: ['sounds/Engine.ogg','sounds/Engine.mp3'],
+                volume: 0.25,
+                loop: true }),
+            player_die: new Howl({
+                src: ['sounds/Playerexplosion2.ogg','sounds/Playerexplosion2.mp3'],
+                volume: 0.25 }),
+            extra_life: new Howl({
+                src: ['sounds/ExtraLife.ogg','sounds/ExtraLife.mp3'],
+                volume: 1.00 }),
+            shot_reflect: new Howl({
+                src: ['sounds/Blocked.ogg','sounds/Blocked.mp3'],
+                volume: 0.25 }),
+            drifter_die: new Howl({
+                src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
+                volume: 0.25 }),
+            blocker_die: new Howl({
+                src: ['sounds/Drifterexplosion.ogg','sounds/Drifterexplosion.mp3'],
+                volume: 0.25 }),
+            ship_respawn: new Howl({
+                src: ['sounds/ShipRespawn.ogg','sounds/ShipRespawn.mp3'],
+                volume: 0.25 }),
+        };
+
         Game.updateMusic = function(){
             var enabled = (
                 Flynn.mcp.optionManager.getOption('musicEnabled') &&
                 Flynn.mcp.optionManager.getOption('soundEnabled')
                 );
             if(enabled){
-                if(!Game.config.soundMusic.playing()){
-                    Game.config.soundMusic.play();
+                if(!Game.sounds.music.intro.playing()){
+                    Game.sounds.music.intro.play();
                 }
             }
             else{
-                Game.config.soundMusic.stop();
+                Game.sounds.music.intro.stop();
             }
         };
         Game.updateSound = function(){
@@ -129,11 +182,7 @@ Game.Main = Class.extend({
             var sound;
             var sound_enabled = Flynn.mcp.optionManager.getOption('soundEnabled');
             if (sound_enabled){
-                sound = new Howl({
-                    src: ['sounds/InsertCoin.ogg','sounds/InsertCoin.mp3'],
-                    volume: 0.5
-                });
-                sound.play();
+                Game.sounds.insert_coin.play();
             }
         };
 
