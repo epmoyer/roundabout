@@ -174,7 +174,7 @@ Game.Main = Class.extend({
         };
         Game.updateSound = function(){
             var sound_enabled = Flynn.mcp.optionManager.getOption('soundEnabled');
-            Howler.mute(!sound_enabled);
+            Flynn.mcp.muteAudio(!sound_enabled);
             Game.updateMusic();
         };
         Game.updateSoundOptionChange = function(){
