@@ -85,8 +85,7 @@ Game.StateGame = Flynn.State.extend({
         this.lvl = 0;
 
         this.generateLvl();
-
-        this.engine_sound_playing = false;
+        
         this.vortexCollapse = false;
 
         // Game Clock
@@ -259,9 +258,8 @@ Game.StateGame = Flynn.State.extend({
             this.thrustHasOccurred = true;
             this.popUpThrustPending = false;
             this.ship.addVel(paceFactor);
-            if(!this.engine_sound_playing){
+            if(!Game.sounds.engine.playing()){
                 Game.sounds.engine.play();
-                this.engine_sound_playing = true;
             }
 
             // Cancel PopUp
@@ -269,9 +267,8 @@ Game.StateGame = Flynn.State.extend({
                 this.popUpLife = Math.min(this.POP_UP_CANCEL_TIME, this.popUpLife);
             }
         } else {
-            if (this.engine_sound_playing){
+            if (Game.sounds.engine.playing()){
                 Game.sounds.engine.stop();
-                this.engine_sound_playing = false;
             }
         }
 

@@ -233,10 +233,9 @@ Game.Main = Class.extend({
         });
         Flynn.mcp.resize();
 
+        // Initialize sound and music
         Game.updateSound();
         Game.updateMusic();
-        //Game.config.soundMusic.play();
-        //soundMusic.stop();
     },
 
     resetScores: function(){
