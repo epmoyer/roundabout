@@ -50,32 +50,14 @@ Game.Main = Class.extend({
                             Game.States.MENU     // Parent state
                             );
                     case Game.States.CONFIG:
-                        Flynn.mcp.optionManager.removeOption('exitToMenu');
-                        Flynn.mcp.optionManager.removeOption('exitGame');
-                        if(Game.state_game){
-                            Flynn.mcp.optionManager.addOption(
-                                'exitToMenu', Flynn.OptionType.COMMAND, true, true, 
-                                'EXIT TO MENU', null,
-                                function(){
-                                    Flynn.mcp.changeState(Game.States.MENU);
-                                });
-                        }
-                        else{
-                            if(Flynn.mcp.backEnabled){
-                                Flynn.mcp.optionManager.addOption(
-                                    'exitGame', Flynn.OptionType.COMMAND, true, true, 
-                                    'EXIT GAME', null,
-                                    function(){
-                                        window.history.back();
-                                    });
-                            }
-                        }
                         return new Flynn.StateConfig(
                             Flynn.Colors.CYAN,
                             Flynn.Colors.YELLOW,
                             Flynn.Colors.GREEN,
                             Flynn.Colors.MAGENTA,
-                            Game.state_game ? Game.States.GAME : Game.States.MENU  // Parent state
+                            Game.state_game ? Game.States.GAME : Game.States.MENU, // Parent state
+                            Game.States.MENU,         // Abort state
+                            Game.state_game !== null  // Abort enable
                             );
                 }
             }
