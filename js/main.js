@@ -36,7 +36,7 @@ Game.Main = Class.extend({
                         return new Flynn.StateEnd(
                             Game.config.score,
                             Game.config.leaderboard,
-                            Flynn.Colors.GREEN,
+                            Flynn.Colors.CYAN,
                             'HIGH SCORES',
                             'YOU MADE IT TO THE HIGH SCORE LIST!',
                             Game.States.MENU     // Parent state
@@ -65,12 +65,12 @@ Game.Main = Class.extend({
             );
         Game.config.leaderboard.setDefaultList(
             [
-                {'name': 'FLOATINHEAD', 'score': 2200},
-                {'name': 'FIENDFODDER', 'score': 2100},
-                {'name': 'DIO',         'score': 2000},
-                {'name': 'JOTARO',      'score': 1300},
-                {'name': 'JOSEPH',      'score': 1200},
-                {'name': 'JONATHAN',    'score': 1100},
+                {'name': 'FLOATINHEAD', 'score':  600},
+                {'name': 'FIENDFODDER', 'score':  500},
+                {'name': 'DIO',         'score':  400},
+                {'name': 'JOTARO',      'score':  300},
+                {'name': 'JOSEPH',      'score':  200},
+                {'name': 'JONATHAN',    'score':  100},
             ]);
         Game.config.leaderboard.loadFromCookies();
         Game.config.leaderboard.saveToCookies();
