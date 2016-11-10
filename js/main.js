@@ -29,10 +29,18 @@ Game.Main = Class.extend({
             function(state){
                 switch(state){
                     case Game.States.MENU:
+                        Game.state_game = null;
                         return new Game.StateMenu();
                     case Game.States.GAME:
-                        return new Game.StateGame();
+                        if(Game.state_game){
+                            // Game in progress
+                            return Game.state_game;
+                        }
+                        // Start new game
+                        Game.state_game = new Game.StateGame();
+                        return Game.state_game;
                     case Game.States.END:
+                        Game.state_game = null;
                         return new Flynn.StateEnd(
                             Game.config.score,
                             Game.config.leaderboard,
@@ -42,12 +50,32 @@ Game.Main = Class.extend({
                             Game.States.MENU     // Parent state
                             );
                     case Game.States.CONFIG:
+                        Flynn.mcp.optionManager.removeOption('exitToMenu');
+                        Flynn.mcp.optionManager.removeOption('exitGame');
+                        if(Game.state_game){
+                            Flynn.mcp.optionManager.addOption(
+                                'exitToMenu', Flynn.OptionType.COMMAND, true, true, 
+                                'EXIT TO MENU', null,
+                                function(){
+                                    Flynn.mcp.changeState(Game.States.MENU);
+                                });
+                        }
+                        else{
+                            if(Flynn.mcp.backEnabled){
+                                Flynn.mcp.optionManager.addOption(
+                                    'exitGame', Flynn.OptionType.COMMAND, true, true, 
+                                    'EXIT GAME', null,
+                                    function(){
+                                        window.history.back();
+                                    });
+                            }
+                        }
                         return new Flynn.StateConfig(
                             Flynn.Colors.CYAN,
                             Flynn.Colors.YELLOW,
                             Flynn.Colors.GREEN,
                             Flynn.Colors.MAGENTA,
-                            Game.States.MENU     // Parent state
+                            Game.state_game ? Game.States.GAME : Game.States.MENU  // Parent state
                             );
                 }
             }

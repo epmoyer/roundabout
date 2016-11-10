@@ -7,7 +7,11 @@
 
 Flynn.StateConfig = Flynn.State.extend({
 
-    init: function(mainTextColor, menuTextColor, selectionBoxColor, menuPromptColor, parentState){
+    init: function(mainTextColor,
+                   menuTextColor,
+                   selectionBoxColor,
+                   menuPromptColor,
+                   parentState){
         this._super();
 
         this.OPTION_SELECTION_MARGIN = 5;

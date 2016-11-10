@@ -231,6 +231,11 @@ Game.StateGame = Flynn.State.extend({
                 this.vortex.grow(1);
             }
         }
+
+        // Config
+        if (input.virtualButtonWasPressed("UI_escape")){
+            Flynn.mcp.changeState(Game.States.CONFIG);
+        }
         
         if(!this.ship.visible){
             if (input.virtualButtonWasPressed("UI_enter")){
@@ -242,7 +247,6 @@ Game.StateGame = Flynn.State.extend({
                                    name: "NONAME"
                                 }
                             );
-
                         Flynn.mcp.changeState(Game.States.MENU);
                     } else {
                         Flynn.mcp.changeState(Game.States.END);
