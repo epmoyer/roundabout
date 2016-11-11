@@ -32,12 +32,10 @@ Game.Main = Class.extend({
                         Game.state_game = null;
                         return new Game.StateMenu();
                     case Game.States.GAME:
-                        if(Game.state_game){
-                            // Game in progress
-                            return Game.state_game;
+                        if(!Game.state_game){
+                            // Start new game
+                            Game.state_game = new Game.StateGame();
                         }
-                        // Start new game
-                        Game.state_game = new Game.StateGame();
                         return Game.state_game;
                     case Game.States.END:
                         Game.state_game = null;
@@ -114,7 +112,8 @@ Game.Main = Class.extend({
                 intro: new Howl({
                     //src: ['sounds/song_roundabout.ogg', 'sounds/song_roundabout.mp3'],
                     // src: ['sounds/ThemeIntroRDB.ogg', 'sounds/ThemeIntroRDB.mp3'],
-                    src: ['sounds/SpaceThemev3.mp3'],
+                    // src: ['sounds/SpaceThemev3.mp3'],
+                    src: ['sounds/DST-TowerDefenseTheme_1.mp3'],
                     loop: true,
                     buffer: !this.browserIsIos,  // Buffering causes problems on iOS devices
                     volume: 0.5 }),
@@ -192,7 +191,7 @@ Game.Main = Class.extend({
             var sound;
             var sound_enabled = Flynn.mcp.optionManager.getOption('soundEnabled');
             if (sound_enabled){
-                Game.sounds.insert_coin.play();
+                Flynn.sounds.ui_select.play();
             }
         };
 
