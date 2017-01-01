@@ -37,6 +37,12 @@ Game.StateMenu = Flynn.State.extend({
 
         this.timers = new Flynn.Timers();
         this.timers.add("view_phase", this.VIEW_PHASE_TICKS_NORMAL, null);
+
+        this.va_logo = new Flynn.VALogo(
+            60,
+            Flynn.mcp.canvasHeight - 60,
+            1,
+            false);
     },
 
     handleInputs: function(input, paceFactor) {
@@ -106,6 +112,8 @@ Game.StateMenu = Flynn.State.extend({
         this.creditsAngle3 += this.CREDITS_ANGULAR_VELOCITY3 * paceFactor;
         this.creditsAngle4 += this.CREDITS_ANGULAR_VELOCITY4 * paceFactor;
         this.creditsAngle5 += this.CREDITS_ANGULAR_VELOCITY5 * paceFactor;
+
+        this.va_logo.update(paceFactor);
     },
 
     render: function(ctx) {
@@ -208,6 +216,7 @@ Game.StateMenu = Flynn.State.extend({
         }
         
         Flynn.mcp.renderLogo(ctx);
+        this.va_logo.render(ctx);
     }
 
 });
