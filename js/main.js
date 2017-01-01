@@ -2,7 +2,7 @@ var Game = Game || {}; // Create namespace
 
 (function () { "use strict";
 
-Game.VERSION = '7.1';
+Game.VERSION = '7.2';
 Game.CANVAS_HEIGHT = 768;
 Game.CANVAS_WIDTH = 1024;
 Game.SPEED_FACTOR = 0.7;
@@ -211,18 +211,19 @@ Game.Main = Class.extend({
         Flynn.mcp.optionManager.loadFromCookies();
 
         // Setup touch controls
-        var button_size = 80;
+        var button_size = 200;
+        var button_margin = 1;
         var x, y;
         if(Flynn.mcp.browserSupportsTouch){
-            x = 0.1*button_size;
-            y = Game.CANVAS_HEIGHT - 1.1*button_size;
+            x = button_margin;
+            y = Game.CANVAS_HEIGHT - button_size - button_margin;
             Flynn.mcp.input.addTouchRegion("thrust",
                 x, y, x+button_size, y+button_size,
                 'round',
                 [Game.States.GAME]  // visible_states
                 );
 
-            x = Game.CANVAS_WIDTH - 1.1*button_size;
+            x = Game.CANVAS_WIDTH - button_size - button_margin;
             Flynn.mcp.input.addTouchRegion("fire",
                 x, y, x+button_size, y+button_size,
                 'round',
