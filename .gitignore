@@ -4,3 +4,4 @@
 js/lib/flynn/old
 js/lib/flynn/*.sh
 scrapbook
+deploy.sh
