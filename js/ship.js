@@ -15,23 +15,26 @@ Game.Ship = Flynn.Polygon.extend({
     maxX: null,
     maxY: null,
 
-    init: function(p, pf, s, x, y, radius, radialAngle, color, f_radiusToAngularVelocity, vortex){
+    init: function(p, pf, s, center, radius, radialAngle, color, f_radiusToAngularVelocity, vortex){
         this._super(
             p,
             color,
             s, // scale
-            {x:x, y:y, is_world:false}
+            center,
+            false, // constrained
+            true // is_world
             );
 
         this.flames = new Flynn.Polygon(
             pf,
             Flynn.Colors.CYAN,
             s, // scale
-            {x:x, y:y, is_world:false}
+            center,
+            false, // constrained
+            true // is_world
             );
 
-        this.center_x = x;
-        this.center_y = y;
+        this.center = center;
         this.radius = radius;
         this.radialAngle = radialAngle;
         this.angle = 0;
@@ -56,12 +59,12 @@ Game.Ship = Flynn.Polygon.extend({
         };
     },
 
-    // Calculate caridnal position and angle from radial position and angle
+    // Calculate cardinal position and angle from radial position and angle
     radial_to_cardinal: function(){
         this.setAngle(this.radialAngle);
         this.flames.setAngle(this.radialAngle);
-        this.position.x = this.center_x + this.radius * Math.cos(this.radialAngle);
-        this.position.y = this.center_y + this.radius * Math.sin(this.radialAngle);
+        this.position.x = this.center.x + this.radius * Math.cos(this.radialAngle);
+        this.position.y = this.center.y + this.radius * Math.sin(this.radialAngle);
     },
 
     shoot: function() {
@@ -70,8 +73,8 @@ Game.Ship = Flynn.Polygon.extend({
         var projectile_info = {};
         var b_advance_angle = this.angularVelocity; // start bullet angle one animation frame forward
         projectile_info.world_position_v = new Victor(
-            this.center_x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0],
-            this.center_y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1]);
+            this.center.x + this.radius * Math.cos(this.radialAngle + b_advance_angle) + this.points[0],
+            this.center.y + this.radius * Math.sin(this.radialAngle + b_advance_angle) + this.points[1]);
         projectile_info.velocity_v = new Victor(
             Math.cos(this.radialAngle + b_advance_angle) * this.BULLET_VELOCITY,
             Math.sin(this.radialAngle + b_advance_angle) * this.BULLET_VELOCITY);

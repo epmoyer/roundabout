@@ -25,11 +25,10 @@ Game.Vortex = Class.extend({
     STAR_SPAWN_RATE: 0.07,
     STAR_NUM_MAX: 100,
 
-    init: function(x, y){
+    init: function(center){
         this.target_radius = this.VORTEX_START_RADIUS;
         this.angle = 0;
-        this.center_x = x;
-        this.center_y = y;
+        this.center = center.clone();
 
         this.stars = [];
         for (var i=0; i<this.STAR_NUM_MAX; i++){
@@ -47,9 +46,9 @@ Game.Vortex = Class.extend({
             shieldPoints,
             Flynn.Colors.CYAN,
             1, // scale (Temporary; Will be overwritten)
-            {   x:this.center_x, // Will be set when rendering instances
-                y:this.center_y, 
-                is_world:false}
+            this.center,
+            false, // constrained
+            true // is_world
             );
         this.shieldAngleTarget = -Math.PI/2;
         this.shieldAngle = -Math.PI/2;
@@ -98,11 +97,11 @@ Game.Vortex = Class.extend({
     },
 
     caresianToAngle: function (x, y) {
-        return Math.atan2(y-this.center_y, x-this.center_x);
+        return Math.atan2(y-this.center.y, x-this.center.x);
     },
 
     cartesianToRadius: function (x, y) {
-        return Math.sqrt(Math.pow(y-this.center_y,2) + Math.pow(x-this.center_x,2));
+        return Math.sqrt(Math.pow(y-this.center.y,2) + Math.pow(x-this.center.x,2));
     },
 
     update: function(paceFactor, doCollapse) {
@@ -212,10 +211,10 @@ Game.Vortex = Class.extend({
             ctx.vectorStart(Flynn.Colors.GREEN);
         }
         for(var theta = 0, angle_delta = (Math.PI * 2)/this.VORTEX_LINES; theta < ((Math.PI * 2)-0.001); theta += angle_delta){
-            var sx = this.center_x + Math.cos(theta+this.angle - this.VORTEX_TWIST) * (this.radius - this.VORTEX_THICKNESS/2);
-            var sy = this.center_y + Math.sin(theta+this.angle - this.VORTEX_TWIST) * (this.radius - this.VORTEX_THICKNESS/2);
-            var ex = this.center_x + Math.cos(theta+this.angle + this.VORTEX_TWIST) * (this.radius + this.VORTEX_THICKNESS/2);
-            var ey = this.center_y + Math.sin(theta+this.angle + this.VORTEX_TWIST) * (this.radius + this.VORTEX_THICKNESS/2);
+            var sx = this.center.x + Math.cos(theta+this.angle - this.VORTEX_TWIST) * (this.radius - this.VORTEX_THICKNESS/2);
+            var sy = this.center.y + Math.sin(theta+this.angle - this.VORTEX_TWIST) * (this.radius - this.VORTEX_THICKNESS/2);
+            var ex = this.center.x + Math.cos(theta+this.angle + this.VORTEX_TWIST) * (this.radius + this.VORTEX_THICKNESS/2);
+            var ey = this.center.y + Math.sin(theta+this.angle + this.VORTEX_TWIST) * (this.radius + this.VORTEX_THICKNESS/2);
             ctx.vectorMoveTo(sx,sy);
             ctx.vectorLineTo(ex,ey);
         }
@@ -226,8 +225,8 @@ Game.Vortex = Class.extend({
         for(var i=0, len=this.stars.length; i<len; i+=2){
             var radius = this.stars[i];
             var angle = this.stars[i+1];
-            var x = this.center_x + Math.cos(angle) * radius;
-            var y = this.center_y + Math.sin(angle) * radius;
+            var x = this.center.x + Math.cos(angle) * radius;
+            var y = this.center.y + Math.sin(angle) * radius;
             ctx.fillRect(x,y,2,2);
         }
 

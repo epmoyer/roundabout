@@ -23,8 +23,9 @@ Game.StateMenu = Flynn.State.extend({
 
         this.canvasWidth = Flynn.mcp.canvas.ctx.width;
         this.canvasHeight = Flynn.mcp.canvas.ctx.height;
+        this.center = new Victor(this.canvasWidth/2, this.canvasHeight/2);
 
-        this.vortex = new Game.Vortex(this.canvasWidth/2, this.canvasHeight/2);
+        this.vortex = new Game.Vortex(this.center);
         this.vortex.shieldActive = false;
 
         this.titleAngle = (Math.PI*2) * (210/360);
@@ -41,10 +42,10 @@ Game.StateMenu = Flynn.State.extend({
         this.timers.add("view_phase", this.VIEW_PHASE_TICKS_NORMAL, null);
 
         this.va_logo = new Flynn.VALogo(
-            60,
-            Flynn.mcp.canvasHeight - 60,
+            new Victor(60, Flynn.mcp.canvasHeight - 60),
             1,
-            false);
+            false // enable_color
+            );
     },
 
     handleInputs: function(input, paceFactor) {
@@ -135,13 +136,13 @@ Game.StateMenu = Flynn.State.extend({
         var credit_text, y_step, y_text, line_text, line_color;
 
         for (var angle = 0; angle < Math.PI + 0.1; angle += Math.PI) {
-            ctx.vectorTextArc("ROUNDABOUT", scale, this.vortex.center_x, this.vortex.center_y, this.titleAngle + angle, 300, 
+            ctx.vectorTextArc("ROUNDABOUT", scale, this.vortex.center.x, this.vortex.center.y, this.titleAngle + angle, 300, 
                 Flynn.Colors.MAGENTA,
                 is_world,
                 false, // is_centered
                 false, // is_reversed
                 Flynn.Font.Block);
-            ctx.vectorTextArc("ROUNDABOUT", scale, this.vortex.center_x, this.vortex.center_y, this.titleAngle - 0.01 + angle, 297,
+            ctx.vectorTextArc("ROUNDABOUT", scale, this.vortex.center.x, this.vortex.center.y, this.titleAngle - 0.01 + angle, 297,
                 Flynn.Colors.CYAN,
                 is_world,
                 false, // is_centered
@@ -153,7 +154,7 @@ Game.StateMenu = Flynn.State.extend({
             case this.VIEW_PHASES.NORMAL:
 
                 ctx.vectorTextArc("VERSION " + Game.VERSION,
-                    2, this.vortex.center_x, this.vortex.center_y,
+                    2, this.vortex.center.x, this.vortex.center.y,
                     this.creditsAngle3, 100, Flynn.Colors.GREEN, this.IS_CENTERED);
                 var startText;
                 var controlsText1, controlsText2;
@@ -176,7 +177,7 @@ Game.StateMenu = Flynn.State.extend({
                         Game.config.thrustPrompt = "PRESS " + thrustButtonName + " TO THRUST";
                         Game.config.shootPrompt = "PRESS " + fireButtonName + " TO SHOOT";
                         ctx.vectorTextArc("PRESS ESCAPE TO CONFIGURE",
-                            2, this.vortex.center_x, this.vortex.center_y,
+                            2, this.vortex.center.x, this.vortex.center.y,
                             this.creditsAngle5, 60, Flynn.Colors.GREEN, this.IS_CENTERED);
                     } else {
                         startText = "TAP ANYWHERE TO START";
@@ -190,20 +191,20 @@ Game.StateMenu = Flynn.State.extend({
                 if(!Flynn.mcp.arcadeModeEnabled || (Flynn.mcp.arcadeModeEnabled && (Flynn.mcp.credits > 0))) {
                     if (Math.floor(Flynn.mcp.clock / 40) % 2 == 1) {
                         ctx.vectorTextArc(startText,
-                            2, this.vortex.center_x, this.vortex.center_y,
+                            2, this.vortex.center.x, this.vortex.center.y,
                             this.creditsAngle3 + Math.PI, 100, Flynn.Colors.CYAN, this.IS_CENTERED);
                     }
                 }
                 ctx.vectorTextArc(controlsText1,
-                    2, this.vortex.center_x, this.vortex.center_y,
+                    2, this.vortex.center.x, this.vortex.center.y,
                     this.creditsAngle4, 80, Flynn.Colors.YELLOW, this.IS_CENTERED);
                 ctx.vectorTextArc(controlsText2,
-                    2, this.vortex.center_x, this.vortex.center_y,
+                    2, this.vortex.center.x, this.vortex.center.y,
                     this.creditsAngle4 + Math.PI, 80, Flynn.Colors.YELLOW, this.IS_CENTERED);
 
                 ctx.vectorTextArc(
                     "CREATED BY ERIC MOYER AND TRAYTON MOYER (FLOATIN' HEAD)",
-                    2, this.vortex.center_x, this.vortex.center_y, this.creditsAngle , 240, Flynn.Colors.GREEN);
+                    2, this.vortex.center.x, this.vortex.center.y, this.creditsAngle , 240, Flynn.Colors.GREEN);
 
                 break;
 

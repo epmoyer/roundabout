@@ -50,21 +50,27 @@ Game.StateGame = Flynn.State.extend({
     init: function() {
         this._super();
         
-        this.center_x = Game.CANVAS_WIDTH/2;
-        this.center_y = Game.CANVAS_HEIGHT/2;
+        this.center = new Victor(Game.CANVAS_WIDTH/2, Game.CANVAS_HEIGHT/2);
 
-        this.vortex = new Game.Vortex(this.center_x, this.center_y);
+        this.vortex = new Game.Vortex(this.center);
 
-        this.ship = new Game.Ship(Game.Points.WIDE_SHIP, Game.Points.FLAMES, 1.5, this.center_x, this.center_y,
+        this.ship = new Game.Ship(Game.Points.WIDE_SHIP, Game.Points.FLAMES, 1.5, this.center,
             this.SHIP_START_RADIUS, this.SHIP_START_ANGLE, Flynn.Colors.YELLOW, this.vortex.radiusToAngularVelocity, this.vortex);
         this.ship.maxX = Game.CANVAS_WIDTH;
         this.ship.maxY = Game.CANVAS_HEIGHT;
         this.ship.visible = false; // Start invisible, to force respawn animation
 
-        this.respawnPolygon = new Flynn.Polygon(Game.Points.RESPAWN, Flynn.Colors.YELLOW);
+        this.respawnPolygon = new Flynn.Polygon(
+            Game.Points.RESPAWN,
+            Flynn.Colors.YELLOW,
+            1, //scale
+            new Victor(0,0), // position
+            false, // constrained
+            true // is_world
+            );
         this.respawnPolygon.setScale(1);
-        this.shipRespawnX = this.center_x + this.SHIP_START_RADIUS * Math.cos(this.SHIP_START_ANGLE);
-        this.shipRespawnY = this.center_y + this.SHIP_START_RADIUS * Math.sin(this.SHIP_START_ANGLE);
+        this.shipRespawnX = this.center.x + this.SHIP_START_RADIUS * Math.cos(this.SHIP_START_ANGLE);
+        this.shipRespawnY = this.center.y + this.SHIP_START_RADIUS * Math.sin(this.SHIP_START_ANGLE);
 
         this.gameOver = false;
         this.lives = 3;
@@ -72,10 +78,9 @@ Game.StateGame = Flynn.State.extend({
             Game.Points.WIDE_SHIP, 
             Flynn.Colors.YELLOW,
             1.2, // scale
-            {   x:0, // Will be set when rendering instances
-                y:50, 
-                is_world:false
-            }
+            new Victor(0, 50), // Position be set when rendering instances
+            false, // constrained
+            true // is_world
         );
         this.lifepolygon.setAngle(-Math.PI/2);
 
@@ -102,7 +107,7 @@ Game.StateGame = Flynn.State.extend({
         this.blockers = [];
 
         // Vortex
-        this.particles = new Game.Particles(this.center_x, this.center_y, this.vortex);
+        this.particles = new Game.Particles(this.center.x, this.center.y, this.vortex);
         this.vortex.particles = this.particles;
 
         // Pop-up messages
@@ -358,7 +363,7 @@ Game.StateGame = Flynn.State.extend({
             var bulletRemove = false;
 
             // Remove shots that reflect back into vortex
-            if (Math.sqrt(Math.pow(b.position.x - this.center_x, 2) + Math.pow(b.position.y - this.center_y,2)) <= this.vortex.radius){
+            if (Math.sqrt(Math.pow(b.position.x - this.center.x, 2) + Math.pow(b.position.y - this.center.y,2)) <= this.vortex.radius){
                 bulletRemove = true;
             }
 
@@ -425,7 +430,7 @@ Game.StateGame = Flynn.State.extend({
                     // Start first drifter at one of the midscreen edges, so that it is immediately visisble
                     if (Math.random() > 0.5){
                         // Left/right
-                        drifterRadius = this.center_x;
+                        drifterRadius = this.center.x;
                         if (Math.random() > 0.5){
                             drifterAngle = 0;
                         }
@@ -434,7 +439,7 @@ Game.StateGame = Flynn.State.extend({
                         }
                     } else {
                         // Top/bottom
-                        drifterRadius = this.center_y;
+                        drifterRadius = this.center.y;
                         if (Math.random() > 0.5){
                             drifterAngle = Math.PI/2;
                         }
@@ -483,7 +488,7 @@ Game.StateGame = Flynn.State.extend({
                 }
 
                 // Create drifter
-                drifter = new Game.Drifter(Game.Points.POINTY_SHIP, 2, this.center_x, this.center_y,
+                drifter = new Game.Drifter(Game.Points.POINTY_SHIP, 2, this.center,
                     drifterRadius, drifterAngle, Flynn.Colors.RED,
                     this.vortex);
                 this.drifters.push(drifter);
@@ -559,7 +564,7 @@ Game.StateGame = Flynn.State.extend({
                     }
                 }
 
-                blocker = new Game.Blocker(Game.Points.SHIELD_TYPE_SHORT, Game.Points.SHIELD_CORE_SHORT, 2, this.center_x, this.center_y,
+                blocker = new Game.Blocker(Game.Points.SHIELD_TYPE_SHORT, Game.Points.SHIELD_CORE_SHORT, 2, this.center,
                     blockerRadius, blockerAngle, Flynn.Colors.RED,
                     this.vortex);
                 this.blockers.push(blocker);
@@ -679,11 +684,11 @@ Game.StateGame = Flynn.State.extend({
         // PopUp Text
         if(this.popUpLife > 0){
             ctx.vectorTextArc(this.popUpText,
-                3, this.vortex.center_x, this.vortex.center_y,
+                3, this.vortex.center.x, this.vortex.center.y,
                 Math.PI*3/2, 150, Flynn.Colors.YELLOW, true, false);
             if(this.popUpText2){
                 ctx.vectorTextArc(this.popUpText2,
-                    3, this.vortex.center_x, this.vortex.center_y,
+                    3, this.vortex.center.x, this.vortex.center.y,
                     Math.PI/2, 150, Flynn.Colors.YELLOW, true, true);
             }
         }
